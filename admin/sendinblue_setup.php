@@ -46,33 +46,16 @@ $action = GETPOST('action', 'alpha');
 /*
  * Actions
  */
-if (preg_match('/set_(.*)/',$action,$reg))
-{
-	$code=$reg[1];
-	if (dolibarr_set_const($db, $code, GETPOST($code), 'chaine', 0, '', $conf->entity) > 0)
-	{
-		header("Location: ".$_SERVER["PHP_SELF"]);
-		exit;
-	}
-	else
-	{
-		dol_print_error($db);
-	}
-}
+ if ($action == 'setvar') {
+	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY'),'chaine',0,'',$conf->entity);
+		if (! $res > 0) $error++;
 	
-if (preg_match('/del_(.*)/',$action,$reg))
-{
-	$code=$reg[1];
-	if (dolibarr_del_const($db, $code, 0) > 0)
-	{
-		Header("Location: ".$_SERVER["PHP_SELF"]);
-		exit;
+		if ($error) {
+			setEventMessage('Error','errors');
+		}else {
+			setEventMessage($langs->trans('SendinBlueSuccessSave'),'mesgs');
+		}
 	}
-	else
-	{
-		dol_print_error($db);
-	}
-}
 
 /*
  * View
@@ -98,36 +81,74 @@ dol_fiche_head(
 // Setup page goes here
 $form=new Form($db);
 $var=false;
-print '<table class="noborder" width="100%">';
-print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("Parameters").'</td>'."\n";
-print '<td align="center" width="20">&nbsp;</td>';
-print '<td align="center" width="100">'.$langs->trans("Value").'</td>'."\n";
-
-
-// Example with a yes / no select
-$var=!$var;
-print '<tr '.$bc[$var].'>';
-print '<td>'.$langs->trans("ParamLabel").'</td>';
-print '<td align="center" width="20">&nbsp;</td>';
-print '<td align="right" width="300">';
-print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+print '<BR>';
+echo $langs->trans("SendinBlueExplain");
+print '<BR>';
+print '<form method="post" action="'.$_SERVER['PHP_SELF'].'" enctype="multipart/form-data" >';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-print '<input type="hidden" name="action" value="set_CONSTNAME">';
-print $form->selectyesno("CONSTNAME",$conf->global->CONSTNAME,1);
-print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
-print '</form>';
-print '</td></tr>';
+print '<input type="hidden" name="action" value="setvar">';
 
-$var=!$var;
-print '<tr '.$bc[$var].'>';
-print '<td>'.$langs->trans("ParamLabel").'</td>';
-print '<td align="center" width="20">&nbsp;</td>';
-print '<td align="center" width="300">';
-print ajax_constantonoff('CONSTNAME');
-print '</td></tr>';
+print '<table class="noborder" width="100%">';
+
+print '<tr class="liste_titre">';
+print '<td width="40%">'.$langs->trans("Name").'</td>';
+print '<td>'.$langs->trans("Valeur").'</td>';
+print '<td></td>';
+print "</tr>\n";
+
+
+//SENDINBLUE_API_KEY
+print '<tr class="impair"><td>'.$langs->trans("SENDINBLUE_API_KEY").'</td>';
+print '<td align="left">';
+print '<input type="password" name="SENDINBLUE_API_KEY" value="'.$conf->global->SENDINBLUE_API_KEY.'" size="20" ></td>';
+print '<td align="left">';
+print $form->textwithpicto('',$langs->trans("SENDINBLUE_API_KEYHelp"),1,'help');
+print '</td>';
+print '</tr>';
+print '<tr class="liste_titre"><td colspan="3" align="center"><input type="submit" class="button" value="'.$langs->trans("Save").'"></td></tr>';
 
 print '</table>';
+print '</form>';
+
+print '<BR>';
+
+
+
+print '<form method="post" action="'.$_SERVER['PHP_SELF'].'" enctype="multipart/form-data" >';
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="activsendinblue">';
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print '<td width="40%">'.$langs->trans("SendinblueByDol").'</td>';
+print '<td align="center">';
+if (!empty($conf->global->SENDINBLUE_API_KEY) && empty($conf->global->SEND_BY_SENDINBLUE)) {
+	print '<a href="'.$_SERVER['PHP_SELF'].'">';
+	print ajax_constantonoff('SENDINBLUE_SEND_BY_DOL');
+	print '</a>';
+}
+print '</td>';
+print '</tr>';
+print '</table>';
+print '</form>';
+
+print $langs->trans('or');
+
+print '<form method="post" action="'.$_SERVER['PHP_SELF'].'" enctype="multipart/form-data" >';
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="activsendinblue">';
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print '<td width="40%">'.$langs->trans("SendBySendinblue").'</td>';
+print '<td align="center">';
+if (!empty($conf->global->SENDINBLUE_API_KEY) && empty ($conf->global->SENDINBLUE_SEND_BY_DOL)) {
+	print '<a href="'.$_SERVER['PHP_SELF'].'">';
+	print ajax_constantonoff('SEND_BY_SENDINBLUE');
+	print '</a>';
+}
+print '</td>';
+print '</tr>';
+print '</table>';
+print '</form>';
 
 llxFooter();
 

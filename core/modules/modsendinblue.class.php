@@ -52,17 +52,17 @@ class modsendinblue extends DolibarrModules
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
-		$this->family = "ATM";
+		$this->family = "other";
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
-		$this->description = "Description of module sendinblue";
+		$this->description = "SendInBlue Connector";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
-		$this->special = 0;
+		$this->special = 1;
 		// Name of image file used for this module.
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
@@ -87,8 +87,19 @@ class modsendinblue extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@sendinblue')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array('hooks' => array('mailingcard',
+													'productstatssupplyorder',
+													'productstatsorder',
+													'productstatscontract',
+													'productstatssupplyinvoice',
+													'productstatsinvoice',
+													'productstatspropal',
+													'categorycard',
+													'contactcard'),
+									'triggers' => 1
 
+
+		);
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/sendinblue/temp");
 		$this->dirs = array();
@@ -98,11 +109,11 @@ class modsendinblue extends DolibarrModules
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
-		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
+		$this->depends = array("modMailing");		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
-		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
+		$this->phpmin = array(5,3);					// Minimum version of PHP required by module
+		$this->need_dolibarr_version = array(3,8);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("sendinblue@sendinblue");
 
 		// Constants
@@ -110,7 +121,17 @@ class modsendinblue extends DolibarrModules
 		// Example: $this->const=array(0=>array('MYMODULE_MYNEWCONST1','chaine','myvalue','This is a constant to add',1),
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
-		$this->const = array();
+		$this->const = array(
+			0=>array(
+					'SENDINBLUE_API_KEY',
+					'chaine',
+					'0',
+					'Sendinblue API Key',
+					0,
+					'current',
+					1
+				)
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@sendinblue:$user->rights->sendinblue->read:/sendinblue/mynewtab1.php?id=__ID__',  	// To add a new tab identified by code tabname1
@@ -136,7 +157,12 @@ class modsendinblue extends DolibarrModules
 		// 'stock'            to add a tab in stock view
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
-        $this->tabs = array();
+        $this->tabs = array(
+				'emailing:+tabSendInBlueSending:SendInBlueSending:sendinblue@sendinblue:$user->rights->sendinblue->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',
+				'emailing:-targets',
+				'emailing:+tabSendInBlueTarget:SendInBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
+				'contact:+tabSendInBlueActivities:Module104036Name:mailchimp@mailchimp:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activities.php?id=__ID__'
+		);
 
         // Dictionaries
 	    if (! isset($conf->sendinblue->enabled))
@@ -170,6 +196,24 @@ class modsendinblue extends DolibarrModules
 		// Permissions
 		$this->rights = array();		// Permission array used by this module
 		$r=0;
+		
+		$this->rights[$r][0] = 104037;
+		$this->rights[$r][1] = 'read';
+		$this->rights[$r][3] = 1;
+		$this->rights[$r][4] = 'read';
+		$r++;
+
+		$this->rights[$r][0] = 104038;
+		$this->rights[$r][1] = 'write';
+		$this->rights[$r][3] = 1;
+		$this->rights[$r][4] = 'write';
+		$r++;
+
+		$this->rights[$r][0] = 104039;
+		$this->rights[$r][1] = 'Autoriser la synchronisation manuelle';
+		$this->rights[$r][3] = 1;
+		$this->rights[$r][4] = 'sync';
+		$r++;
 
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		// Example:
@@ -179,11 +223,77 @@ class modsendinblue extends DolibarrModules
 		// $this->rights[$r][4] = 'level1';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		// $this->rights[$r][5] = 'level2';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		// $r++;
-
+		if ((float)DOL_VERSION < 3.7 ) { // DOL_VERSION < 3.7
+			$is_doli_37_or_more = false;
+		} else {
+			$is_doli_37_or_more = true;
+		}
 
 		// Main menu entries
 		$this->menu = array();			// List of menus to add
-		$r=0;
+		$this->menu[$r]=array(	'fk_menu'=>0,
+		'type'=>'top',
+		'titre'=>'Module104036Name',
+		'mainmenu'=>'sendinblue',
+		'leftmenu'=>'1',
+		'url'=>'/sendinblue/index.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>100,
+		'enabled'=>'1',
+		'perms'=>'$user->rights->sendinblue->read',
+		'target'=>'',
+		'user'=>2
+		);
+		$r++;
+
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue',
+		'type'=>'left',
+		'titre'=>'Module104036Name',
+		'leftmenu'=>'SendInBlueMenu',
+		'url'=>'/sendinblue/sendinblue/destinaries_list.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>100,
+		'enabled'=>'$user->rights->sendinblue->read',
+		'perms'=>'$user->rights->sendinblue->read',
+		'target'=>'',
+		'user'=>2);
+		$r++;
+
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		'type'=>'left',
+		'titre'=>'SendInBlueDestList',
+		'url'=>'/sendinblue/sendinblue/destinaries_list.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>101,
+		'enabled'=>'$user->rights->sendinblue->read',
+		'perms'=>'$user->rights->sendinblue->read',
+		'target'=>'',
+		'user'=>2);
+		$r++;
+
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		'type'=>'left',
+		'titre'=>'NewMailing',
+		'url'=>$is_doli_37_or_more ? '/comm/mailing/card.php?leftmenu=mailing&action=create' : '/comm/mailing/fiche.php?leftmenu=mailing&action=create',
+		'langs'=>'mails',
+		'position'=>105,
+		'enabled'=>'$user->rights->sendinblue->write',
+		'perms'=>'$user->rights->sendinblue->write',
+		'target'=>'',
+		'user'=>2);
+		$r++;
+
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		'type'=>'left',
+		'titre'=>'SendInBlueListCampaign',
+		'url'=>$is_doli_37_or_more ? '/comm/mailing/list.php' : '/comm/mailing/liste.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>106,
+		'enabled'=>'$user->rights->sendinblue->write',
+		'perms'=>'$user->rights->sendinblue->write',
+		'target'=>'',
+		'user'=>2);
+		$r++;
 
 		// Add here entries to declare new menus
 		//
@@ -219,7 +329,68 @@ class modsendinblue extends DolibarrModules
 
 
 		// Exports
-		$r=1;
+		$r++;
+		$this->export_code[$r] = $this->rights_class . '_' . $r;
+		$this->export_label[$r] = 'ExportDataset_MailinsDestStatus';
+		$this->export_icon[$r] = 'bill';
+		$this->export_permission[$r] = array (
+				array (
+						"sendinblue",
+						"read"
+				)
+		);
+
+		$this->export_fields_array[$r] = array (
+				'm.rowid' => 'Id',
+				'm.titre' => 'Title',
+				'm.sujet' => 'Subject',
+				'm.email_from' => 'EmailFrom',
+				'm.date_creat' => 'DateCreate',
+				'm.date_valid' => 'DateValid',
+				'm.date_envoi' => 'DateSend',
+				'mc.lastname' => 'LastName',
+				'mc.firstname' => 'FirstName',
+				'mc.email' => 'Email',
+				'CASE WHEN mc.statut=-1 THEN \'Error\'
+				WHEN mc.statut=0 THEN \'NotSent\'
+				WHEN mc.statut=1 THEN \'Sent\'
+				WHEN mc.statut=2 THEN \'Open\'
+				WHEN mc.statut=3 THEN \'Unsucscribe\'
+				WHEN mc.statut=4 THEN \'Click\'
+				WHEN mc.statut=5 THEN \'HardBounce\'
+				WHEN mc.statut=6 THEN \'SoftBounce\'
+				END as statut' => 'Status'
+		)
+		;
+		$this->export_TypeFields_array[$r] = array (
+				'm.rowid' => "Text",
+				'm.date_valid' => "Date",
+				'm.date_envoi' => "Date"
+		);
+		$this->export_entities_array[$r] = array (
+				'm.rowid' => "Id",
+				'm.titre' => 'Mailing',
+				'm.sujet' => 'Mailing',
+				'm.email_from' => 'Mailing',
+				'm.date_creat' => 'Mailing',
+				'm.date_valid' => 'Mailing',
+				'm.date_envoi' => 'Mailing',
+				'mc.lastname' => 'Target',
+				'mc.firstname' => 'Target',
+				'mc.email' => 'Target',
+				'CASE WHEN mc.statut=-1 THEN \'Error\'
+				WHEN mc.statut=0 THEN \'NotSent\'
+				WHEN mc.statut=1 THEN \'Sent\'
+				WHEN mc.statut=2 THEN \'Open\'
+				WHEN mc.statut=3 THEN \'Unsucscribe\'
+				WHEN mc.statut=4 THEN \'Click\'
+				WHEN mc.statut=5 THEN \'HardBounce\'
+				WHEN mc.statut=6 THEN \'SoftBounce\'
+				END as statut' => 'Target'
+		);
+
+		$this->export_sql_start[$r] = 'SELECT DISTINCT ';
+		$this->export_sql_end[$r] = 'FROM llx_mailing as m INNER JOIN llx_mailing_cibles as mc ON m.rowid=mc.fk_mailing';
 
 		// Example:
 		// $this->export_code[$r]=$this->rights_class.'_'.$r;
