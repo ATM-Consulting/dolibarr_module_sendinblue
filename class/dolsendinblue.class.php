@@ -625,10 +625,13 @@ class DolSendinBlue extends CommonObject
 
 		// Call
 		try {
-
+			if(!empty($filters)){
+				$response = $this->sendinblue->get_list($filters);
 			
-			$response = $this->sendinblue->get_lists($filters);
-
+			}
+			else {
+				$response = $this->sendinblue->get_lists(array());
+			}
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			$error ++;
@@ -787,49 +790,19 @@ class DolSendinBlue extends CommonObject
 	 */
 	function getEmailList() {
 		global $conf;
-
+		$this->getInstanceSendinBlue();
 		$error = 0;
 
 		$this->email_lines = array();
-		$emailsegment = 0;
-
-		$dc = "us1";
-		if (strstr($conf->global->MAILCHIMP_MAIL_SMTPS_PW, "-")) {
-			list ( $key, $dc ) = explode("-", $conf->global->MAILCHIMP_MAIL_SMTPS_PW, 2);
-			if (! $dc)
-				$dc = "us1";
-		}
-
-		$chunk_size = 4096; // in bytes
-		$url = 'http://' . $dc . '.api.sendinblue.com/export/1.0/list?apikey=' . $conf->global->MAILCHIMP_MAIL_SMTPS_PW . '&status=subscribed&id=' . $this->sendinblue_listid;
-		// print $url.'<BR>';
-		/**
-		 * a more robust client can be built using fsockopen *
-		 */
-		$handle = @fopen($url, 'r');
-		if (! $handle) {
-			$this->error = "failed to access url\n";
-			dol_syslog(get_class($this) . "::getEmailList " . $this->error, LOG_ERR);
-			return - 1;
+		$data = array("listids"=>array($this->sendinblue_listid) , "page"=>1, "page_limit"=>500);
+		$response = $this->sendinblue->display_list_users($data);
+		
+		if(!empty($response['data'])){
+			$emailsegment = 1;
 		} else {
-			$i = 0;
-			$email_addr = array();
-			while ( ! feof($handle) ) {
-				$buffer = fgets($handle, $chunk_size);
-				if (trim($buffer) != '') {
-					$obj = json_decode($buffer);
-					if ($i != 0) {
-						if (! in_array($obj[0], $this->email_lines)) {
-							$this->email_lines[] = $obj[0];
-							$emailsegment ++;
-						}
-					}
-					$i ++;
-				}
-			}
-			fclose($handle);
+			$emailsegment = -1;
 		}
-
+		$this->email_lines = $response['data']['data'];
 		return $emailsegment;
 	}
 
@@ -930,7 +903,7 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function updateSegment($listid, $segmentid, $emailtoadd, $resetseg = 0) {
+	function updateList($listid,  $emailtoadd) {
 		$error = 0;
 
 		$result = $this->getInstanceSendinBlue();
@@ -939,7 +912,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 
-		if (! empty($resetseg)) {
+		/*if (! empty($resetseg)) {
 			try {
 				$myMembers = $this->sendinblue->get('/lists/' . $listid . '/segments/' . $segmentid . '/members');
 				$emails_to_remove = array();
@@ -955,12 +928,13 @@ class DolSendinBlue extends CommonObject
 				dol_syslog(get_class($this) . "::updateSegment  listStaticSegmentReset " . $this->error, LOG_ERR);
 				return - 1;
 			}
-		}
+		}*/
 
 		$batch = array();
 		$total_added = 0;
 		$nb_emailadded = 1;
 		foreach ( $emailtoadd as $email ) {
+			var_dump($email);exit;
 			$tmp_array = explode('&', $email);
 			if (! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && filter_var($tmp_array[0], FILTER_VALIDATE_EMAIL) && ! in_array($tmp_array[0], $batch)) {
 				$idx_tbl = intval($nb_emailadded / 9000);
@@ -1347,34 +1321,28 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . '::addEmailToList count($batch_email_to_add)=' . count($batch_email_to_add), LOG_DEBUG);
 
 			dol_syslog(get_class($this) . '::addEmailToList start batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
-
-			$attributes=array();
-
-			foreach ( $batch_email_to_add as $key_mail=>$emails ) {
-
-				$email_object = new stdClass();
-				$email_object->email_address = $emails['email_address'];
-				$email_object->status_if_new = $emails['status'];
-				$email_object->email_type = $emails['email_type'];
-				$email_object->merge_fields = $emails['merge_vars'];
-
-
-				$attributes_object = new stdClass();
-				$attributes_object->method='PUT';
-				$attributes_object->path='lists/' . $listid . '/members/'.$this->sendinblue->subscriberHash($email_object->email_address);
-				$attributes_object->body=json_encode($email_object);
-
-
-				$attributes['operations'][] = $attributes_object;
+			
+			foreach($batch_email_to_add as $email){
+				// Call
+			
+				
+				
+						
+				if(!empty($email)){
+					try {
+						$data = array("email" => $email['email_address'],
+						"attributes"=>array("PRENOM"=>$email['merge_vars']->FNAME, "NOM"=>$email['merge_vars']->LNAME),
+						"listid"=>array($listid)
+						);
+						$response = $this->sendinblue->create_update_user($data);
+					} catch ( Exception $e ) {
+						$this->errors[] = $e->getMessage();
+						$batch_email_to_add_error=$batch_email_to_add;
+						$error ++;
+					}
+				}
 			}
-			// Call
-			try {
-				$response = $this->sendinblue->post('batches/', $attributes);
-			} catch ( Exception $e ) {
-				$this->errors[] = $e->getMessage();
-				$batch_email_to_add_error=$batch_email_to_add;
-				$error ++;
-			}
+			
 
 			dol_syslog(get_class($this) . '::addEmailToList end batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 
@@ -1639,6 +1607,9 @@ class DolSendinBlue extends CommonObject
 			if ($status == 'sending') {
 				return img_picto($langs->trans('SendinBlue' . $status), 'stcomm2') . ' ' . $langs->trans('SendinBlue' . $status);
 			}
+			if ($status == 'Scheduled') {
+				return img_picto($langs->trans('SendinBlue' . $status), 'stcomm2') . ' ' . $langs->trans('SendinBlue' . $status);
+			}
 		}
 	}
 
@@ -1656,20 +1627,18 @@ class DolSendinBlue extends CommonObject
 		}
 
 		$opts['campaign_id'] = $this->sendinblue_id;
-
 		// Call
 		try {
-			$response = $this->sendinblue->get('campaigns/' . $this->sendinblue_id);
+			$response = $this->sendinblue->get_campaign_v2(array("id"=>$this->sendinblue_id));
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 			return - 1;
 		}
-
 		if ($mode == 1) {
-			return DolSendinBlue::getLibStatus($response['status']);
+			return DolSendinBlue::getLibStatus($response['data'][0]['status']);
 		} elseif ($mode == 0) {
-			return $response['status'];
+			return $response['data'][0]['status'];
 		}
 	}
 
@@ -1684,9 +1653,12 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
 			return - 1;
 		}
+		$data = array("id"=>$this->sendinblue_id,
+				"listid"=>array($this->sendinblue_listid),
+				"send_now"=>1);
 
 		try {
-			$response = $this->sendinblue->post('campaigns/' . $this->sendinblue_id . '/actions/send');
+			$response = $this->sendinblue->update_campaign($data);
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
@@ -1842,7 +1814,7 @@ class DolSendinBlue extends CommonObject
 	 * @param int $resetseg segment
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function exportSegmentDesttoSendinBlue($segmentid, $newsegmentname, $resetseg = 0) {
+	function exportDesttoSendinBlue($listid) {
 		global $conf;
 
 		$result = $this->getEmailMailingDolibarr('toadd');
@@ -1853,19 +1825,7 @@ class DolSendinBlue extends CommonObject
 
 			$result_add_to_list = $this->addEmailToList($this->sendinblue_listid, $this->email_lines);
 
-			$this->sendinblue_segmentid = $segmentid;
-			if (! empty($newsegmentname)) {
-				$result = $this->createSegment($this->sendinblue_listid, $newsegmentname);
-				if ($result < 0) {
-					return - 1;
-				}
-				$this->sendinblue_segmentid = $result;
-			}
-
-			$result = $this->updateSegment($this->sendinblue_listid, $this->sendinblue_segmentid, $this->email_lines, $resetseg);
-			if ($result < 0) {
-				return - 1;
-			}
+			
 		}
 
 		if ($result_add_to_list < 0) {
@@ -1883,7 +1843,7 @@ class DolSendinBlue extends CommonObject
 	 * @param int $resetseg segment
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function exportSegmentOnlyDesttoSendinBlue($segmentid, $newsegmentname, $resetseg = 0) {
+	/*function exportSegmentOnlyDesttoSendinBlue($segmentid, $newsegmentname, $resetseg = 0) {
 		global $conf;
 
 		$result = $this->getEmailMailingDolibarr('toadd');
@@ -1894,7 +1854,7 @@ class DolSendinBlue extends CommonObject
 
 			$this->sendinblue_segmentid = $segmentid;
 
-			$result = $this->updateSegment($this->sendinblue_listid, $this->sendinblue_segmentid, $this->email_lines, $resetseg);
+			$result = $this->updateList($this->sendinblue_listid,  $this->email_lines, $resetseg);
 			if ($result < 0) {
 				return - 1;
 			}
@@ -1905,7 +1865,7 @@ class DolSendinBlue extends CommonObject
 		} else {
 			return 1;
 		}
-	}
+	}*/
 
 	/**
 	 * Create the capaign on SendinBlue
@@ -1919,7 +1879,15 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::createSendinBlueCampaign " . $this->error, LOG_ERR);
 			return - 1;
 		}
-
+		$data =array("category"=>'Send by dolibarr',
+				"from_name" =>$this->sendinblue_sender_name,
+				 "name" => $this->currentmailing->titre,
+				 "html_content"=> $this->currentmailing->body,
+				 "listid"=>$this->sendinblue_listid,
+				 "subject"=>$this->currentmailing->sujet,
+				 "from_email"=>$this->currentmailing->email_from,
+				 "reply_to"=>$this->currentmailing->email_from);
+/*
 		$type = 'regular';
 		$recipients = new stdClass();
 		$settings = new stdClass();
@@ -1952,28 +1920,21 @@ class DolSendinBlue extends CommonObject
 				'html' => $this->currentmailing->body,
 				'plain_text' => $this->currentmailing->body
 		);
-
+*/
 		if (empty($this->sendinblue_id)) {
 			try {
 
-				$response = $this->sendinblue->post('campaigns', array(
-						'type' => $type,
-						'recipients' => $recipients,
-						'settings' => $settings,
-						'tracking' => $tracking
-				));
+				$response = $this->sendinblue->create_campaign($data);
 			} catch ( Exception $e ) {
 				$this->error = $e->getMessage();
 				dol_syslog(get_class($this) . "::createSendinBlueCampaign " . $this->error, LOG_ERR);
 				return - 1;
 			}
-
-			$this->sendinblue_id = $response['id'];
-			$r = $this->sendinblue->put('campaigns/' . $this->sendinblue_id . '/content', $content);
+			$this->sendinblue_id = $response['data']['id'];
 
 			$opts['campaign_id'] = $this->sendinblue_id;
 			try {
-				$response = $this->sendinblue->get('campaigns/' . $this->sendinblue_id);
+				$response = $this->sendinblue->get_campaign_v2(array("id"=>$this->sendinblue_id));
 			} catch ( Exception $e ) {
 				$this->error = $e->getMessage();
 				dol_syslog(get_class($this) . "::createSendinBlueCampaign " . $this->error, LOG_ERR);
@@ -2011,7 +1972,6 @@ class DolSendinBlue extends CommonObject
 		}
 
 		$error = 0;
-
 		if (is_array($sendinbluestatic->lines) && count($sendinbluestatic->lines) > 0) {
 			foreach ( $sendinbluestatic->lines as $line ) {
 				if ($line->sendinblue_id != null) {
@@ -2061,8 +2021,8 @@ class DolSendinBlue extends CommonObject
 		$body_html = '';
 		try {
 
-			$response = $this->sendinblue->get('campaigns/' . $this->sendinblue_id . '/content');
-
+			$response = $this->sendinblue->get_campaign_v2(array( "id"=>$this->sendinblue_id));
+			var_dump($response);exit;
 			$body_html = $response['html'];
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();

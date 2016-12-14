@@ -943,6 +943,14 @@ class Sendinblue
         unset($data['id']);
         return $this->get("sms/".$id,json_encode($data));
     }
+	
+	
+	
+	  public function subscriberHash($email)
+    {
+        return md5(strtolower($email));
+    }
+	
 
 }
 ?>

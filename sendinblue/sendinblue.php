@@ -160,10 +160,10 @@ if ($action=='associateconfirm') {
 		}
 
 		if (!empty($export)) {
-			if (empty($segmentid) && empty($newsegmentname)) {
-				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueSegment")), 'errors');
+			if (empty($listid)) {
+				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueList")), 'errors');
 			} else {
-				$result=$sendinblue->exportSegmentDesttoSendinBlue($segmentid,$newsegmentname,$resetseg);
+				$result=$sendinblue->exportDesttoSendinBlue($listid);
 
 				if ($result<0) {
 					setEventMessage($sendinblue->error,'errors');
@@ -175,7 +175,7 @@ if ($action=='associateconfirm') {
 				}
 			}
 		}
-
+/*
 		if (!empty($updatesegment)) {
 			if (empty($segmentid)) {
 				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueSegment")), 'errors');
@@ -199,7 +199,7 @@ if ($action=='associateconfirm') {
 			if ($result<0) {
 				setEventMessage($sendinblue->error,'errors');
 			}
-		}
+		}*/
 	}
 
 	$result=$object->fetch($id);
@@ -323,6 +323,7 @@ if (!empty($sendinblue->id)) {
 			if (!empty($sendinblue->sendinblue_listid)) {
 				$result=$sendinblue->getEmailList();
 				if ($result<0) {
+					
 					setEventMessage($sendinblue->error,'errors');
 				} else {
 					$email_seg_array=$sendinblue->email_lines;
@@ -351,16 +352,20 @@ if (!empty($sendinblue->id)) {
 			}
 
 		}else {
+			foreach($email_seg_array as $emailadress){
+				$email_sb_array[]=$emailadress['email']; 
+			}
 
 			//if count is same compare email by email
 			foreach($email_dol_array as $emailadress) {
-				if (!in_array($emailadress,$email_seg_array)) {
+				if (!in_array($emailadress,$email_sb_array)) {
+					
 					$warning_destnotsync=true;
 					break;
 				}
 			}
 
-			foreach($email_seg_array as $emailadress) {
+			foreach($email_sb_array as $emailadress) {
 				if (!in_array($emailadress,$email_dol_array)) {
 					$warning_destnotsync=true;
 					break;
@@ -497,7 +502,7 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 		print '<tr><td width="15%">';
 		print $langs->trans("SendinBlueCampaign");
 		print '</td><td colspan="3">';
-		print '<a target="_blanck" href="https://us7.admin.sendinblue.com/campaigns/">'.$langs->trans('SendinBlueCampaign').'</a>';
+		print '<a target="_blanck" href="https://my.sendinblue.com/camp/listing#draft_c">'.$langs->trans('SendinBlueCampaign').'</a>';
 		print '</td></tr>';
 
 		//List campaign sendinblue
@@ -505,18 +510,19 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 		print $langs->trans("SendinBlueDestList");
 		print '</td><td colspan="3">';
 		if (!empty($sendinblue->sendinblue_listid)) {
-			$result=$sendinblue->getListDestinaries(array('list_id'=>$sendinblue->sendinblue_listid));
+			$result=$sendinblue->getListDestinaries(array('id'=>$sendinblue->sendinblue_listid));
 			if ($result<0) {
 				setEventMessage($sendinblue->error,'errors');
 			}
 			if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
-				foreach($sendinblue->listdest_lines as $line) {
-					print $line['name'];
-				}
+				
+					
+				print $sendinblue->listdest_lines['data']['name'];
+				
 			}
 		}
 		print '</td></tr>';
-		print '<tr><td width="15%">';
+	/*	print '<tr><td width="15%">';
 		print $langs->trans("SendinBlueSegment");
 		print '</td><td colspan="3">';
 		if (!empty($sendinblue->sendinblue_segmentid) && !empty($sendinblue->sendinblue_listid)) {
@@ -532,7 +538,7 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 				}
 			}
 		}
-		print '</td></tr>';
+		print '</td></tr>';*/
 	}
 
 
@@ -563,23 +569,23 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 		print $langs->trans('SendinBlueUpdateExistingList');
 		print '</td><td>';
 		$events=array();
-		if ($conf->use_javascript_ajax) {
-			$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
-		}
+		//if ($conf->use_javascript_ajax) {
+			//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
+		//}
 		print $formsendinblue->select_sendinbluelist('selectlist',1,$sendinblue->sendinblue_listid,0,$events);
 		print '&nbsp;'.$langs->trans('SendinBlueOr');
 
-		print '&nbsp;<a href="https://admin.sendinblue.com/lists/#" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
+		print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
 		print '</td></tr>';
 
-		print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
+		/*print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
 		print $langs->trans('SendinBlueUpdateExistingSegments');
 		print '</td><td>';
-		print $formsendinblue->select_sendinbluesegement($sendinblue->sendinblue_listid,'segmentlist',1,$sendinblue->sendinblue_segmentid);
-		print '<input type="checkbox" name="resetseg" value="1"/>'.$langs->trans('SendinBlueResetSegment');
-		print '&nbsp;'.$langs->trans('SendinBlueOr');
-		print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
-		print '</td></tr>';
+		//print $formsendinblue->select_sendinbluesegement($sendinblue->sendinblue_listid,'segmentlist',1,$sendinblue->sendinblue_segmentid);
+		//print '<input type="checkbox" name="resetseg" value="1"/>'.$langs->trans('SendinBlueResetSegment');
+		//print '&nbsp;'.$langs->trans('SendinBlueOr');
+		//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
+		print '</td></tr>';*/
 		print '<tr class="pair"><td colspan="2" style="text-align:center">';
 		print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
 		print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
