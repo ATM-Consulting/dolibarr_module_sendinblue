@@ -158,7 +158,7 @@ class modsendinblue extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-				'emailing:+tabSendInBlueSending:SendInBlueSending:sendinblue@sendinblue:$user->rights->sendinblue->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',
+				'emailing:+tabSendInBlueSending:SendInBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',	
 				'emailing:-targets',
 				'emailing:+tabSendInBlueTarget:SendInBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
 				'contact:+tabSendInBlueActivities:Module104036Name:mailchimp@mailchimp:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activities.php?id=__ID__'
@@ -425,7 +425,6 @@ class modsendinblue extends DolibarrModules
 		dol_include_once('/sendinblue/script/create-maj-base.php');
 
 		$result=$this->_load_tables('/sendinblue/sql/');
-
 		return $this->_init($sql, $options);
 	}
 

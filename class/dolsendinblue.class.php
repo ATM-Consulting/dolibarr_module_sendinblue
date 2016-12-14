@@ -23,7 +23,7 @@
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 // require_once 'MCAPI.class.php';
-require_once "SendinBlue.class.php";
+require_once DOL_DOCUMENT_ROOT."/custom/sendinblue/class/Sendinblue.class.php";
 
 /**
  * Put here description of your class
@@ -581,16 +581,14 @@ class DolSendinBlue extends CommonObject
 			global $conf, $langs;
 	
 			if (! is_object($this->sendinblue)) {
-				if (empty($conf->global->MAILCHIMP_SENDINBLUE_API_KEY)) {
+				if (empty($conf->global->SENDINBLUE_API_KEY)) {
 					$langs->load("sendinblue@sendinblue");
 					$this->error = $langs->trans("SendinBlueAPIKeyNotSet");
 					dol_syslog(get_class($this) . "::getInstanceSendinBlue " . $this->error, LOG_ERR);
 					return - 1;
 				}
 				
-				
-				$sendinblue = new SendinBlue('https://api.sendinblue.com/v2.0', $conf->global->MAILCHIMP_SENDINBLUE_API_KEY);
-				
+				$sendinblue = new SendinBlue('https://api.sendinblue.com/v2.0', $conf->global->SENDINBLUE_API_KEY);
 				$this->sendinblue = $sendinblue;
 			}
 	
@@ -628,11 +626,9 @@ class DolSendinBlue extends CommonObject
 		// Call
 		try {
 
-			if (! empty($filters['list_id'])) {
-				$response = $this->sendinblue->get('lists/' . $filters['list_id']);
-			} else {
-				$response = $this->sendinblue->get('lists');
-			}
+			
+			$response = $this->sendinblue->get_lists($filters);
+
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			$error ++;
@@ -642,7 +638,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-			$nb_lists = $response['total_items'];
+			$nb_lists = count($response['data']);
 			if ($nb_lists > 100) {
 				$response = $this->sendinblue->get('lists');
 			}
@@ -651,7 +647,7 @@ class DolSendinBlue extends CommonObject
 						$response
 				);
 			} else {
-				$this->listdest_lines = $response['lists'];
+				$this->listdest_lines = $response;
 			}
 
 			return 1;
@@ -676,7 +672,7 @@ class DolSendinBlue extends CommonObject
 
 		// Call
 		try {
-			$response = $this->sendinblue->get('lists/' . $id . '/segments');
+			$response = $this->sendinblue->get_list(array("id"=>$id));
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			$error ++;
@@ -686,6 +682,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getListSegmentDestinaries " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
+			var_dump($response['data']);exit;
 			$this->listsegment_lines = $response['segments'];
 			return 1;
 		}
@@ -1202,18 +1199,14 @@ class DolSendinBlue extends CommonObject
 	function getListCampaign() {
 		
 		$result = $this->getInstanceSendinBlue();
-		$resultSendinBlue = $this->getInstanceSendinBlue();
-		if ($result < 0 && $resultSendinBlue <0) {
-			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+		if ($result < 0 ) {
+			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 			return - 1;
 		}
 
 		// Call
 		try {
 			if(!($result<0)){
-				$response = $this->sendinblue->get('campaigns', array());
-			}
-			if(!($resultSendinBlue<0)){
 				$responseSendinBlue = $this->sendinblue->get_campaigns_v2(array("type"=>"classic", "page"=>1,"page_limit"=>10));
 			}		
 		} catch ( Exception $e ) {
@@ -1222,11 +1215,8 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 		if(!($result<0)){
-			$this->listcampaign_lines = $response['campaigns'];
-		}
-		if(!($resultSendinBlue<0)){
 			
-			$this->listcampaign_lines = array_merge($this->listcampaign_lines , $responseSendinBlue['data']['campaign_records']);
+			$this->listcampaign_lines=$responseSendinBlue['data']['campaign_records'];
 		}
 		return 1;
 	}

@@ -56,11 +56,11 @@ if ($action=='updateallcampagin_confirm' && $confirm='yes' && $user->rights->mai
 // Load translation files required by the page
 $langs->load("sendinblue@sendinblue");
 
-llxHeader('',$langs->trans("Module103020Name"));
+llxHeader('',$langs->trans("Module104036Name"));
 
 if ($action=='updateallcampagin') {
 	$form = new Form($db);
-	$text=$langs->trans("SendinBlueConfirmUpdateAllCampaignText",dol_buildpath('/sendinblue/scripts/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang);
+	$text=$langs->trans("SendinBlueConfirmUpdateAllCampaignText",dol_buildpath('/sendinblue/script/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang);
 	$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?'.$urlconfirm,$langs->trans("SendinBlueConfirmUpdateAllCampaign"),$text,"updateallcampagin_confirm",'','',1,250);
 	if ($ret == 'html') print '<br>';
 }
