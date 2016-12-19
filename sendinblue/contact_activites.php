@@ -21,9 +21,9 @@
 */
 
 /**
- *       \file       /mailchimp/mailchimp/contact_activites.php
-*       \ingroup    mailchimp
-*       \brief      Card of a contact mailchimp activites
+ *       \file       /sendinblue/sendinblue/contact_activites.php
+*       \ingroup    sendinblue
+*       \brief      Card of a contact sendinblue activites
 */
 
 $res=false;
@@ -47,14 +47,14 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
 
-require_once '../class/dolmailchimp.class.php';
-require_once '../class/html.formmailchimp.class.php';
+require_once '../class/dolsendinblue.class.php';
+require_once '../class/html.formsendinblue.class.php';
 
 $langs->load("companies");
 $langs->load("users");
 $langs->load("other");
 $langs->load("commercial");
-$langs->load("mailchimp@mailchimp");
+$langs->load("sendinblue@sendinblue");
 
 $mesg=''; $error=0; $errors=array();
 
@@ -68,7 +68,7 @@ if ($user->societe_id) $socid=$user->societe_id;
 
 $object = new Contact($db);
 $extrafields = new ExtraFields($db);
-$mailchimp= new DolMailchimp($db);
+$sendinblue= new DolSendinBlue($db);
 
 // fetch optionals attributes and labels
 $extralabels=$extrafields->fetch_name_optionals_label($object->table_element);
@@ -92,7 +92,7 @@ $res=$object->fetch_optionals($object->id,$extralabels);
 $result = restrictedArea($user, 'contact', $id, 'socpeople&societe', '', '', 'rowid', $objcanvas); // If we create a contact with no company (shared contacts), no check on write permission
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-$hookmanager->initHooks(array('mailchimpcontactcard'));
+$hookmanager->initHooks(array('sendinbluecontactcard'));
 
 /*
  *	Actions
@@ -108,16 +108,16 @@ if (empty($reshook))
 }
 
 if ($action=='unsubscribe') {
-	$result = $mailchimp->deleteEmailFromList($listid,array($object->email));
+	$result = $sendinblue->deleteEmailFromList($listid,array($object->email));
 	if ($result<0) {
-		setEventMessage($mailchimp->error,'errors');
+		setEventMessage($sendinblue->error,'errors');
 	}
 }
 
 if ($action=='subscribe') {
-	$result = $mailchimp->addEmailToList($listid,array($object->email.'&contact&'.$object->id));
+	$result = $sendinblue->addEmailToList($listid,array($object->email.'&contact&'.$object->id));
 	if ($result<0) {
-		setEventMessage($mailchimp->error,'errors');
+		setEventMessage($sendinblue->error,'errors');
 	}
 }
 
@@ -127,7 +127,7 @@ if ($action=='subscribe') {
 
 
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
-llxHeader('',$langs->trans("MailChimpActivites"),$help_url);
+llxHeader('',$langs->trans("SendinBlueActivites"),$help_url);
 
 $form = new Form($db);
 $formcompany = new FormCompany($db);
@@ -139,8 +139,8 @@ $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("Se
 // Show tabs
 $head = contact_prepare_head($object);
 
-$title = $langs->trans("MailChimpActivites");
-dol_fiche_head($head, 'tabMailChimpActivites', $title, 0, 'contact');
+$title = $langs->trans("SendinBlueActivites");
+dol_fiche_head($head, 'tabSendinBlueActivites', $title, 0, 'contact');
 
 
 print '<table class="border" width="100%">';
@@ -240,7 +240,6 @@ print '</tr>';
 print '<tr><td>'.$langs->trans("ContactVisibility").'</td><td colspan="3">';
 print $object->LibPubPriv($object->priv);
 print '</td></tr>';
-
 // Note Public
 print '<tr><td valign="top">'.$langs->trans("NotePublic").'</td><td colspan="3">';
 print nl2br($object->note_public);
@@ -257,7 +256,6 @@ print '<td>';
 print $object->getLibStatut(5);
 print '</td>';
 print '</tr>'."\n";
-
 // Other attributes
 $parameters=array('socid'=>$socid, 'colspan' => ' colspan="3"');
 $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
@@ -270,48 +268,48 @@ print "</table>";
 print '</div>';
 
 /*
- * Mailchimp list subscription
+ * SendinBlue list subscription
  */
 
 //find is email is in the list
-$result = $mailchimp->getListForEmail($object->email);
+$result = $sendinblue->getListForEmail($object->email);
 if ($result<0) {
-	setEventMessage($mailchimp->error,'errors');
+	setEventMessage($sendinblue->error,'errors');
 }
 $list_subcribed_id=array();
-if (is_array($mailchimp->listlist_lines) && count($mailchimp->listlist_lines)>0) {
-	foreach ($mailchimp->listlist_lines as $listsubcribed) {
-		$list_subcribed_id[$listsubcribed['web_id']]=$listsubcribed['web_id'];
+if (is_array($sendinblue->listlist_lines) && count($sendinblue->listlist_lines)>0) {
+	foreach ($sendinblue->listlist_lines as $listsubcribed) {
+		$list_subcribed_id[]=$listsubcribed;
 	}
 }
 
 
-$result=$mailchimp->getListDestinaries();
+$result=$sendinblue->getListDestinaries();
 if ($result<0) {
-	setEventMessage($mailchimp->error,'errors');
+	setEventMessage($sendinblue->error,'errors');
 }
 
-if (is_array($mailchimp->listdest_lines) && count($mailchimp->listdest_lines)>0) {
-	print load_fiche_titre($langs->trans("MailChimpDestList"),'','');
+if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
+	print load_fiche_titre($langs->trans("SendinBlueDestList"),'','');
 	print '<table class="border" width="100%">';
 	print '<tr class="liste_titre">';
-	print '<td>'.$langs->trans('MailChimpListName').'</td>';
-	print '<td>'.$langs->trans('MailChimpContactIsList').'</td>';
-	print '<td>'.$langs->trans('MailChimpSubscribersState').'</td>';
+	print '<td>'.$langs->trans('SendinBlueListName').'</td>';
+	print '<td>'.$langs->trans('SendinBlueContactIsList').'</td>';
+	print '<td>'.$langs->trans('SendinBlueSubscribersState').'</td>';
 	print '</tr>';
 
-	foreach($mailchimp->listdest_lines as $line) {
+	foreach($sendinblue->listdest_lines['data'] as $line) {
 		//Si le contact n'a pas d'email
 
 		if($object->email == null){
  			$var=!$var;
  			print "<tr " . $bc[$var] . ">";
- 			print '<td width="20%"><a target="_blanck" href="http://admin.mailchimp.com/lists/members?id='.$line['web_id'].'">'.$line['name'].'</a></td>';
+ 			print '<td width="20%"><a target="_blanck" href="http://admin.sendinblue.com/lists/members?id='.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
 
  			print '<link rel="stylesheet" href="../scripts/style.css" />';
  			print "<div style='position:relative;' >";
- 			print "<div class='mailchimp_grise'></div>";
+ 			print "<div class='sendinblue_grise'></div>";
  			print img_picto($langs->trans("Enabled"),'switch_off');
  			print "</div>";
 
@@ -331,20 +329,26 @@ if (is_array($mailchimp->listdest_lines) && count($mailchimp->listdest_lines)>0)
  		//Récupération du statut
  		else if($object->email != null){
  			$var=!$var;
+			//var_dump($line);exit;
  			$emails = array(array('email' => $object->email));
- 			$result = $mailchimp->mailchimp->get('lists/'.$line['id'].'/members/'.$mailchimp->mailchimp->subscriberHash($object->email));
- 			$statut = $result['status'];
+			if(in_array($line['id'],$list_subcribed_id)){
+ 				//$result = $sendinblue->sendinblue->get('lists/'.$line['id'].'/members/'.$sendinblue->sendinblue->subscriberHash($object->email));
+				$statut = 'unsubscribe';
+			}else {
+				
+			}
+ 			
  			print "<tr " . $bc[$var] . ">";
- 			print '<td width="20%"><a target="_blanck" href="http://admin.mailchimp.com/lists/members?id='.$line['id'].'">'.$line['name'].'</a></td>';
+ 			print '<td width="20%"><a target="_blanck" href="http://admin.sendinblue.com/lists/members?id='.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
  			if ($statut == 'subscribed') {
  				print '<a href="'.$_SERVER['PHP_SELF'].'?action=unsubscribe&id='.$object->id.'&listid='.$line['id'].'">';
  				print img_picto($langs->trans("Disabled"),'switch_on');
  				print '</a>';
- 			}  else if($mailchimp->isUnsubscribed($line['id'], $object->email)){
+ 			}  else if($sendinblue->isUnsubscribed($line['id'], $object->email)){
  				print '<link rel="stylesheet" href="../scripts/style.css" />';
  				print "<div style='position:relative;' >";
- 				print "<div class='mailchimp_grise'></div>";
+ 				print "<div class='sendinblue_grise'></div>";
  				print img_picto($langs->trans("Enabled"),'switch_off');
  				print "</div>";
  			} else {
@@ -358,10 +362,10 @@ if (is_array($mailchimp->listdest_lines) && count($mailchimp->listdest_lines)>0)
  			if($statut != null){
 
 	 			if ($statut == "404"){
-	 				print $langs->trans("MailChimpStatuscleaned");
+	 				print $langs->trans("SendinBlueStatuscleaned");
 	 			}
 	 			else {
-	 				print $langs->trans("MailChimpStatus".$statut);
+	 				print $langs->trans("SendinBlueStatus".$statut);
 	 			}
 			}
  			print "</td>\n";
@@ -376,32 +380,30 @@ if (is_array($mailchimp->listdest_lines) && count($mailchimp->listdest_lines)>0)
 }
 
 /*
- * MailChimp Campagin Actvites
+ * SendinBlue Campagin Actvites
  */
-if (!empty($conf->global->MAILCHIMP_SAVE_ACTIVITY_LOCALY)) {
-	$result=$mailchimp->getEmailcontactActivitesFromDB($object->email);
-} else {
-	$result=$mailchimp->getEmailcontactActivites($object->email);
-}
-if ($result<0) {
-	setEventMessage($mailchimp->error,'errors');
-}
-$mailchimpstatic= new DolMailchimp($db);
 
-print load_fiche_titre($langs->trans("MailChimpActivites"),'','');
+$result=$sendinblue->getEmailcontactActivites($object->email);
+
+if ($result<0) {
+	setEventMessage($sendinblue->error,'errors');
+}
+$sendinbluestatic= new DolSendinBlue($db);
+
+print load_fiche_titre($langs->trans("SendinBlueActivites"),'','');
 
 print '<table class="border" width="100%">';
-if(is_array($mailchimp->contactemail_activity) && count($mailchimp->contactemail_activity)>0) {
-	foreach($mailchimp->contactemail_activity as $activites) {
+if(is_array($sendinblue->contactemail_activity) && count($sendinblue->contactemail_activity)>0) {
+	foreach($sendinblue->contactemail_activity as $activites) {
 
 		if(!empty($activites->activites)){
 			print '<tr class="pair">';
 			print '<td>';
-			print $langs->trans('MailChimpCampaign');
+			print $langs->trans('SendinBlueCampaign');
 			print '</td>';
 			print '<td>';
-			$mailchimpstatic->fk_mailing=$activites->fk_mailing;
-			print $mailchimpstatic->getNomUrl();
+			$sendinbluestatic->fk_mailing=$activites->fk_mailing;
+			print $sendinbluestatic->getNomUrl();
 			print '</td>';
 			print '</tr>';
 			print '<tr class="impair">';
@@ -409,15 +411,14 @@ if(is_array($mailchimp->contactemail_activity) && count($mailchimp->contactemail
 			print $langs->trans('Activité');
 			print '</td>';
 			print '<td>';
-			if (is_array($activites->activites) && count($activites->activites)>0) {
+		
 				print '<table class="noborder">';
-				foreach($activites->activites as $act) {
 					print '<tr class="pair">';
-					print '<td>'.$act['action'].'</td><td>'.$act['timestamp'].'</td><td>'.$act['url'].'</td>';
+					print '<td>'.$langs->trans($activites->activites).'</td>';
+					print '<td>'.$activites->timestamp.'</td>';
 					print '</tr>';
-				}
 				print '</table>';
-			}
+			
 			print '</td>';
 			print '</tr>';
 			print '<tr><td colspan="2"></td></tr>';
