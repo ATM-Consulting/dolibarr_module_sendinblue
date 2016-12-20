@@ -725,6 +725,27 @@ class DolSendinBlue extends CommonObject
 			return $response;
 		}
 	}
+	
+	
+	
+	
+	function delete_user($email){
+		$result = $this->getInstanceSendinBlue();
+		if ($result < 0) {
+			dol_syslog(get_class($this) . "::getListForEmail " . $this->error, LOG_ERR);
+			return - 1;
+		}
+
+		// Call
+		try {
+			$response = $this->sendinblue->delete_user($email);
+		} catch ( Exception $e ) {
+			if (get_class($e) != 'SendinBlue_List_NotSubscribed') {
+				$this->error = $e->getMessage();
+				$error ++;
+			}
+		}
+	}
 
 	/**
 	 * Retraive email from sendinblue segment
@@ -1397,18 +1418,16 @@ class DolSendinBlue extends CommonObject
 		}
 		$success_count = 0;
 
-		foreach ( $array_email as $mail ) {
-			try {
-
-				$response = $this->sendinblue->delete('lists/' . $listid . '/members/' . $this->sendinblue->subscriberHash($mail));
-
-				$success_count ++;
-			} catch ( Exception $e ) {
-				$error ++;
-				$this->error = $e->getMessage();
-				dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
-			}
+	
+		try {
+			$response = $this->sendinblue->delete_users_list(array('id'=>$listid,'users'=>$array_email));
+			$success_count ++;
+		} catch ( Exception $e ) {
+			$error ++;
+			$this->error = $e->getMessage();
+			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 		}
+		
 		if ($response['error_count'] > 0) {
 			$error ++;
 			foreach ( $response['errors'] as $err ) {
@@ -1609,6 +1628,9 @@ class DolSendinBlue extends CommonObject
 			if ($status == 'sent' ||$status == 'Sent' ) {
 				return img_picto($langs->trans( $status), 'stcomm3') . ' ' . $langs->trans($status);
 			}
+			if ($status == 'Sent and Archived'  ) {
+				return img_picto($langs->trans( $status), 'stcomm3') . ' ' . $langs->trans($status);
+			}
 			if ($status == 'sending') {
 				return img_picto($langs->trans('SendinBlue' . $status), 'stcomm2') . ' ' . $langs->trans('SendinBlue' . $status);
 			}
@@ -1664,6 +1686,11 @@ class DolSendinBlue extends CommonObject
 
 		try {
 			$response = $this->sendinblue->update_campaign($data);
+			$res = $this->sendinblue->get_campaign_v2(array('id'=>$this->sendinblue_id));
+			if($res['data'][0]['status'] == 'Draft'){
+				return -1;
+			}
+
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
@@ -1731,7 +1758,12 @@ class DolSendinBlue extends CommonObject
 		}
 
 		$this->sendinblue_segmentid = $segment_id;
-		$result = $this->getEmailSegment();
+		$this->getInstanceSendinBlue();
+		$result = $this->sendinblue->display_list_users(array('listids'=>array($segment_id),'page'=>1,'page_limit'=>500));
+		foreach($result['data']['data'] as $d){
+			$this->email_lines[] = $d['email'];
+		}
+		
 
 		if ($result > 0) {
 			// Try to find for each email if it is already into dolibarr as thirdparty or contact
@@ -1888,7 +1920,7 @@ class DolSendinBlue extends CommonObject
 				"from_name" =>$this->sendinblue_sender_name,
 				 "name" => $this->currentmailing->titre,
 				 "html_content"=> $this->currentmailing->body,
-				 "listid"=>$this->sendinblue_listid,
+				 "listid"=>array($this->sendinblue_listid),
 				 "subject"=>$this->currentmailing->sujet,
 				 "from_email"=>$this->currentmailing->email_from,
 				 "reply_to"=>$this->currentmailing->email_from);
@@ -2201,14 +2233,13 @@ class DolSendinBlue extends CommonObject
 	 */
 	public function isUnsubscribed($idList, $email) {
 		global $conf, $langs;
-		$response = $this->sendinblue->get('lists/' . $idList . '/members', array(
-				'status' => 'unsubscribed'
-		));
+		$response = $this->sendinblue->get_user(array('email'=>$email));
 
-		foreach ( $response['members'] as $list_unsub ) {
-			if ($email == $list_unsub['email_address']) {
-
-				return true;
+	if(!empty($response['data']['unsubscription']['user_unsubscribe'])){
+		foreach($response['data']['unsubscription']['user_unsubscribe'] as $u){
+			if($u['camp_id'] == $idList){
+					return true;
+				}
 			}
 		}
 
@@ -2420,9 +2451,10 @@ class DolSendinBlue extends CommonObject
 			if(!empty($reponse['data']['hard_bounces'])){
 				foreach($reponse['data']['hard_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					
 					$res = $this->db->query($sql);
+					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'hard bounce';
@@ -2430,7 +2462,7 @@ class DolSendinBlue extends CommonObject
 					$this->contactemail_activity[] = $tmp;
 					
 				}
-			} else if(!empty($reponse['data']['soft_bounces'])){
+			}  if(!empty($reponse['data']['soft_bounces'])){
 				foreach($reponse['data']['soft_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
 					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
@@ -2444,11 +2476,12 @@ class DolSendinBlue extends CommonObject
 					$this->contactemail_activity[] = $tmp;
 					
 				}
-			} else if(!empty($reponse['data']['spam'])){
+			} if(!empty($reponse['data']['spam'])){
 				foreach($reponse['data']['spam'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					$res = $this->db->query($sql);
+					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'spam';		
@@ -2456,11 +2489,12 @@ class DolSendinBlue extends CommonObject
 					$this->contactemail_activity[] = $tmp;
 					
 				}
-			} else if(!empty($reponse['data']['opened'])){
+			}  if(!empty($reponse['data']['opened'])){
 				foreach($reponse['data']['opened'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					$res = $this->db->query($sql);
+					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'opened';		
@@ -2468,11 +2502,12 @@ class DolSendinBlue extends CommonObject
 					$this->contactemail_activity[] = $tmp;
 					
 				}
-			} else if(!empty($reponse['data']['clicks'])){
+			} if(!empty($reponse['data']['clicks'])){
 				foreach($reponse['data']['clicks'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					$res = $this->db->query($sql);
+					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'clicks';	
@@ -2480,11 +2515,12 @@ class DolSendinBlue extends CommonObject
 					$this->contactemail_activity[] = $tmp;
 					
 				}
-			} else if(!empty($reponse['data']['unsubscription']['user_unsubscribe'])){
+			}  if(!empty($reponse['data']['unsubscription']['user_unsubscribe'])){
 				foreach($reponse['data']['unsubscription']['user_unsubscribe'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
 					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
 					$res = $this->db->query($sql);
+					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'unsubscribe';

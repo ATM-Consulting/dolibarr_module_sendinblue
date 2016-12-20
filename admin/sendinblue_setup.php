@@ -69,7 +69,7 @@ $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
 print_fiche_titre($langs->trans($page_name), $linkback);
 
 // Configuration header
-$head = sendinblueAdminPrepareHead();
+//$head = sendinblueAdminPrepareHead();
 dol_fiche_head(
     $head,
     'settings',

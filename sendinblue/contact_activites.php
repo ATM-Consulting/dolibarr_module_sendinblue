@@ -304,7 +304,7 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 		if($object->email == null){
  			$var=!$var;
  			print "<tr " . $bc[$var] . ">";
- 			print '<td width="20%"><a target="_blanck" href="http://admin.sendinblue.com/lists/members?id='.$line['id'].'">'.$line['name'].'</a></td>';
+ 			print '<td width="20%"><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
 
  			print '<link rel="stylesheet" href="../scripts/style.css" />';
@@ -331,25 +331,26 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
  			$var=!$var;
 			//var_dump($line);exit;
  			$emails = array(array('email' => $object->email));
-			if(in_array($line['id'],$list_subcribed_id)){
+			if(!in_array($line['id'],$list_subcribed_id)){
  				//$result = $sendinblue->sendinblue->get('lists/'.$line['id'].'/members/'.$sendinblue->sendinblue->subscriberHash($object->email));
-				$statut = 'unsubscribe';
+				$statut = 'cleaned';
 			}else {
-				
+				$statut = 'subscribed';
 			}
  			
  			print "<tr " . $bc[$var] . ">";
- 			print '<td width="20%"><a target="_blanck" href="http://admin.sendinblue.com/lists/members?id='.$line['id'].'">'.$line['name'].'</a></td>';
+ 			print '<td width="20%"><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
  			if ($statut == 'subscribed') {
  				print '<a href="'.$_SERVER['PHP_SELF'].'?action=unsubscribe&id='.$object->id.'&listid='.$line['id'].'">';
  				print img_picto($langs->trans("Disabled"),'switch_on');
  				print '</a>';
- 			}  else if($sendinblue->isUnsubscribed($line['id'], $object->email)){
- 				print '<link rel="stylesheet" href="../scripts/style.css" />';
+ 			}  else if($sendinblue->isUnsubscribed($line['id'], $object->email) || $object->statut == 0){
+ 				print '<link rel="stylesheet" href="../script/style.css" />';
  				print "<div style='position:relative;' >";
  				print "<div class='sendinblue_grise'></div>";
  				print img_picto($langs->trans("Enabled"),'switch_off');
+				$statut='unsubscribed';
  				print "</div>";
  			} else {
  				print '<a href="'.$_SERVER['PHP_SELF'].'?action=subscribe&id='.$object->id.'&listid='.$line['id'].'">';
@@ -361,12 +362,9 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 
  			if($statut != null){
 
-	 			if ($statut == "404"){
-	 				print $langs->trans("SendinBlueStatuscleaned");
-	 			}
-	 			else {
-	 				print $langs->trans("SendinBlueStatus".$statut);
-	 			}
+	 			
+	 			print $langs->trans("SendinBlueStatus".$statut);
+	 			
 			}
  			print "</td>\n";
  			print '</tr>';
@@ -395,7 +393,6 @@ print load_fiche_titre($langs->trans("SendinBlueActivites"),'','');
 print '<table class="border" width="100%">';
 if(is_array($sendinblue->contactemail_activity) && count($sendinblue->contactemail_activity)>0) {
 	foreach($sendinblue->contactemail_activity as $activites) {
-
 		if(!empty($activites->activites)){
 			print '<tr class="pair">';
 			print '<td>';

@@ -56,7 +56,7 @@ class modsendinblue extends DolibarrModules
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
-		$this->description = "SendInBlue Connector";
+		$this->description = "SendinBlue Connector";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '1.0';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
@@ -158,10 +158,10 @@ class modsendinblue extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-				'emailing:+tabSendInBlueSending:SendInBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',	
+				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',	
 				'emailing:-targets',
-				'emailing:+tabSendInBlueTarget:SendInBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
-				'contact:+tabSendInBlueActivities:Module104036Name:mailchimp@mailchimp:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activities.php?id=__ID__'
+				'emailing:+tabSendinBlueTarget:SendinBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
+				'contact:+tabSendinBlueActivities:Module104036Name:mailchimp@mailchimp:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
 		);
 
         // Dictionaries
@@ -249,7 +249,7 @@ class modsendinblue extends DolibarrModules
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue',
 		'type'=>'left',
 		'titre'=>'Module104036Name',
-		'leftmenu'=>'SendInBlueMenu',
+		'leftmenu'=>'SendinBlueMenu',
 		'url'=>'/sendinblue/sendinblue/destinaries_list.php',
 		'langs'=>'sendinblue@sendinblue',
 		'position'=>100,
@@ -259,9 +259,9 @@ class modsendinblue extends DolibarrModules
 		'user'=>2);
 		$r++;
 
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
 		'type'=>'left',
-		'titre'=>'SendInBlueDestList',
+		'titre'=>'SendinBlueDestList',
 		'url'=>'/sendinblue/sendinblue/destinaries_list.php',
 		'langs'=>'sendinblue@sendinblue',
 		'position'=>101,
@@ -271,7 +271,7 @@ class modsendinblue extends DolibarrModules
 		'user'=>2);
 		$r++;
 
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
 		'type'=>'left',
 		'titre'=>'NewMailing',
 		'url'=>$is_doli_37_or_more ? '/comm/mailing/card.php?leftmenu=mailing&action=create' : '/comm/mailing/fiche.php?leftmenu=mailing&action=create',
@@ -283,9 +283,9 @@ class modsendinblue extends DolibarrModules
 		'user'=>2);
 		$r++;
 
-		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendInBlueMenu',
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
 		'type'=>'left',
-		'titre'=>'SendInBlueListCampaign',
+		'titre'=>'SendinBlueListCampaign',
 		'url'=>$is_doli_37_or_more ? '/comm/mailing/list.php' : '/comm/mailing/liste.php',
 		'langs'=>'sendinblue@sendinblue',
 		'position'=>106,

@@ -145,12 +145,12 @@ if ($action=='associateconfirm') {
 
 	if (empty($error)) {
 		if (!empty($import)) {
-			if (!empty($segmentid)) {
-				$result=$sendinblue->importSegmentDestToDolibarr($segmentid);
+			if (!empty($listid)) {
+				$result=$sendinblue->importSegmentDestToDolibarr($listid);
 				if ($result<0) {
 					setEventMessage($sendinblue->error,'errors');
 				}else {
-					$sendinblue->sendinblue_segmentid=$segmentid;
+					$sendinblue->sendinblue_segmentid=$listid;
 					$result=$sendinblue->update($user);
 					if ($result<0) {
 						setEventMessage($sendinblue->error,'errors');
@@ -312,21 +312,26 @@ if (!empty($sendinblue->id)) {
 
 		//retrive email for segment and Or List
 		if (!empty($sendinblue->sendinblue_segmentid)) {
-			$result=$sendinblue->getEmailSegment();
+			$result=$sendinblue->getEmailList();
 			if ($result<0) {
 				setEventMessage($sendinblue->error,'errors');
 			} else {
-				$email_seg_array=$sendinblue->email_lines;
+				foreach($sendinblue->email_lines as $l){
+					$email_seg_array[]=$l['email'];
+				}
 			}
 		}
 		else {
 			if (!empty($sendinblue->sendinblue_listid)) {
 				$result=$sendinblue->getEmailList();
+				
 				if ($result<0) {
 					
 					setEventMessage($sendinblue->error,'errors');
 				} else {
-					$email_seg_array=$sendinblue->email_lines;
+					foreach($sendinblue->email_lines as $l){
+					$email_seg_array[]=$l['email'];
+				}
 				}
 			}
 		}
@@ -353,7 +358,7 @@ if (!empty($sendinblue->id)) {
 
 		}else {
 			foreach($email_seg_array as $emailadress){
-				$email_sb_array[]=$emailadress['email']; 
+				$email_sb_array[]=$emailadress; 
 			}
 
 			//if count is same compare email by email
