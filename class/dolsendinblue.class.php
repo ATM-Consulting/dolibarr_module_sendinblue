@@ -536,46 +536,7 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
-	/**
-	 * Get Current instance of Mailjet Connector
-	 *
-	 * return SendinBlue Object of rise error
-	 */
-	/*private function getInstanceSendinBlue() {
-		global $conf, $langs;
-
-		if (! is_object($this->sendinblue)) {
-			if (empty($conf->global->MAILCHIMP_MAIL_SMTPS_ID)) {
-				$langs->load("sendinblue@sendinblue");
-				$this->error = $langs->trans("SendinBlueAPIKeyNotSet");
-				dol_syslog(get_class($this) . "::getInstanceSendinBlue " . $this->error, LOG_ERR);
-				return - 1;
-			}
-			if (empty($conf->global->MAILCHIMP_MAIL_SMTPS_PW)) {
-				$langs->load("sendinblue@sendinblue");
-				$this->error = $langs->trans("SendinBlueSecretKeyNotSet");
-				dol_syslog(get_class($this) . "::getInstanceSendinBlue " . $this->error, LOG_ERR);
-				return - 1;
-			}
-
-			if (! empty($conf->global->MAILCHIMP_MAIL_EMAIL_TLS)) {
-				$param = array(
-						'ssl_verifypeer' => true,
-						'ssl_verifyhost' => 2
-				);
-				// TODO: Need to specify ssl_cainfo or PATH check SendinBlue.php
-			} else {
-				$param = array(
-						'ssl_verifypeer' => false
-				);
-			}
-			$sendinblue = new SendinBlue($conf->global->MAILCHIMP_MAIL_SMTPS_PW, $param);
-			
-			$this->sendinblue = $sendinblue;
-		}
-
-		return 1;
-	}*/
+	
 
 	private function getInstanceSendinBlue() {
 			global $conf, $langs;
@@ -747,60 +708,7 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
-	/**
-	 * Retraive email from sendinblue segment
-	 *
-	 * @return int <0 if KO, >0 if OK
-	 */
-	function getEmailSegment() {
-		global $conf;
-
-		$error = 0;
-
-		$this->email_lines = array();
-		$emailsegment = 0;
-
-		$dc = "us1";
-		if (strstr($conf->global->MAILCHIMP_MAIL_SMTPS_PW, "-")) {
-			list ( $key, $dc ) = explode("-", $conf->global->MAILCHIMP_MAIL_SMTPS_PW, 2);
-			if (! $dc)
-				$dc = "us1";
-		}
-
-		$url_string = "&segment[match]=all&segment[conditions][0][field]=static_segment&segment[conditions][0][op]=eq&segment[conditions][0][value]=" . $this->sendinblue_segmentid;
-
-		$chunk_size = 4096; // in bytes
-		$url = 'http://' . $dc . '.api.sendinblue.com/export/1.0/list?apikey=' . $conf->global->MAILCHIMP_MAIL_SMTPS_PW . '&id=' . $this->sendinblue_listid . $url_string;
-		// print $url.'<BR>';
-		/**
-		 * a more robust client can be built using fsockopen *
-		 */
-		$handle = @fopen($url, 'r');
-		if (! $handle) {
-			$this->error = "failed to access url\n";
-			dol_syslog(get_class($this) . "::getEmailSegment " . $this->error, LOG_ERR);
-			return - 1;
-		} else {
-			$i = 0;
-			$email_addr = array();
-			while ( ! feof($handle) ) {
-				$buffer = fgets($handle, $chunk_size);
-				if (trim($buffer) != '') {
-					$obj = json_decode($buffer);
-					if ($i != 0) {
-						if (! in_array($obj[0], $this->email_lines)) {
-							$this->email_lines[] = $obj[0];
-							$emailsegment ++;
-						}
-					}
-					$i ++;
-				}
-			}
-			fclose($handle);
-		}
-
-		return $emailsegment;
-	}
+	
 
 	/**
 	 * Retraive email from sendinblue List
@@ -960,7 +868,7 @@ class DolSendinBlue extends CommonObject
 		$total_added = 0;
 		$nb_emailadded = 1;
 		foreach ( $emailtoadd as $email ) {
-			var_dump($email);exit;
+			//var_dump($email);exit;
 			$tmp_array = explode('&', $email);
 			if (! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && filter_var($tmp_array[0], FILTER_VALIDATE_EMAIL) && ! in_array($tmp_array[0], $batch)) {
 				$idx_tbl = intval($nb_emailadded / 9000);
@@ -1599,6 +1507,16 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
+	function createList($namelist){
+		$result = $this->getInstanceSendinBlue();
+		if ($result < 0) {
+			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
+			return - 1;
+		}
+		$response = $this->sendinblue->create_list(array("list_name"=>$namelist,"list_parent"=>1));
+		
+	}
+
 	/**
 	 * get SendinBlue campaign status
 	 *
@@ -1686,11 +1604,9 @@ class DolSendinBlue extends CommonObject
 
 		try {
 			$response = $this->sendinblue->update_campaign($data);
-			$res = $this->sendinblue->get_campaign_v2(array('id'=>$this->sendinblue_id));
-			if($res['data'][0]['status'] == 'Draft'){
+			if($response['code']=='failure'){
 				return -1;
 			}
-
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
@@ -1968,7 +1884,6 @@ class DolSendinBlue extends CommonObject
 				return - 1;
 			}
 			$this->sendinblue_id = $response['data']['id'];
-
 			$opts['campaign_id'] = $this->sendinblue_id;
 			try {
 				$response = $this->sendinblue->get_campaign_v2(array("id"=>$this->sendinblue_id));

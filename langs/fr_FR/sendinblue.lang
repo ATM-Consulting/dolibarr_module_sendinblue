@@ -145,6 +145,7 @@ SendinBlueEmailNotSyncInDolNotSendinBlue=Adresse(s) destinataire Dolibarr est ab
 SendinBlueUpdateOnly=Sauver le lien Liste/Segment entre la campagne Dolibarr et la campagne SendinBlue uniquement
 SendinBlueUpdateSegmentOnly=Mettre à jour uniquement le segment sélectionné (ne seront ajoutés au segment que les contacts déjà présents dans la liste SendinBlue)
 SendinBlueStats=SendinBlue Stats.
+SendinBlueSenderMustBeAnEmail=L'émetteur doit contenir un e-mail
 
 #
 # Contact Activites

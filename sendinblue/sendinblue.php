@@ -54,6 +54,8 @@ $langs->load("mails");
 $id = GETPOST('id', 'int');
 $action = GETPOST('action', 'alpha');
 $confirm = GETPOST('confirm');
+$createList = GETPOST('createList');
+$nameList = GETPOST('nameList');
 
 $error=0;
 
@@ -97,7 +99,9 @@ $error_sendinblue_control=0;
 
 $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
-
+if(!empty($createList) && !empty($nameList)){
+	$sendinblue->createList($nameList);
+}
 // Action update description of emailing
 if ($action == 'settitre' || $action == 'setemail_from') {
 
@@ -369,11 +373,12 @@ if (!empty($sendinblue->id)) {
 					break;
 				}
 			}
-
-			foreach($email_sb_array as $emailadress) {
-				if (!in_array($emailadress,$email_dol_array)) {
-					$warning_destnotsync=true;
-					break;
+			if(!empty($email_sb_array)){
+				foreach($email_sb_array as $emailadress) {
+					if (!in_array($emailadress,$email_dol_array)) {
+						$warning_destnotsync=true;
+						break;
+					}
 				}
 			}
 		}
@@ -408,7 +413,7 @@ $head = emailing_prepare_head($object);
 
 dol_fiche_head($head, 'tabSendinBlueSending', $langs->trans("SendinBlue"), 0, 'email');
 
-if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_ACTIVE_MAILING_ONLY)) {
+if (!empty($conf->global->SENDINBLUE_SEND_BY_DOL) || !empty($conf->global->SEND_BY_SENDINBLUE)) {
 
 	$form = new Form($db);
 	$formsendinblue = new FormSendinBlue($db);
@@ -579,8 +584,10 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 		//}
 		print $formsendinblue->select_sendinbluelist('selectlist',1,$sendinblue->sendinblue_listid,0,$events);
 		print '&nbsp;'.$langs->trans('SendinBlueOr');
-
-		print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
+		print '&nbsp;<input type="submit" class="button" name="createList" value="'.$langs->trans('SendinBlueCreateList').'"/>';
+		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
+		
+		print '&nbsp; <input type="text" name="nameList"></input>';
 		print '</td></tr>';
 
 		/*print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
@@ -594,8 +601,8 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 		print '<tr class="pair"><td colspan="2" style="text-align:center">';
 		print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
 		print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
-		print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
-		print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
+	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
+		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
 		print '</td></tr></table>';
 
 		print '<form>';
@@ -611,6 +618,9 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 	}
 	if ($error_sendername) {
 		dol_htmloutput_mesg($langs->trans("SendinBlueSenderNameMandatory"),'','error',1);
+	}
+	if(!strpos($object->email_from,'@')){
+		dol_htmloutput_mesg($langs->trans("SendinBlueSenderMustBeAnEmail"),'','error',1);
 	}
 	if ($warning_destnotsync) {
 		dol_htmloutput_mesg($langs->trans("SendinBlueEmailNotSync"),'','warning',1);
@@ -640,7 +650,6 @@ if (!empty($conf->global->MAILCHIMP_ACTIVE) || !empty($conf->global->MAILCHIMP_A
 	}else {
 		print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("SendinBlueCannotSendControlNotOK")).'">'.$langs->trans("SendinBlueCreateCampaign").'</a>';
 	}
-
 	if (!empty($sendinblue->sendinblue_id) && !$error_sendinblue_control) {
 		if (($object->statut == 1 || $object->statut == 2) && $object->nbemail > 0 && $user->rights->mailing->valider) {
 			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {

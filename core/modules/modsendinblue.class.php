@@ -161,7 +161,7 @@ class modsendinblue extends DolibarrModules
 				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',	
 				'emailing:-targets',
 				'emailing:+tabSendinBlueTarget:SendinBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
-				'contact:+tabSendinBlueActivities:Module104036Name:mailchimp@mailchimp:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
+				'contact:+tabSendinBlueActivities:Module104036Name:sendinblue@sendinblue:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
 		);
 
         // Dictionaries

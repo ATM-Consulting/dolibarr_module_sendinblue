@@ -67,8 +67,8 @@ class Actionssendinblue
 
 		// Add javascript Jquery to add button Create Destinatires list
 		if (empty($action) && ($object->table_element == 'product')
-				&& (! empty($object->id)) && (! empty($conf->global->MAILCHIMP_ACTIVE)
-						|| ! empty($conf->global->MAILCHIMP_ACTIVE_MAILING_ONLY))) {
+				&& (! empty($object->id)) && (! empty($conf->global->SEND_BY_SENDINBLUE)
+						|| ! empty($conf->global->SENDINBLUE_SEND_BY_DOL))) {
 
 			$langs->load('sendinblue@sendinblue');
 
@@ -303,7 +303,7 @@ class Actionssendinblue
 
 		global $db, $langs, $conf;
 
-		if ((! empty($conf->global->MAILCHIMP_ACTIVE) || ! empty($conf->global->MAILCHIMP_ACTIVE_MAILING_ONLY)) && in_array('mailingcard', $hookmanager->contextarray)) {
+		if ((! empty($conf->global->SENDINBLUE_SEND_BY_DOL) || ! empty($conf->global->SEND_BY_SENDINBLUE)) && in_array('mailingcard', $hookmanager->contextarray)) {
 
 			$langs->load("sendinblue@sendinblue");
 			$langs->load("user");

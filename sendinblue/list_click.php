@@ -21,8 +21,8 @@
  */
 
 /**
- * \file /mailchimp/mailchimp/list_click.php
- * \ingroup mailchimp
+ * \file /sendinblue/sendinblue/list_click.php
+ * \ingroup sendinblue
  * \brief Click List from DB
  */
 $res = false;
@@ -47,15 +47,15 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formother.class.php';
 
-require_once '../class/dolmailchimp.class.php';
-require_once '../class/mailchimpactivites.class.php';
-require_once '../class/html.formmailchimp.class.php';
+require_once '../class/dolsendinblue.class.php';
+require_once '../class/sendinblueactivites.class.php';
+require_once '../class/html.formsendinblue.class.php';
 
 $langs->load("companies");
 $langs->load("users");
 $langs->load("other");
 $langs->load("commercial");
-$langs->load("mailchimp@mailchimp");
+$langs->load("sendinblue@sendinblue");
 
 $search_month = GETPOST('search_month', 'aplha');
 $search_year = GETPOST('search_year', 'int');
@@ -128,35 +128,35 @@ if (! empty($search_socname)) {
 	$options .= '&amp;search_socname=' . $search_socname;
 }
 
-$mailchimp = new DolMailchimp($db);
-$mailchimpactivities = new MailchimpActivites($db);
+$sendinblue = new DolSendinBlue($db);
+$sendinblueactivities = new SendinBlueActivites($db);
 $formother = new FormOther($db);
 $contact = new Contact($db);
 
 // Security check
-if (! $user->rights->mailchimp->read && ! empty($conf->global->MAILCHIMP_SAVE_ACTIVITY_LOCALY)) {
+if (! $user->rights->sendinblue->read && ! empty($conf->global->SENDINBLUE_SAVE_ACTIVITY_LOCALY)) {
 	accessforbidden();
 }
 
 /*
  *	View
  */
-$title = $langs->trans("MailChimpClickReport");
+$title = $langs->trans("SendinBlueClickReport");
 llxHeader('', $title);
 
 $form = new Form($db);
 
 /*
- * MailChimp Campagin Actvites
+ * SendinBlue Campagin Actvites
  */
 
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
-	$nbtotalofrecords = $mailchimpactivities->getEmailcontactActivitesClick($sortorder, $sortfield, 0, 0, $filter);
+	$nbtotalofrecords = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, 0, 0, $filter);
 }
 
-$result = $mailchimpactivities->getEmailcontactActivitesClick($sortorder, $sortfield, $limit, $offset, $filter);
+$result = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, $limit, $offset, $filter);
 if ($result < 0) {
-	setEventMessage($mailchimpactivities->error, 'errors');
+	setEventMessage($sendinblueactivities->error, 'errors');
 }
 
 print_barre_liste($title, $page, $_SERVEUR['PHP_SELF'], $option, $sortfield, $sortorder, '', $result, $nbtotalofrecords);
@@ -177,7 +177,7 @@ print '</div>';
 
 print '<table class="border" width="100%">';
 print '<tr>';
-print_liste_field_titre($langs->trans("MailChimpCampaign"), $_SERVEUR['PHP_SELF'], "ml.titre", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("SendinBlueCampaign"), $_SERVEUR['PHP_SELF'], "ml.titre", "", $options, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Date"), $_SERVEUR['PHP_SELF'], "ml.date_creat", "", $options, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Email"), $_SERVEUR['PHP_SELF'], "t.email", "", $options, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Company"), $_SERVEUR['PHP_SELF'], "soc.nom", "", $options, '', $sortfield, $sortorder);
@@ -192,10 +192,10 @@ print '<td><input type="text" class="flat" name="search_socname" value="' . $sea
 print '<td><input type="text" class="flat" name="search_link" value="' . $search_link . '" size="20"></td>';
 print '<td></td>';
 print '</tr>';
-$mailchimpstatic = new DolMailchimp($db);
+$sendinbluestatic = new DolSendinBlue($db);
 $contact_array=array();
-if (is_array($mailchimpactivities->contactemail_clickactivity) && count($mailchimpactivities->contactemail_clickactivity) > 0) {
-	foreach ( $mailchimpactivities->contactemail_clickactivity as $activites ) {
+if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
+	foreach ( $sendinblueactivities->contactemail_clickactivity as $activites ) {
 		
 		if (!array_key_exists($activites->contactid, $contact_array) && !empty($activites->contactid)) {
 			$result=$contact->fetch($activites->contactid);
@@ -211,8 +211,8 @@ if (is_array($mailchimpactivities->contactemail_clickactivity) && count($mailchi
 				$var = ! $var;
 				print "<tr $bc[$var]>";
 				print '<td>';
-				$mailchimpstatic->fk_mailing = $activites->fk_mailing;
-				print $mailchimpstatic->getNomUrl();
+				$sendinbluestatic->fk_mailing = $activites->fk_mailing;
+				print $sendinbluestatic->getNomUrl();
 				print '</td>';
 				print '<td>';
 				print dol_print_date($activites->datec);
