@@ -294,6 +294,30 @@ class modsendinblue extends DolibarrModules
 		'target'=>'',
 		'user'=>2);
 		$r++;
+		
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
+		'type'=>'left',
+		'titre'=>'SendinBlueClickReport',
+		'url'=>'/sendinblue/sendinblue/list_click.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>107,
+		'enabled'=>'$user->rights->sendinblue->read',
+		'perms'=>'$user->rights->sendinblue->read',
+		'target'=>'',
+		'user'=>2);
+		$r++;
+		
+		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
+		'type'=>'left',
+		'titre'=>'SendinBlueOpenedReport',
+		'url'=>'/sendinblue/sendinblue/list_open.php',
+		'langs'=>'sendinblue@sendinblue',
+		'position'=>108,
+		'enabled'=>'$user->rights->sendinblue->read',
+		'perms'=>'$user->rights->sendinblue->read',
+		'target'=>'',
+		'user'=>2);
+		$r++;
 
 		// Add here entries to declare new menus
 		//

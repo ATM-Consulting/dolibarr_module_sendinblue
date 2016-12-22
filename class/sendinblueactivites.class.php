@@ -354,11 +354,15 @@ class SendinBlueActivites extends CommonObject
 		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as soc ON socp.fk_soc=soc.rowid";
 
 		$sql .= " WHERE t.activites LIKE '%Click%'";
+		
 		if (count($filter) > 0) {
 			foreach ( $filter as $key => $value ) {
 				if ($key == 'ml.titre' || $key == 't.email' || $key == 'soc.nom') {
 					$sql .= ' AND ' . $key . ' LIKE \'%' . $this->db->escape($value) . '%\'';
-				} elseif ($key != 'link') {
+				}elseif ($key == 'socp.rowid'){
+					$sql .=' AND '.$key.' = '.$value;
+					
+				}  elseif ($key != 'link') {
 					$sql .= ' AND ' . $key . ' IN (' . $value . ')';
 				}
 			}
@@ -376,19 +380,19 @@ class SendinBlueActivites extends CommonObject
 		if ($resql) {
 			$num = $this->db->num_rows($resql);
 			if ($num) {
+				
 				$this->contactemail_clickactivity = array();
 
 				while ( $obj = $this->db->fetch_object($resql) ) {
 
 					$line = new SendinBlueActivitesLineDb();
-
+				
 					$addline = false;
-					$activites = unserialize($obj->activites);
+					$activites = ($obj->activites);
+					if (!empty($activites) && count($activites) > 0) {
 
-					if (is_array($activites) && count($activites) > 0) {
-
-						foreach ( $activites as $act ) {
-							if ($act['action'] == 'click') {
+						
+						
 								if (array_key_exists('link', $filter) && ! empty($filter['link'])) {
 									if (strpos($act['url'], $filter['link']) !== false) {
 										$addline = true;
@@ -397,8 +401,8 @@ class SendinBlueActivites extends CommonObject
 									$addline = true;
 								}
 								$line->activites[] = $act;
-							}
-						}
+							
+						
 					}
 					if ($addline) {
 						$line->id = $obj->rowid;
@@ -421,7 +425,6 @@ class SendinBlueActivites extends CommonObject
 				}
 			}
 			$this->db->free($resql);
-
 			return $num;
 		} else {
 			$this->error = "Error " . $this->db->lasterror();
@@ -563,6 +566,115 @@ class SendinBlueActivites extends CommonObject
 			return 1;
 		}
 	}
+
+
+
+
+
+function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid', $limit = 0, $offset = 0, $filter = array()) {
+		global $langs;
+		$sql = "SELECT";
+		$sql .= " t.rowid,";
+
+		$sql .= " t.entity,";
+		$sql .= " t.fk_mailing,";
+		$sql .= " t.sendinblue_id,";
+		$sql .= " t.email,";
+		$sql .= " t.activites,";
+		$sql .= " t.fk_user_author,";
+		$sql .= " ml.date_creat as datec,";
+		$sql .= " ml.date_valid,";
+		$sql .= " t.fk_user_mod,";
+		$sql .= " ml.titre,";
+		$sql .= " soc.nom as socname,";
+		$sql .= " socp.rowid as contactid,";
+		$sql .= " t.tms";
+
+		$sql .= " FROM " . MAIN_DB_PREFIX . "sendinblue_activites as t";
+		$sql .= " INNER JOIN " . MAIN_DB_PREFIX . "sendinblue as m ON m.fk_mailing=t.fk_mailing";
+		$sql .= " INNER JOIN " . MAIN_DB_PREFIX . "mailing as ml ON t.fk_mailing=ml.rowid";
+		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "socpeople as socp ON t.email=socp.email";
+		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as soc ON socp.fk_soc=soc.rowid";
+
+		$sql .= " WHERE t.activites LIKE '%Open%'";
+		
+		if (count($filter) > 0) {
+			foreach ( $filter as $key => $value ) {
+				if ($key == 'ml.titre' || $key == 't.email' || $key == 'soc.nom') {
+					$sql .= ' AND ' . $key . ' LIKE \'%' . $this->db->escape($value) . '%\'';
+				} elseif ($key == 'socp.rowid'){
+					$sql .=' AND '.$key.' = '.$value;
+					
+				} elseif ($key != 'link') {
+					$sql .= ' AND ' . $key . ' IN (' . $value . ')';
+				}
+			}
+		}
+		if (! empty($sortfield)) {
+			$sql .= " ORDER BY " . $sortfield . ' ' . $sortorder;
+		}
+
+		if (! empty($limit)) {
+			$sql .= ' ' . $this->db->plimit($limit + 1, $offset);
+		}
+
+		dol_syslog(get_class($this) . "::getEmailcontactActivitesOpen sql=" . $sql, LOG_DEBUG);
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			$num = $this->db->num_rows($resql);
+			if ($num) {
+				
+				$this->contactemail_clickactivity = array();
+
+				while ( $obj = $this->db->fetch_object($resql) ) {
+
+					$line = new SendinBlueActivitesLineDb();
+				
+					$addline = false;
+					$activites = ($obj->activites);
+					if (!empty($activites) && count($activites) > 0) {
+
+						
+						
+								if (array_key_exists('link', $filter) && ! empty($filter['link'])) {
+									if (strpos($act['url'], $filter['link']) !== false) {
+										$addline = true;
+									}
+								} else {
+									$addline = true;
+								}
+								$line->activites[] = $act;
+							
+						
+					}
+					if ($addline) {
+						$line->id = $obj->rowid;
+
+						$line->entity = $obj->entity;
+						$line->fk_mailing = $obj->fk_mailing;
+						$line->sendinblue_id = $obj->sendinblue_id;
+						$line->email = $obj->email;
+
+						$line->fk_user_author = $obj->fk_user_author;
+						$line->datec = $this->db->jdate($obj->datec);
+						$line->fk_user_mod = $obj->fk_user_mod;
+						$line->tms = $this->db->jdate($obj->tms);
+						$line->campaign_title = $obj->title;
+						$line->socname = $obj->socname;
+						$line->contactid = $obj->contactid;
+
+						$this->contactemail_clickactivity[] = $line;
+					}
+				}
+			}
+			$this->db->free($resql);
+			return $num;
+		} else {
+			$this->error = "Error " . $this->db->lasterror();
+			dol_syslog(get_class($this) . "::getEmailcontactActivitesClick " . $this->error, LOG_ERR);
+			return - 1;
+		}
+		}
 
 	/**
 	 * Load an object from its id and create a new one in database

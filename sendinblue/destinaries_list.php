@@ -246,6 +246,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
 			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'">'.$dest_line['name'].'</a></td>';
+			if(empty($dest_line['total_subscribers'])) $dest_line['total_subscribers']=0;
 			print '<td>'.$dest_line['total_subscribers'].'</td>';
 			print '<td>'.$dest_line['entered'].'</td>';
 			print '</tr>';

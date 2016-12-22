@@ -51,8 +51,6 @@ require_once '../class/dolsendinblue.class.php';
 require_once '../class/sendinblueactivites.class.php';
 require_once '../class/html.formsendinblue.class.php';
 require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
-
-
 $langs->load("companies");
 $langs->load("users");
 $langs->load("other");
@@ -64,7 +62,6 @@ $search_year = GETPOST('search_year', 'int');
 $sortorder = GETPOST('sortorder', 'alpha');
 $sortfield = GETPOST('sortfield', 'alpha');
 $page = GETPOST('page', 'int');
-$contact_id=GETPOST('contactid');
 
 
 if (empty($search_year)) {
@@ -88,6 +85,7 @@ $search_title=GETPOST('search_title','alpha');
 $search_mail=GETPOST('search_mail','alpha');
 $search_link=GETPOST('search_link','alpha');
 $search_socname=GETPOST('search_socname','alpha');
+$contact_id=GETPOST('contactid');
 
 if ($page == - 1) {
 	$page = 0;
@@ -134,6 +132,7 @@ if (! empty($contact_id)) {
 	$filter['socp.rowid'] = $contact_id;
 	$options .= '&amp;contactid=' . $contact_id;
 }
+
 $sendinblue = new DolSendinBlue($db);
 $sendinblueactivities = new SendinBlueActivites($db);
 $formother = new FormOther($db);
@@ -147,7 +146,7 @@ if (! $user->rights->sendinblue->read ) {
 /*
  *	View
  */
-$title = $langs->trans("SendinBlueClickReport");
+$title = $langs->trans("SendinBlueOpenedReport");
 llxHeader('', $title);
 
 $form = new Form($db);
@@ -158,10 +157,10 @@ $form = new Form($db);
 
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
 	
-	$nbtotalofrecords = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, 0, 0, $filter);
+	$nbtotalofrecords = $sendinblueactivities->getEmailcontactActivitesOpen($sortorder, $sortfield, 0, 0, $filter);
 }
 
-$result = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, $limit, $offset, $filter);
+$result = $sendinblueactivities->getEmailcontactActivitesOpen($sortorder, $sortfield, $limit, $offset, $filter);
 if ($result < 0) {
 	setEventMessage($sendinblueactivities->error, 'errors');
 }

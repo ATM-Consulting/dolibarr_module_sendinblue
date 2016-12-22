@@ -33,7 +33,7 @@ SendinBlueSending=SendinBlue
 SendinBlueTarget=Destinataires
 SendinBlueListCampaign = Liste des campagnes Dolibarr
 SendinBlueClickReport=Rapport des clics
-
+SendinBlueOpenedReport = Rapport des ouvertures
 #
 # Admin
 #
