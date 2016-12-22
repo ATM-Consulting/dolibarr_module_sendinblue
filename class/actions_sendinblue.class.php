@@ -109,7 +109,7 @@ class Actionssendinblue
 					</script>';
 		}
 
-		if ($parameters['currentcontext'] == 'categorycard' ||
+	/*	if ($parameters['currentcontext'] == 'categorycard' ||
 				in_array('categorycard', explode(':', $parameters['context']))
 				&& (stripos($_SERVER['PHP_SELF'], 'viewcat.php') !== false
 						|| stripos($_SERVER['PHP_SELF'], 'edit.php') !== false)) {
@@ -255,7 +255,7 @@ class Actionssendinblue
 
 			// var_dump($parameters);
 			// exit;
-		}
+		}*/
 		if (in_array('contactcard', $hookmanager->contextarray)) {
 
 			if ($action == 'edit' && GETPOST('action') == 'update') {
@@ -309,19 +309,7 @@ class Actionssendinblue
 			$langs->load("user");
 
 			// Change substitution array
-			$object->substitutionarray = array(
-					'*|FNAME|*' => 'Firstname',
-					'*|LNAME|*' => 'Lastname',
-					'*|EMAIL|*' => 'EMail',
-					'*|UNSUB|*' => 'SendinBlueUnsubscribe'
-			);
-
-			$object->substitutionarrayfortest = array(
-					'*|FNAME|*' => 'Firstname',
-					'*|LNAME|*' => 'Lastname',
-					'*|EMAIL|*' => 'EMail',
-					'*|UNSUB|*' => 'SendinBlueUnsubscribe'
-			);
+			
 
 			if ($action == '' || $action == 'valid') {
 				$error_sendinblue_control = 0;

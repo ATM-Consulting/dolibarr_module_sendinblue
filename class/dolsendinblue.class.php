@@ -1514,7 +1514,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 		$response = $this->sendinblue->create_list(array("list_name"=>$namelist,"list_parent"=>1));
-		
+		return $response['data']['id'];
 	}
 
 	/**

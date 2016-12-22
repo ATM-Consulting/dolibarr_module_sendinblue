@@ -153,6 +153,7 @@ SendinBlueSenderMustBeAnEmail=L'émetteur doit contenir un e-mail
 SendinBlueActivites=Activité SendinBlue
 NbOfEMailingsSend=Emailings de masse envoyé
 SendinBlueContactIsList=Le contact appartient à la liste
+titleGraphContactActions=Résumé de l'activité du contact
 
 #
 # Contact Status

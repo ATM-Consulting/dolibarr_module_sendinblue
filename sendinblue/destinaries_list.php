@@ -46,13 +46,13 @@ $langs->load("sendinblue@sendinblue");
 $productid = GETPOST('productid', 'int');
 $action = GETPOST('action', 'alpha');
 $type = GETPOST('type', 'alpha');
+$nameList = GETPOST('nameList');
 
 //Set page var
 $refemail=false;
 $error=0;
 
 $sendinblue= new DolSendinBlue($db);
-$result=$sendinblue->getListDestinaries();
 if ($result<0) {
 	setEventMessage($sendinblue->error,'errors');
 }
@@ -74,27 +74,19 @@ $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 
 if ($action=='associateconfirm') {
-	$listid=GETPOST('selectlist','alpha');
+	if(!empty($nameList)){
+		$listid = $sendinblue->createList($nameList);
+	} else {
+		$listid=GETPOST('selectlist','alpha');
+	}
 	$emailtoadd=GETPOST('emailtoadd');
-	$segmentname=GETPOST('segmentname','alpha');
-	$segmentid=GETPOST('segmentlist','alpha');
-	$resetseg=GETPOST('resetseg','int');
-
 	if (empty($listid)) {
 		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("SendinBlueUpdateExistingList")),'errors');
 		$error++;
 	}
 	
-	if (empty($segmentid) && empty($segmentname)) {
-		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("SendinBlueNewSegmentName")),'errors');
-		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("SendinBlueUpdateExistingSegments")),'errors');
-		$error++;
-	}
+
 	
-	if (!empty($segmentid) && !empty($segmentname)) {
-		setEventMessage($langs->trans("SendinBlueSelectSegmentOrNewOnes"),'errors');
-		$error++;
-	}
 
 	if (!is_array($emailtoadd)) {
 		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("EMail")),'errors');
@@ -103,32 +95,18 @@ if ($action=='associateconfirm') {
 		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("EMail")),'errors');
 		$error++;
 	}
-
 	if (!$error) {
 		$result=$sendinblue->addEmailToList($listid,$emailtoadd);
 		if ($result<0) {
 			setEventMessage($sendinblue->error,'errors');
-		} else {
-				if(!empty($segmentname)) {
-					$result=$sendinblue->createSegment($listid,$segmentname);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
-					$segmentid=$result;
-			}
-			
-			$result=$sendinblue->updateSegment($listid,$segmentid,$emailtoadd,$resetseg);
-			if ($result<0) {
-				setEventMessage($sendinblue->error,'errors');
-			}
-		}
+		} 
 	}else {
 		$action='associate';
 	}
 	
 }
 
-
+$result=$sendinblue->getListDestinaries();
 /*
  * VIEW
 *
@@ -210,15 +188,17 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			print $formsendinblue->select_sendinbluelist('selectlist',1,'',0,$events);
 			print '<br>'.$langs->trans('SendinBlueOr');
 			
-			print '&nbsp;<a href="https://admin.sendinblue.com/lists/#" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
-
-			print '<div id="blocksegement" style="display:none">';
-			print $langs->trans('SendinBlueUpdateExistingSegments');
-			print $formsendinblue->select_sendinbluesegement(0,'segmentlist');
-			print '<input type="checkbox" name="resetseg" value="1"/>'.$langs->trans('SendinBlueResetSegment');
-			print '<br>'.$langs->trans('SendinBlueOr');
+			print ' '.$langs->trans('SendinBlueCreateList').' : ';
+		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
+		
+			print '&nbsp; <input type="text" name="nameList"></input>';
+			print '</td></tr>';
+			print '<div id="blocksegement" >';
+		//	print $langs->trans('SendinBlueUpdateExistingSegments');
+			//print $formsendinblue->select_sendinbluesegement(0,'segmentlist');
+			//print '<br>'.$langs->trans('SendinBlueOr');
 				
-			print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
+			//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
 			
 			print '<br><input type="submit" class="button" value="'.$langs->trans('Save').'"/>';
 			print '</div>';

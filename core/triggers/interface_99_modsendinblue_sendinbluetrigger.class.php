@@ -117,31 +117,6 @@ class Interfacesendinbluetrigger
         // Data and type of action are stored into $object and $action
         // Users
      
-		if (in_array($action, array('CATEGORY_CREATE', 'CATEGORY_MODIFY', 'CATEGORY_DELETE')))
-		{
-			dol_include_once('/sendinblue/lib/sendinblue.lib.php');
-			$langs->load('sendinblue@sendinblue');
-			
-			switch ($action) {
-				case 'CATEGORY_CREATE':
-				case 'CATEGORY_MODIFY':
-					$r = setSendinBlueInfoFromCategorie($object);
-					//echo $r;exit;
-					break;
-				
-				case 'CATEGORY_DELETE':
-					$r = deleteSendinBlueInfoFromCategorie($category);
-					break;
-					
-				default:
-					$r = 1;
-					break;
-			}
-			if(!$r){
-				if (function_exists('setEventMessages')) setEventMessages($langs->trans('SendinBlue_error_can_not_update_fields'), array(), 'errors'); 
-				else setEventMessage($langs->trans('SendinBlue_error_can_not_update_fields'), 'errors');
-			}
-		}
 		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE')))
 		{
 				define ('INC_FROM_DOLIBARR',true);

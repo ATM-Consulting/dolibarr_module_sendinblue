@@ -26,19 +26,7 @@
 *       \brief      Card of a contact sendinblue activites
 */
 
-$res=false;
-if (file_exists("../main.inc.php")) {
-	$res = @include("../main.inc.php");
-}
-if (! $res && file_exists("../../main.inc.php")) {
-	$res = @include("../../main.inc.php");
-}
-if (! $res && file_exists("../../../main.inc.php")) {
-	$res = @include("../../../main.inc.php");
-}
-if (! $res) {
-	die("Main include failed");
-}
+require '../config.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/contact.lib.php';
@@ -418,6 +406,7 @@ if(is_array($sendinblue->contactemail_activity) && count($sendinblue->contactema
 			
 			print '</td>';
 			print '</tr>';
+			
 			print '<tr><td colspan="2"></td></tr>';
 			}
 
@@ -426,7 +415,38 @@ if(is_array($sendinblue->contactemail_activity) && count($sendinblue->contactema
 
 
 print "</table>";
-
+		$PDOdb = new TPDOdb;
+		$listeview = new TListviewTBS('graphContactActions');
+		if(!empty($sendinblue->contactemail_activity)){
+			foreach($sendinblue->contactemail_activity as $act){
+				$bool=false;
+				if(!empty($TSum)){
+					foreach($TSum as &$t){
+						if($t[0] == $act->activites){
+							$t[1]= $t[1]+1;
+							
+							$bool=true;
+						}
+					}
+				
+				}
+				if(!$bool){
+					$TSum[] = array($act->activites,1);
+				}
+			}
+		
+			print $listeview->renderArray($PDOdb, $TSum
+			,array(
+			'type' => 'chart'
+			,'chartType' => 'PieChart'
+			,'liste'=>array(
+			'titre'=>$langs->transnoentitiesnoconv('titleGraphContactActions')
+			)
+			)
+			);
+		
+		}
+		
 dol_fiche_end();
 
 llxFooter();
