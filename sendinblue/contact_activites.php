@@ -431,7 +431,7 @@ print "</table>";
 				
 				}
 				if(!$bool){
-					$TSum[] = array($act->activites,1);
+					$TSum[] = array($langs->transnoentities($act->activites),1);
 				}
 			}
 		

@@ -686,15 +686,14 @@ if (!empty($conf->global->SENDINBLUE_SEND_BY_DOL) || !empty($conf->global->SEND_
 if($object->statut == 3){
 		$PDOdb = new TPDOdb;
 		$listeview = new TListviewTBS('graphCampaignActions');
-		$TSum[] = array('unique views',$sendinblue->sendinblue_webid['data'][0]['unique_views']);
-		$TSum[] = array('viewed',$sendinblue->sendinblue_webid['data'][0]['viewed']);	
-		$TSum[] = array('clicked',$sendinblue->sendinblue_webid['data'][0]['clicked']);	
-		$TSum[] = array('clicker',$sendinblue->sendinblue_webid['data'][0]['clicker']);	
-		$TSum[] = array('hard bounce',$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);	
-		$TSum[] = array('soft bounce',$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);	
-		$TSum[] = array('unsub',$sendinblue->sendinblue_webid['data'][0]['unsub']);	
-		$TSum[] = array('mirror click',$sendinblue->sendinblue_webid['data'][0]['mirror_click']);	
-		$TSum[] = array('complaints',$sendinblue->sendinblue_webid['data'][0]['complaints']);	
+		$TSum[] = array($langs->transnoentities('unique views'),$sendinblue->sendinblue_webid['data'][0]['unique_views']);
+		$TSum[] = array($langs->transnoentities('viewed'),$sendinblue->sendinblue_webid['data'][0]['viewed']);	
+		$TSum[] = array($langs->transnoentities('clicked'),$sendinblue->sendinblue_webid['data'][0]['clicked']);	
+		$TSum[] = array($langs->transnoentities('Hard Bounce'),$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);	
+		$TSum[] = array($langs->transnoentities('Soft Bounce'),$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);	
+		$TSum[] = array($langs->transnoentities('unsub'),$sendinblue->sendinblue_webid['data'][0]['unsub']);	
+		$TSum[] = array($langs->transnoentities('mirror click'),$sendinblue->sendinblue_webid['data'][0]['mirror_click']);	
+		$TSum[] = array($langs->transnoentities('complaints'),$sendinblue->sendinblue_webid['data'][0]['complaints']);	
 		
 		if(!empty($sendinblue->sendinblue_webid['data'][0]['delivered'])){
 			print $listeview->renderArray($PDOdb, $TSum

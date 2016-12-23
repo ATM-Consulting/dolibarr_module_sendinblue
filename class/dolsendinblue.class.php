@@ -2374,7 +2374,7 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'hard bounce';
+					$tmp->activites = 'Hard Bounce';
 					$tmp->timestamp = $camp['event_time'];		
 					$this->contactemail_activity[] = $tmp;
 					
@@ -2388,7 +2388,7 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'soft bounce';	
+					$tmp->activites = 'Soft Bounce';	
 					$tmp->timestamp = $camp['event_time'];		
 					$this->contactemail_activity[] = $tmp;
 					
@@ -2401,7 +2401,7 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'spam';		
+					$tmp->activites = 'Spam';		
 					$tmp->timestamp = $camp['event_time'];		
 					$this->contactemail_activity[] = $tmp;
 					

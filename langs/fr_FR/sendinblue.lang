@@ -166,6 +166,15 @@ cleaned=Supprimé
 pending=En attente
 subscribed=Inscrit 
 NoEmail = Pas d'email
+unique views=Vu une seule fois
+viewed=Vu au moins une fois
+unsub=Désinscrit
+mirror click=Cliqué lien mirroir
+clicked=Cliqué
+complaints=Plaintes
+opened=Ouvert
+clicks=Cliqué
+unsubscribe=Désinscrit
 
 #
 # Export
