@@ -34,6 +34,8 @@ SendinBlueTarget=Destinataires
 SendinBlueListCampaign = Liste des campagnes Dolibarr
 SendinBlueClickReport=Rapport des clics
 SendinBlueOpenedReport = Rapport des ouvertures
+Sent = Envoyé
+Sent and Archived = Envoyé et Archivé
 #
 # Admin
 #
@@ -146,7 +148,7 @@ SendinBlueUpdateOnly=Sauver le lien Liste/Segment entre la campagne Dolibarr et 
 SendinBlueUpdateSegmentOnly=Mettre à jour uniquement le segment sélectionné (ne seront ajoutés au segment que les contacts déjà présents dans la liste SendinBlue)
 SendinBlueStats=SendinBlue Stats.
 SendinBlueSenderMustBeAnEmail=L'émetteur doit contenir un e-mail
-
+titleGraphCampaignActions=Activité des contacts sur la campagne
 #
 # Contact Activites
 #

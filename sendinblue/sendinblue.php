@@ -26,19 +26,8 @@ ini_set('html_errors', false);*/
  */
 
 
-$res = 0;
-if (! $res && file_exists("../main.inc.php")) {
-	$res = @include("../main.inc.php");
-}
-if (! $res && file_exists("../../main.inc.php")) {
-	$res = @include("../../main.inc.php");
-}
-if (! $res && file_exists("../../../main.inc.php")) {
-	$res = @include("../../../main.inc.php");
-}
-if (! $res) {
-	die("Main include failed");
-}
+require '../config.php';
+
 require_once DOL_DOCUMENT_ROOT.'/core/lib/emailing.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
@@ -694,7 +683,32 @@ if (!empty($conf->global->SENDINBLUE_SEND_BY_DOL) || !empty($conf->global->SEND_
 }else {
 	dol_htmloutput_mesg($langs->trans("SendinBlueNotActive"),'','error',1);
 }
-
+if($object->statut == 3){
+		$PDOdb = new TPDOdb;
+		$listeview = new TListviewTBS('graphCampaignActions');
+		$TSum[] = array('unique views',$sendinblue->sendinblue_webid['data'][0]['unique_views']);
+		$TSum[] = array('viewed',$sendinblue->sendinblue_webid['data'][0]['viewed']);	
+		$TSum[] = array('clicked',$sendinblue->sendinblue_webid['data'][0]['clicked']);	
+		$TSum[] = array('clicker',$sendinblue->sendinblue_webid['data'][0]['clicker']);	
+		$TSum[] = array('hard bounce',$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);	
+		$TSum[] = array('soft bounce',$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);	
+		$TSum[] = array('unsub',$sendinblue->sendinblue_webid['data'][0]['unsub']);	
+		$TSum[] = array('mirror click',$sendinblue->sendinblue_webid['data'][0]['mirror_click']);	
+		$TSum[] = array('complaints',$sendinblue->sendinblue_webid['data'][0]['complaints']);	
+		
+		if(!empty($sendinblue->sendinblue_webid['data'][0]['delivered'])){
+			print $listeview->renderArray($PDOdb, $TSum
+			,array(
+			'type' => 'chart'
+			,'chartType' => 'PieChart'
+			,'liste'=>array(
+			'titre'=>$langs->transnoentitiesnoconv('titleGraphCampaignActions')
+			)
+			)
+			);
+		}
+		
+}
 
 // End of page
 dol_fiche_end();

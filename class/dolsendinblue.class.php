@@ -1570,11 +1570,13 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSendinBlueCampaignStatus " . $this->error, LOG_ERR);
 			return - 1;
 		}
+	
 
 		$opts['campaign_id'] = $this->sendinblue_id;
 		// Call
 		try {
 			$response = $this->sendinblue->get_campaign_v2(array("id"=>$this->sendinblue_id));
+				$this->sendinblue_webid = $response;
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
@@ -2433,7 +2435,7 @@ class DolSendinBlue extends CommonObject
 			}  if(!empty($reponse['data']['unsubscription']['user_unsubscribe'])){
 				foreach($reponse['data']['unsubscription']['user_unsubscribe'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data']['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
