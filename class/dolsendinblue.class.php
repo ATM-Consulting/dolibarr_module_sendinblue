@@ -650,6 +650,35 @@ class DolSendinBlue extends CommonObject
 			return 1;
 		}
 	}
+	
+	
+		function getSMTPDetails() {
+		$error = 0;
+
+		$result = $this->getInstanceSendinBlue();
+		if ($result < 0) {
+			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
+			return - 1;
+		}
+
+		// Call
+		try {
+			$response = $this->sendinblue->get_smtp_details();
+		} catch ( Exception $e ) {
+			$this->error = $e->getMessage();
+			$error ++;
+		}
+
+		if (! empty($error)) {
+			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
+			return - 1;
+		} else {
+			
+			return $response['data']['relay_data']['data'];
+		}
+	}
+	
+	
 
 	/**
 	 * Retreive SendinBlue list for email
