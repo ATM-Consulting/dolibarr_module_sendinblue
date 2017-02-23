@@ -47,11 +47,11 @@ $action = GETPOST('action', 'alpha');
  * Actions
  */
  if ($action == 'setvar') {
- 	$sendinblue= new DolSendinBlue($db);
-	$smtp = $sendinblue->getSMTPDetails();
+ 
 	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY'),'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
-
+	$sendinblue= new DolSendinBlue($db);
+	$smtp = $sendinblue->getSMTPDetails();
 	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTP_SERVER', $smtp['relay'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
 	$res = dolibarr_set_const($db, 'SENDINBLUE_SMTP_PORT', $smtp['port'],'chaine',0,'',$conf->entity);
@@ -62,12 +62,12 @@ $action = GETPOST('action', 'alpha');
 	if (! $res > 0) $error++;
 	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_EMAIL_FROM', $smtp['username'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
+
 		if ($error) {
 			setEventMessage('Error','errors');
 		}else {
 			setEventMessage($langs->trans('SendinBlueSuccessSave'),'mesgs');
 		}
-
 	}
 if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE){
 		$res =dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE,'chaine',0,'',$conf->entity);
@@ -85,8 +85,9 @@ if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE){
 		$res =dolibarr_set_const($db, "SENDINBLUE_MAIL_EMAIL_FROM_STD",   $conf->global->MAIN_MAIL_EMAIL_FROM,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 
-		$res =dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", 'smtps','chaine',0,'',$conf->entity);
+        $res =dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", 'smtps','chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
+		
 		$res =dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT",   $conf->global->SENDINBLUE_SMTP_PORT,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 		$res =dolibarr_set_const($db, "MAIN_MAIL_SMTP_SERVER", $conf->global->SENDINBLUE_MAIL_SMTP_SERVER,'chaine',0,'',$conf->entity);
@@ -99,12 +100,10 @@ if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE){
 		if (! $res > 0) $error++;
 		$res =dolibarr_set_const($db, "MAILING_EMAIL_FROM",   $conf->global->SENDINBLUE_MAIL_EMAIL_FROM,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
-		$res =dolibarr_set_const($db, "MAIN_DISABLE_ALL_MAILS", 0,'chaine',0,'',0);
+		$res =dolibarr_set_const($db, "MAIN_DISABLE_ALL_MAILS", 0,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
-		var_dump($conf->global->MAIN_MAIL_SMTP_PORT,$conf->global->SENDINBLUE_MAIL_SMTP_SERVER);
-		
 }
-if($action == 'activsendinbluebydol' && $conf->global->SENDINBLUE_SEND_BY_DOL || $action == 'activsendinblue' && !$conf->global->SEND_BY_SENDINBLUE){
+if($action == 'activsendinbluebydol' &&  $conf->global->SENDINBLUE_SEND_BY_DOL || $action == 'activsendinblue' && !$conf->global->SEND_BY_SENDINBLUE){
 		$res =dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", $conf->global->SENDINBLUE_MAIL_SENDMODE_STD,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 		$res =dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT",   $conf->global->SENDINBLUE_SMTP_PORT_STD,'chaine',0,'',$conf->entity);

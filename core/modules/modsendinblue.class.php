@@ -589,22 +589,13 @@ class modsendinblue extends DolibarrModules
 	 */
 	function init($options='')
 	{
-		include_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
-		global $db;
+
 		$sql = array();
 		
 		define('INC_FROM_DOLIBARR',true);
 
 		dol_include_once('/sendinblue/config.php');
 		dol_include_once('/sendinblue/script/create-maj-base.php');
-		
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE,'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_SMTP_PORT_STD",   $conf->global->MAIN_MAIL_SMTP_PORT,'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTP_SERVER_STD", $conf->global->MAIN_MAIL_SMTP_SERVER,'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTPS_ID_STD",    $conf->global->MAIN_MAIL_SMTPS_ID, 'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTPS_PW_STD",   $conf->global->MAIN_MAIL_SMTPS_PW, 'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_EMAIL_TLS_STD",   $conf->global->MAIN_MAIL_EMAIL_TLS,'chaine',0,'',$conf->entity);
-		dolibarr_set_const($db, "SENDINBLUE_MAIL_EMAIL_FROM_STD",   $conf->global->MAIN_MAIL_EMAIL_FROM,'chaine',0,'',$conf->entity);
 		
 		$result=$this->_load_tables('/sendinblue/sql/');
 		return $this->_init($sql, $options);
@@ -621,9 +612,8 @@ class modsendinblue extends DolibarrModules
 	function remove($options='')
 	{
 		include_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
-		global $db;
+		global $db,$conf;
 		$sql = array();
-		
 		dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", $conf->global->SENDINBLUE_MAIL_SENDMODE_STD,'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT",   $conf->global->SENDINBLUE_SMTP_PORT_STD,'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db, "MAIN_MAIL_SMTP_SERVER", $conf->global->SENDINBLUE_MAIL_SMTP_SERVER_STD,'chaine',0,'',$conf->entity);
