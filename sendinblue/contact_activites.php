@@ -260,6 +260,8 @@ print '</div>';
  */
 
 //find is email is in the list
+if($conf->global->SENDINBLUE_API_KEY){	
+
 $result = $sendinblue->getListForEmail($object->email);
 if ($result<0) {
 	setEventMessage($sendinblue->error,'errors');
@@ -446,6 +448,9 @@ print "</table>";
 			);
 		
 		}
+}else{
+	setEventMessage($langs->trans('InvalidAPIKey'),'errors');
+}
 		
 dol_fiche_end();
 

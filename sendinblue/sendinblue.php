@@ -49,7 +49,7 @@ $nameList = GETPOST('nameList');
 $error=0;
 
 // Access control
-if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->societe_id > 0)) {
+if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->societe_id > 0 )) {
 	accessforbidden();
 }
 
@@ -295,10 +295,10 @@ if (empty($sendinblue->sendinblue_sender_name)) {
 	$error_sendinblue_control++;
 }
 
-
-//Check dolibarr dest versus list segment define
 $warning_destnotsync=false;
-if (!empty($sendinblue->id)) {
+//Check dolibarr dest versus list segment define
+if(!empty($conf->global->SENDINBLUE_API_KEY)){
+	if (!empty($sendinblue->id)) {
 
 	if ($object->statut==0 || $object->statut==1) {
 		$email_seg_array=array();
@@ -375,6 +375,9 @@ if (!empty($sendinblue->id)) {
 } else {
 	$warning_destnotsync=true;
 }
+	
+}
+
 
 
 /*
@@ -402,7 +405,7 @@ $head = emailing_prepare_head($object);
 
 dol_fiche_head($head, 'tabSendinBlueSending', $langs->trans("SendinBlue"), 0, 'email');
 
-if (!empty($conf->global->SENDINBLUE_SEND_BY_DOL) || !empty($conf->global->SEND_BY_SENDINBLUE)) {
+if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 
 	$form = new Form($db);
 	$formsendinblue = new FormSendinBlue($db);
@@ -681,7 +684,7 @@ if (!empty($conf->global->SENDINBLUE_SEND_BY_DOL) || !empty($conf->global->SEND_
 	print '</table>';
 	print "<br>";
 }else {
-	dol_htmloutput_mesg($langs->trans("SendinBlueNotActive"),'','error',1);
+	dol_htmloutput_mesg($langs->trans("InvalidAPIKey"),'','error',1);
 }
 if($object->statut == 3){
 		$PDOdb = new TPDOdb;
