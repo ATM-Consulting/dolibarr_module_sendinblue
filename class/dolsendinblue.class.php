@@ -1179,7 +1179,6 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 
-		var_dump($response);
 
 		return 1;
 	}

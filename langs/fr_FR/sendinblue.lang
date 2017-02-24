@@ -60,7 +60,7 @@ SENDINBLUE_API_KEY=Clé API SendinBlue
 SENDINBLUE_API_KEYHelp = Si vous souhaitez acceder à vos informations sendinblue, veuillez remplir ce champs
 SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
-
+InvalidAPIKey=Clé API Invalide
 #
 # Recipients list
 #
