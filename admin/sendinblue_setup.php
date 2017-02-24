@@ -42,6 +42,8 @@ if (! $user->admin) {
 
 // Parameters
 $action = GETPOST('action', 'alpha');
+$refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && $_SERVER['HTTP_CACHE_CONTROL'] === 'max-age=0';
+		
 
 /*
  * Actions
@@ -69,7 +71,7 @@ $action = GETPOST('action', 'alpha');
 			setEventMessage($langs->trans('SendinBlueSuccessSave'),'mesgs');
 		}
 	}
-if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE){
+if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE && !$refreshButtonPressed){
 		$res =dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 		$res =dolibarr_set_const($db, "SENDINBLUE_SMTP_PORT_STD",   $conf->global->MAIN_MAIL_SMTP_PORT,'chaine',0,'',$conf->entity);
