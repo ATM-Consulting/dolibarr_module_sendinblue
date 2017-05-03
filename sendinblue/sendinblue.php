@@ -226,6 +226,7 @@ if ($action == 'createsendinbluecampaign') {
 
 	$result=$sendinblue->createSendinBlueCampaign($user);
 	if ($result<0) {
+		
 		setEventMessage($sendinblue->error,'errors');
 	}
 }
