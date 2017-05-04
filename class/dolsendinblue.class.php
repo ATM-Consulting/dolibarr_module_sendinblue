@@ -1635,6 +1635,9 @@ class DolSendinBlue extends CommonObject
 		try {
 			$response = $this->sendinblue->update_campaign($data);
 			if($response['code']=='failure'){
+					
+				$this->error = $response['message'];
+				
 				return -1;
 			}
 		} catch ( Exception $e ) {
@@ -1908,6 +1911,13 @@ class DolSendinBlue extends CommonObject
 			try {
 
 				$response = $this->sendinblue->create_campaign($data);
+				
+				if($response['code'] == 'failure'){
+					
+					$this->error = $response['message'];
+					return -1;
+				}
+				//var_dump($response);exit;
 			} catch ( Exception $e ) {
 				$this->error = $e->getMessage();
 				dol_syslog(get_class($this) . "::createSendinBlueCampaign " . $this->error, LOG_ERR);
