@@ -78,6 +78,9 @@ $refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && ($_SERVER['HTTP
 	}
 	
 	}
+	if($action == 'activsendinblue' ){
+		dolibarr_set_const($db, "SEND_BY_SENDINBLUE", GETPOST("value"), 'chaine', 0, '', $conf->entity);
+	}
 if($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE && !$refreshButtonPressed){
 		$res =dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
@@ -192,9 +195,18 @@ print '<tr class="liste_titre">';
 print '<td width="40%">'.$langs->trans("SendBySendinblue").'</td>';
 print '<td align="center">';
 if (!empty($conf->global->SENDINBLUE_API_KEY)) {
-	print '<a href="'.$_SERVER['PHP_SELF'].'?action=activsendinblue">';
-	print ajax_constantonoff('SEND_BY_SENDINBLUE');
-	print '</a>';
+	//print '<a href="'.$_SERVER['PHP_SELF'].'?action=activsendinblue">';
+	
+	 if (!empty($conf->global->SEND_BY_SENDINBLUE)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=activsendinblue&value=0">';
+		print img_picto($langs->trans("Enabled"),'switch_on');
+        print "</a></td>\n";
+	 }else {
+         print '<a href="'.$_SERVER['PHP_SELF'].'?action=activsendinblue&value=1">';
+         print img_picto($langs->trans("Disabled"),'switch_off');
+         print "</a></td>\n";
+	}
+	//print '</a>';
 }
 print '</td>';
 print '</tr>';

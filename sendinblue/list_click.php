@@ -162,6 +162,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
 }
 
 $result = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, $limit, $offset, $filter);
+
 if ($result < 0) {
 	setEventMessage($sendinblueactivities->error, 'errors');
 }
