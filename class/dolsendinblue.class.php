@@ -750,15 +750,24 @@ class DolSendinBlue extends CommonObject
 		$error = 0;
 
 		$this->email_lines = array();
-		$data = array("listids"=>array($this->sendinblue_listid) , "page"=>1, "page_limit"=>500);
-		$response = $this->sendinblue->display_list_users($data);
+		$list = $this->sendinblue->get_list(array('id'=>$this->sendinblue_listid));
+		if(!empty($list['data']['total_subscribers'])){
+			$subscribers = ceil($list['data']['total_subscribers']/500);
+		}
+		for($i=1;$i<=$subscribers;$i++){
+			$response = $this->sendinblue->display_list_users(array('listids'=>array($this->sendinblue_listid),'page'=>$i,'page_limit'=>500));
+			
+			$this->email_lines =array_merge($this->email_lines,$response['data']['data']);
+			
+		}
+
 		
 		if(!empty($response['data'])){
 			$emailsegment = 1;
 		} else {
 			$emailsegment = -1;
 		}
-		$this->email_lines = $response['data']['data'];
+		
 		return $emailsegment;
 	}
 
@@ -1708,12 +1717,19 @@ class DolSendinBlue extends CommonObject
 
 		$this->sendinblue_segmentid = $segment_id;
 		$this->getInstanceSendinBlue();
-		$result = $this->sendinblue->display_list_users(array('listids'=>array($segment_id),'page'=>1,'page_limit'=>500));
-		foreach($result['data']['data'] as $d){
-			$this->email_lines[] = $d['email'];
+		
+		$list = $this->sendinblue->get_list(array('id'=>$segment_id));
+		if(!empty($list['data']['total_subscribers'])){
+			$subscribers = ceil($list['data']['total_subscribers']/500);
+		}
+		for($i=1;$i<=$subscribers;$i++){
+			$result = $this->sendinblue->display_list_users(array('listids'=>array($segment_id),'page'=>$i,'page_limit'=>500));
+			foreach($result['data']['data'] as $d){
+				$this->email_lines[] = $d['email'];
+			}
 		}
 		
-
+		
 		if ($result > 0) {
 			// Try to find for each email if it is already into dolibarr as thirdparty or contact
 			foreach ( $this->email_lines as $email ) {
