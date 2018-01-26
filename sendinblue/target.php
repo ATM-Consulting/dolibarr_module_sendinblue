@@ -661,7 +661,7 @@ if ($object->fetch($id) >= 0)
             print '<input type="hidden" name="id" value="'.$object->id.'">';
             print '<input type="hidden" name="action" value="exportlist">';
     
-            print ''.$langs->trans("Exporter la liste").': '.'<input type="submit" name="exportlist" class="button" value="'.$langs->trans("Export").'" />';
+            print ''.$langs->trans("ExportList").': '.'<input type="submit" name="exportlist" class="button" value="'.$langs->trans("Export").'" />';
             
             print '</form>';
             

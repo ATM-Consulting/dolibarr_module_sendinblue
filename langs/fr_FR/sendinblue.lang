@@ -196,3 +196,9 @@ sendinblue_warning_info_about_sync=Attention : une synchronisation peut prendre 
 sendinblue_confirm_sync=Confirmer la synchonisation ?
 UpdateSendinBlueObject=Modification du contact
 ConfirmUpdateSendinBlueObject=L'adresse mail ne sera pas modifié sur SendinBlue, êtes-vous sur de vouloir modifier l'adresse mail du contact ?
+
+
+#
+# target.php
+#
+ExportList=Exporter la liste
