@@ -202,3 +202,5 @@ ConfirmUpdateSendinBlueObject=L'adresse mail ne sera pas modifié sur SendinBlue
 # target.php
 #
 ExportList=Exporter la liste
+MailingModuleDescContactCompanies=Contacts tiers (prospects, clients, fournisseur...)
+MailingModuleDescDolibarrContractsLinesExpired=Tiers avec des lignes de contrat expirées
