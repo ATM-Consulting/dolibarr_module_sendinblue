@@ -569,7 +569,9 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '</td></tr>';*/
 		print '<tr class="pair"><td colspan="2" style="text-align:center">';
 		print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
+		print '<input type="button" class="button" onclick="sendInBlueCallImport()" value="test ajax import" />';
 		print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
+		print '<input type="button" class="button" onclick="sendInBlueCallExport()" value="test ajax export" />';
 	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
 		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
 		print '</td></tr></table>';
@@ -689,6 +691,65 @@ if($object->statut == 3){
 		
 }
 
+//unset($_SESSION['SENDINBLUE_PID_ACTIVE']);
+//$_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id][$sendinblue->sendinblue_listid][] = 158;
+//$_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id][$sendinblue->sendinblue_listid][] = 159;
+
+//var_dump($_SESSION['SENDINBLUE_PID_ACTIVE']);
+//exit;
+?>
+<script type="text/javascript">
+	sendInBlueTimer = null;
+	TSendInBluePid = [];
+	<?php 
+	if (!empty($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id])) { 
+		foreach ($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id] as $lid => $TPid) {
+			foreach ($TPid as $pid) { 
+			?>
+				TSendInBluePid.push(<?php echo $pid; ?>);
+			<?php
+			} 
+		}
+	}
+	?>
+	
+	sendInBlueCallExport = function() {
+		sendInBlueCallAjax('export', '');
+	};
+	
+	sendInBlueCallImport = function() {
+		sendInBlueCallAjax('import', '');
+	};
+	
+	sendInBlueCallAjax = function(set, get) {
+		var listid = $('#selectlist').val();
+		var fk_mailing = <?php echo $object->id; ?>;
+		$.ajax({
+			url: '<?php echo dol_buildpath('/sendinblue/script/interface.php', 1); ?>'
+			,type: 'GET'
+			,dataType: 'json'
+			,data: {
+				json: 1
+				,get: get
+				,set: set
+				,listid: listid
+				,fk_mailing: fk_mailing
+			}
+		}).done(function(pid) {
+			if (pid > 0) {
+				TSendInBluePid.push(pid);
+				if (sendInBlueTimer === null) triggerIntervalChecker();
+			}
+		});
+	};
+	
+	triggerIntervalChecker = function() {
+		sendInBlueTimer = setInterval(function() {
+			// TODO check TSendInBluePid, when empty go reload page
+		}, 5000);
+	};
+</script>
+<?php
 // End of page
 dol_fiche_end();
 llxFooter();
