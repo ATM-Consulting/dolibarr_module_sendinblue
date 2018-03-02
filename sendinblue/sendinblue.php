@@ -141,13 +141,8 @@ if ($action=='associateconfirm') {
 			if (!empty($listid)) {
 				$result=$sendinblue->importSegmentDestToDolibarr($listid);
 				if ($result<0) {
+					$error++;
 					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$sendinblue->sendinblue_segmentid=$listid;
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
 				}
 			}
 		}
@@ -157,42 +152,20 @@ if ($action=='associateconfirm') {
 				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueList")), 'errors');
 			} else {
 				$result=$sendinblue->exportDesttoSendinBlue($listid);
-
 				if ($result<0) {
+					$error++;
 					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
 				}
 			}
 		}
-/*
-		if (!empty($updatesegment)) {
-			if (empty($segmentid)) {
-				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueSegment")), 'errors');
-			} else {
-				$result=$sendinblue->exportSegmentOnlyDesttoSendinBlue($segmentid,$newsegmentname,$resetseg);
-				if ($result<0) {
-					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
-				}
-			}
-		}
-
-		if (!empty($updateonly)) {
-			$sendinblue->sendinblue_listid=$listid;
-			$sendinblue->sendinblue_segmentid=$segmentid;
+		
+		if (!$error)
+		{
 			$result=$sendinblue->update($user);
 			if ($result<0) {
 				setEventMessage($sendinblue->error,'errors');
 			}
-		}*/
+		}
 	}
 
 	$result=$object->fetch($id);
@@ -581,6 +554,9 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
 		
 		print '&nbsp; <input type="text" name="nameList"></input>';
+		
+		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
+		
 		print '</td></tr>';
 
 		/*print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
