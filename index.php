@@ -110,6 +110,8 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		print '<td>';
 		if (!empty($sendinblue_dolibarr->fk_mailing)) {
 			print '<a target="_blanck" href="'.dol_buildpath('/comm/mailing/card.php',1).'?id='.$sendinblue_dolibarr->fk_mailing.'">'.$line['campaign_name'].'</a>';
+		} else {
+			print '-';
 		}
 		print '</td>';
 		print '<td>'.DolSendinBlue::getLibStatus($line['status']).'</td>';
