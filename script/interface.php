@@ -62,7 +62,23 @@ else
 
 switch ($get) {
 	case 'pidIsRunning':
-		__out(file_exists('/proc/'.$pid));
+		$TSendInBluePid = GETPOST('TSendInBluePid');
+		if (!empty($TSendInBluePid))
+		{
+			foreach ($TSendInBluePid as $pid)
+			{
+				// Si j'ai au moin 1 pid en cours je renvoi l'info qu'il ne faut pas reload la page
+				if (file_exists('/proc/'.$pid))
+				{
+					__out(false);
+					exit;
+				}
+				
+				unset($_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid]);
+			}
+		}
+		
+		__out(true);
 		exit;
 		
 		break;
@@ -74,7 +90,7 @@ switch ($set) {
 		$params = 'async_action=export listid='.$listid.' fk_mailing='.$fk_mailing.' fk_user='.$user->id;
 		
 		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
-		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][] = $pid;
+		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
 		
 		__out($pid);
 		exit;
@@ -85,7 +101,7 @@ switch ($set) {
 		$params = 'async_action=import listid='.$listid.' fk_mailing='.$fk_mailing.' fk_user='.$user->id;
 		
 		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
-		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][] = $pid;
+		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
 		
 		__out($pid);
 		exit;
