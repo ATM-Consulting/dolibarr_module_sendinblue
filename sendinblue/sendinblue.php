@@ -524,13 +524,12 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 			//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
 		//}
 		print $formsendinblue->select_sendinbluelist('selectlist',1,$sendinblue->sendinblue_listid,0,$events);
+		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
 		print '&nbsp;'.$langs->trans('SendinBlueOr');
 		print '&nbsp;<input type="submit" class="button" name="createList" value="'.$langs->trans('SendinBlueCreateList').'"/>';
 		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
 		
 		print '&nbsp; <input type="text" name="nameList"></input>';
-		
-		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
 		
 		print '</td></tr>';
 
@@ -547,6 +546,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '<input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
 		//print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
 		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
+		print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
 	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
 		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
 		print '</td></tr></table>';
@@ -690,6 +690,10 @@ if($object->statut == 3){
 	
 	
 	triggerIntervalChecker = function() {
+		$('#bt_send_export').prop('disabled',true);
+		$('#bt_send_import').prop('disabled',true);
+		$('#sendinblue_loading').css('display', 'block');
+		
 		sendInBlueTimer = setInterval(function() {
 			var listid = $('#selectlist').val();
 			var fk_mailing = <?php echo $object->id; ?>;
@@ -716,16 +720,11 @@ if($object->statut == 3){
 		triggerIntervalChecker();
 	}
 	
-	console.log(TSendInBluePid);
 	sendInBlueCallExport = function() {
-		$('#bt_send_export').prop('disabled',true);
-		$('#bt_send_import').prop('disabled',true);
 		sendInBlueCallAjax('export', '');
 	};
 	
 	sendInBlueCallImport = function() {
-		$('#bt_send_export').prop('disabled',true);
-		$('#bt_send_import').prop('disabled',true);
 		sendInBlueCallAjax('import', '');
 	};
 	

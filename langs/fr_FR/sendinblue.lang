@@ -149,6 +149,8 @@ SendinBlueUpdateSegmentOnly=Mettre à jour uniquement le segment sélectionné (
 SendinBlueStats=SendinBlue Stats.
 SendinBlueSenderMustBeAnEmail=L'émetteur doit contenir un e-mail
 titleGraphCampaignActions=Activité des contacts sur la campagne
+SendinBlue_SyncLoading=Synchronisation en cours
+
 #
 # Contact Activites
 #
