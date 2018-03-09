@@ -546,7 +546,8 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '<input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
 		//print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
 		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
-		print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
+		if ($user->id == 18 || GETPOST('unicorn') == 1) print img_picto($langs->trans('SendinBlue_SyncLoading'), 'berengere_touch_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
+		else print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
 	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
 		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
 		print '</td></tr></table>';
