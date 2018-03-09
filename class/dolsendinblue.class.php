@@ -1678,9 +1678,9 @@ class DolSendinBlue extends CommonObject
 			if ($this->db->num_rows($result)) {
 				while ( $obj = $this->db->fetch_object($result) ) {
 					if ($returntype == 'simple') {
-						$this->email_lines[] = $obj->email;
+						$this->email_lines[] = strtolower($obj->email);
 					} elseif ($returntype == 'toadd') {
-						$this->email_lines[] = $obj->email . '&' . $obj->source_type . '&' . $obj->source_id;
+						$this->email_lines[] = strtolower($obj->email) . '&' . $obj->source_type . '&' . $obj->source_id;
 					}
 				}
 			}
