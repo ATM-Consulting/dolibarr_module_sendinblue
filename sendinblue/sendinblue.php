@@ -137,62 +137,10 @@ if ($action=='associateconfirm') {
 	}
 
 	if (empty($error)) {
-		if (!empty($import)) {
-			if (!empty($listid)) {
-				$result=$sendinblue->importSegmentDestToDolibarr($listid);
-				if ($result<0) {
-					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$sendinblue->sendinblue_segmentid=$listid;
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
-				}
-			}
+		$result=$sendinblue->update($user);
+		if ($result<0) {
+			setEventMessage($sendinblue->error,'errors');
 		}
-
-		if (!empty($export)) {
-			if (empty($listid)) {
-				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueList")), 'errors');
-			} else {
-				$result=$sendinblue->exportDesttoSendinBlue($listid);
-
-				if ($result<0) {
-					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
-				}
-			}
-		}
-/*
-		if (!empty($updatesegment)) {
-			if (empty($segmentid)) {
-				setEventMessage($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("SendinBlueSegment")), 'errors');
-			} else {
-				$result=$sendinblue->exportSegmentOnlyDesttoSendinBlue($segmentid,$newsegmentname,$resetseg);
-				if ($result<0) {
-					setEventMessage($sendinblue->error,'errors');
-				}else {
-					$result=$sendinblue->update($user);
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					}
-				}
-			}
-		}
-
-		if (!empty($updateonly)) {
-			$sendinblue->sendinblue_listid=$listid;
-			$sendinblue->sendinblue_segmentid=$segmentid;
-			$result=$sendinblue->update($user);
-			if ($result<0) {
-				setEventMessage($sendinblue->error,'errors');
-			}
-		}*/
 	}
 
 	$result=$object->fetch($id);
@@ -576,11 +524,13 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 			//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
 		//}
 		print $formsendinblue->select_sendinbluelist('selectlist',1,$sendinblue->sendinblue_listid,0,$events);
+		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
 		print '&nbsp;'.$langs->trans('SendinBlueOr');
 		print '&nbsp;<input type="submit" class="button" name="createList" value="'.$langs->trans('SendinBlueCreateList').'"/>';
 		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
 		
 		print '&nbsp; <input type="text" name="nameList"></input>';
+		
 		print '</td></tr>';
 
 		/*print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
@@ -592,8 +542,11 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
 		print '</td></tr>';*/
 		print '<tr class="pair"><td colspan="2" style="text-align:center">';
-		print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
-		print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
+		//print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
+		print '<input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
+		//print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
+		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
+		print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
 	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
 		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
 		print '</td></tr></table>';
@@ -713,6 +666,93 @@ if($object->statut == 3){
 		
 }
 
+//unset($_SESSION['SENDINBLUE_PID_ACTIVE']);
+//$_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id][$sendinblue->sendinblue_listid][] = 158;
+//$_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id][$sendinblue->sendinblue_listid][] = 159;
+
+//var_dump($_SESSION['SENDINBLUE_PID_ACTIVE']);
+//exit;
+?>
+<script type="text/javascript">
+	sendInBlueTimer = null;
+	TSendInBluePid = [];
+	<?php 
+	if (!empty($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id])) { 
+		foreach ($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id] as $lid => $TPid) {
+			foreach ($TPid as $pid) { 
+			?>
+				TSendInBluePid.push(<?php echo $pid; ?>);
+			<?php
+			} 
+		}
+	}
+	?>
+	
+	
+	triggerIntervalChecker = function() {
+		$('#bt_send_export').prop('disabled',true);
+		$('#bt_send_import').prop('disabled',true);
+		$('#sendinblue_loading').css('display', 'block');
+		
+		sendInBlueTimer = setInterval(function() {
+			var listid = $('#selectlist').val();
+			var fk_mailing = <?php echo $object->id; ?>;
+			$.ajax({
+				url: '<?php echo dol_buildpath('/sendinblue/script/interface.php', 1); ?>'
+				,type: 'GET'
+				,dataType: 'json'
+				,data: {
+					json: 1
+					,get: 'pidIsRunning'
+					,TSendInBluePid: TSendInBluePid
+					,listid: listid
+					,fk_mailing: fk_mailing
+				}
+			}).done(function(reload) {
+				if (reload) {
+					window.location.href = '<?php echo dol_buildpath('/sendinblue/sendinblue/sendinblue.php', 1).'?id='.$object->id; ?>';
+				}
+			});
+		}, 5000);
+	};
+	
+	if (TSendInBluePid.length > 0) {
+		triggerIntervalChecker();
+	}
+	
+	sendInBlueCallExport = function() {
+		sendInBlueCallAjax('export', '');
+	};
+	
+	sendInBlueCallImport = function() {
+		sendInBlueCallAjax('import', '');
+	};
+	
+	sendInBlueCallAjax = function(set, get) {
+		var listid = $('#selectlist').val();
+		var fk_mailing = <?php echo $object->id; ?>;
+		$.ajax({
+			url: '<?php echo dol_buildpath('/sendinblue/script/interface.php', 1); ?>'
+			,type: 'GET'
+			,dataType: 'json'
+			,data: {
+				json: 1
+				,get: get
+				,set: set
+				,listid: listid
+				,fk_mailing: fk_mailing
+				,TSendInBluePid: TSendInBluePid
+			}
+		}).done(function(pid) {
+			if (pid > 0) {
+				TSendInBluePid.push(pid);
+				if (sendInBlueTimer === null) triggerIntervalChecker();
+			}
+		});
+	};
+	
+</script>
+<?php
 // End of page
 dol_fiche_end();
 llxFooter();
