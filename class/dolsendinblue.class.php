@@ -674,7 +674,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		} else {
 			
-			return $response['data']['relay_data']['data'];
+			return $response['data']['relay_data'];
 		}
 	}
 	
