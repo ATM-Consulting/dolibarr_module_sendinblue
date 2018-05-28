@@ -206,3 +206,8 @@ ConfirmUpdateSendinBlueObject=L'adresse mail ne sera pas modifié sur SendinBlue
 ExportList=Exporter la liste
 MailingModuleDescContactCompanies=Contacts tiers (prospects, clients, fournisseur...)
 MailingModuleDescDolibarrContractsLinesExpired=Tiers avec des lignes de contrat expirées
+
+#optin
+Undefined=Indéfinie
+NotToAll=Aucune communication autorisée
+YesToAll=Toutes communications autorisées

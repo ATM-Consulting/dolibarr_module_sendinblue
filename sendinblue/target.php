@@ -110,11 +110,25 @@ if ($action == 'add')
 			// Kept for backward compatibility.
 			$filtersarray=array();
 			if (isset($_POST["filter"])) $filtersarray[0]=$_POST["filter"];
-
 			// Add targets into database
 			$obj = new $classname($db);
-			
 			$result=$obj->add_to_target($id,$filtersarray);
+
+			// check optin
+			if(GETPOST('optin')) {
+				
+				$res = $db->query("DELETE FROM ".MAIN_DB_PREFIX."mailing_cibles 
+					WHERE fk_mailing=".$id." 
+						AND source_type='contact'
+						AND email NOT IN (
+							SELECT c.email FROM ".MAIN_DB_PREFIX."socpeople c LEFT JOIN ".MAIN_DB_PREFIX."socpeople_extrafields cex ON (c.rowid=cex.fk_object)
+							WHERE cex.optin='".GETPOST('optin')."'
+						)");
+				if($res===false) {
+					var_dump($db);exit;
+				}
+			}
+
 		}
 	}
 
@@ -287,13 +301,27 @@ if ($object->fetch($id) >= 0)
 	// Show email selectors
 	if ($allowaddtarget && $user->rights->mailing->creer)
 	{
-		print_fiche_titre($langs->trans("ToAddRecipientsChooseHere"),($user->admin?info_admin($langs->trans("YouCanAddYourOwnPredefindedListHere"),1):''),'');
+		echo load_fiche_titre($langs->trans("ToAddRecipientsChooseHere"),($user->admin?info_admin($langs->trans("YouCanAddYourOwnPredefindedListHere"),1):''),'');
+		
+		$optin_filter = GETPOST('optin') ? GETPOST('optin') : 'YES';
+
+		dol_include_once('/core/class/extrafields.class.php');
+	        $extrafields=new ExtraFields($db);
+		$extrafields->fetch_name_optionals_label('contact');
 
 		print '<table class="noborder" width="100%">';
 		print '<tr class="liste_titre">';
 		print '<td class="liste_titre">'.$langs->trans("RecipientSelectionModules").'</td>';
 		print '<td class="liste_titre" align="center">'.$langs->trans("NbOfUniqueEMails").'</td>';
-		print '<td class="liste_titre" align="left">'.$langs->trans("Filter").'</td>';
+		print '<td class="liste_titre" align="left">'.$langs->trans("Filter");
+		if(!empty($extrafields->attribute_param['optin']['options'])) {
+			echo '<form name="formfilter" action="target.php" method="get" style="display:inline;">';
+			echo '<input type="hidden" name="id" value="'.$object->id.'" />';
+			echo ' '.$form->selectarray('optin', $extrafields->attribute_param['optin']['options'],$optin_filter);
+			echo '<input type="submit" value="'.$langs->trans('Ok').'" />';
+			echo '</form>';
+		}
+		print '</td>';
 		print '<td class="liste_titre" align="center">&nbsp;</td>';
 		print "</tr>\n";
 
@@ -359,6 +387,7 @@ if ($object->fetch($id) >= 0)
 					{
 						print '<form name="'.$modulename.'" action="'.$_SERVER['PHP_SELF'].'?action=add&id='.$object->id.'&module='.$modulename.'" method="POST" enctype="multipart/form-data">';
 						print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+						print '<input type="hidden" name="optin" value="'.$optin_filter.'" />';
 					}
 
 					print '<td>';
@@ -426,7 +455,7 @@ if ($object->fetch($id) >= 0)
         
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as soccom ON soccom.fk_soc=socp.fk_soc";
 	//}
-	$sql .= " WHERE mc.fk_mailing=".$object->id;
+	$sql .= " WHERE mc.fk_mailing=".$object->id; //." AND socex.optin='".$optin_filter."'" ;
 	if ($search_lastname)    $sql.= " AND mc.lastname    LIKE '%".$db->escape($search_lastname)."%'";
 	if ($search_firstname) $sql.= " AND mc.firstname LIKE '%".$db->escape($search_firstname)."%'";
 	if ($search_email)  $sql.= " AND mc.email  LIKE '%".$db->escape($search_email)."%'";
