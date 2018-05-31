@@ -209,5 +209,6 @@ MailingModuleDescDolibarrContractsLinesExpired=Tiers avec des lignes de contrat 
 
 #optin
 Undefined=Indéfinie
-NotToAll=Aucune communication autorisée
-YesToAll=Toutes communications autorisées
+OPTIN_NO=Aucune communication autorisée
+OPTIN_YES=Toutes communications autorisées
+StatutOptin=Optin

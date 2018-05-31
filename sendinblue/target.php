@@ -444,7 +444,7 @@ if ($object->fetch($id) >= 0)
 	// List of selected targets
 	$sql  = "SELECT DISTINCT mc.rowid, mc.lastname,civ.label as civilite,mc.firstname, mc.email, mc.other, mc.statut
 	,soc.nom as 'societe',socp.address
-	,socp.zip,socp.town,socp.phone,socp.phone_mobile, mc.date_envoi, mc.source_url, mc.source_id, mc.source_type";
+	,socp.zip,socp.town,socp.phone,socp.phone_mobile, mc.date_envoi, mc.source_url, mc.source_id, mc.source_type,socex.optin";
 	$sql .= " FROM ".MAIN_DB_PREFIX."mailing_cibles as mc";
 
 	//if (!empty($search_origin)) {
@@ -512,6 +512,7 @@ if ($object->fetch($id) >= 0)
 		print_liste_field_titre($langs->trans("Firstname"),$_SERVER["PHP_SELF"],"mc.firstname",$param,"","",$sortfield,$sortorder);
 		print_liste_field_titre($langs->trans("OtherInformations"),$_SERVER["PHP_SELF"],"",$param,"","",$sortfield,$sortorder);
 		print_liste_field_titre($langs->trans("Contact"),$_SERVER["PHP_SELF"],"socp.firstname",$param,"",'align="center"',$sortfield,$sortorder);
+		print_liste_field_titre($langs->trans("StatutOptin"),$_SERVER["PHP_SELF"],"",$param,"",'align="center"',$sortfield,$sortorder);
 		print_liste_field_titre($langs->trans("Customer"),$_SERVER["PHP_SELF"],"soc.nom",$param,"",'align="center"',$sortfield,$sortorder);
 
 		// Date sending
@@ -556,6 +557,11 @@ if ($object->fetch($id) >= 0)
 		print '<td class="liste_titre" align="center">';
 		print '<input class="flat" type="text" name="search_contact" size="20" value="'.$search_contact.'">';
 		print '</td>';
+		// Status Optin
+                print '<td class="liste_titre" align="center">';
+		print '&nbsp;';
+                print '</td>';
+
 		// Company
 		print '<td class="liste_titre" align="center">';
 		print '<input class="flat" type="text" name="search_socname" size="20" value="'.$search_socname.'">';
@@ -595,7 +601,7 @@ if ($object->fetch($id) >= 0)
 
                 if (empty($obj->source_id) || empty($obj->source_type))
                 {
-                	print '<td align="center" colspan="2">';
+                	print '<td align="center" colspan="3">';
                     print $obj->source_url; // For backward compatibility
                     print '</td>';
                 }
@@ -603,7 +609,7 @@ if ($object->fetch($id) >= 0)
                 {
                     if ($obj->source_type == 'member')
                     {
-                    	print '<td align="center" colspan="2">';
+                    	print '<td align="center" colspan="3">';
                         include_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
                         $m=new Adherent($db);
                         $m->id=$obj->source_id;
@@ -612,7 +618,7 @@ if ($object->fetch($id) >= 0)
                     }
                     else if ($obj->source_type == 'user')
                     {
-                    	print '<td align="center" colspan="2">';
+                    	print '<td align="center" colspan="3">';
                         include_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
                         $m=new User($db);
                         $m->id=$obj->source_id;
@@ -621,7 +627,7 @@ if ($object->fetch($id) >= 0)
                     }
                     else if ($obj->source_type == 'thirdparty')
                     {
-                    	print '<td align="center" colspan="2">';
+                    	print '<td align="center" colspan="3">';
                         include_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
                         $m=new Societe($db);
                         $m->id=$obj->source_id;
@@ -637,11 +643,11 @@ if ($object->fetch($id) >= 0)
 						print '<td align="center">';
 						print '<a href="'.dol_buildpath('/sendinblue/sendinblue/contact_activites.php',1).'?id='.$m->id.'">'.$m->getFullName($langs).'</a>';
 						print '</td>';
+						print '<td align="left">'.( $obj->optin ? $langs->trans('OPTIN_'.$obj->optin) : '').'</td>';
 						print '<td align="center">';
 						if (!empty($m->thirdparty->id))
 							print $m->thirdparty->getNomUrl(1);
 						print '</td>';
-
 
                     } else {
                     	print $obj->source_url;
