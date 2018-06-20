@@ -23,7 +23,7 @@
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 // require_once 'MCAPI.class.php';
-require_once DOL_DOCUMENT_ROOT."/custom/sendinblue/class/Sendinblue.class.php";
+dol_include_once('/sendinblue/class/Sendinblue.class.php');
 
 /**
  * Put here description of your class
