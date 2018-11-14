@@ -122,7 +122,7 @@ class DolSendinBlue extends CommonObject
 		$sql .= " " . (! isset($this->sendinblue_segmentid) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_segmentid) . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_sender_name) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_sender_name) . "'") . ",";
 		$sql .= " '" . $user->id . "',";
-		$sql .= " " . $this->db->idate(dol_now()) . ",";
+		$sql .= " '" . $this->db->idate(dol_now()) . "',";
 		$sql .= " '" . $user->id . "'";
 		$sql .= ")";
 
@@ -536,11 +536,11 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
-	
+
 
 	private function getInstanceSendinBlue() {
 			global $conf, $langs;
-	
+
 			if (! is_object($this->sendinblue)) {
 				if (empty($conf->global->SENDINBLUE_API_KEY)) {
 					$langs->load("sendinblue@sendinblue");
@@ -548,11 +548,11 @@ class DolSendinBlue extends CommonObject
 					dol_syslog(get_class($this) . "::getInstanceSendinBlue " . $this->error, LOG_ERR);
 					return - 1;
 				}
-				
+
 				$sendinblue = new SendinBlue('https://api.sendinblue.com/v2.0', $conf->global->SENDINBLUE_API_KEY);
 				$this->sendinblue = $sendinblue;
 			}
-	
+
 			return 1;
 		}
 
@@ -588,7 +588,7 @@ class DolSendinBlue extends CommonObject
 		try {
 			if(!empty($filters)){
 				$response = $this->sendinblue->get_list($filters);
-			
+
 			}
 			else {
 				$response = $this->sendinblue->get_lists(array());
@@ -650,8 +650,8 @@ class DolSendinBlue extends CommonObject
 			return 1;
 		}
 	}
-	
-	
+
+
 		function getSMTPDetails() {
 		$error = 0;
 
@@ -673,12 +673,11 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-			
 			return $response['data']['relay_data']['data'];
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * Retreive SendinBlue list for email
@@ -699,7 +698,7 @@ class DolSendinBlue extends CommonObject
 		// Call
 		try {
 			$response = $this->sendinblue->get_user(array('email'=>$email));
-			
+
 		} catch ( Exception $e ) {
 			if (get_class($e) != 'SendinBlue_List_NotSubscribed') {
 				$this->error = $e->getMessage();
@@ -715,10 +714,10 @@ class DolSendinBlue extends CommonObject
 			return $response;
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	function delete_user($email){
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
@@ -737,7 +736,7 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
-	
+
 
 	/**
 	 * Retraive email from sendinblue List
@@ -756,18 +755,18 @@ class DolSendinBlue extends CommonObject
 		}
 		for($i=1;$i<=$subscribers;$i++){
 			$response = $this->sendinblue->display_list_users(array('listids'=>array($this->sendinblue_listid),'page'=>$i,'page_limit'=>500));
-			
+
 			$this->email_lines =array_merge($this->email_lines,$response['data']['data']);
-			
+
 		}
 
-		
+
 		if(!empty($response['data'])){
 			$emailsegment = 1;
 		} else {
 			$emailsegment = -1;
 		}
-		
+
 		return $emailsegment;
 	}
 
@@ -823,9 +822,9 @@ class DolSendinBlue extends CommonObject
 				}
 			}
 			$this->email_activity[] = array('email'=>$e['email'], 'activity'=>$status);
-			
+
 		}
-	
+
 		return 1;
 	}
 
@@ -1143,7 +1142,7 @@ class DolSendinBlue extends CommonObject
 	 * @return int <0 if KO, 1 if OK
 	 */
 	function getListCampaign() {
-		
+
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0 ) {
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
@@ -1154,14 +1153,14 @@ class DolSendinBlue extends CommonObject
 		try {
 			if(!($result<0)){
 				$responseSendinBlue = $this->sendinblue->get_campaigns_v2(array("type"=>"classic", "page"=>1,"page_limit"=>10));
-			}		
+			}
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 			return - 1;
 		}
 		if(!($result<0)){
-			
+
 			$this->listcampaign_lines=$responseSendinBlue['data']['campaign_records'];
 		}
 		return 1;
@@ -1292,13 +1291,13 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . '::addEmailToList count($batch_email_to_add)=' . count($batch_email_to_add), LOG_DEBUG);
 
 			dol_syslog(get_class($this) . '::addEmailToList start batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
-			
+
 			foreach($batch_email_to_add as $email){
 				// Call
-			
-				
-				
-						
+
+
+
+
 				if(!empty($email)){
 					try {
 						$data = array("email" => $email['email_address'],
@@ -1313,7 +1312,7 @@ class DolSendinBlue extends CommonObject
 					}
 				}
 			}
-			
+
 
 			dol_syslog(get_class($this) . '::addEmailToList end batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 
@@ -1363,7 +1362,7 @@ class DolSendinBlue extends CommonObject
 		}
 		$success_count = 0;
 
-	
+
 		try {
 			$response = $this->sendinblue->delete_users_list(array('id'=>$listid,'users'=>$array_email));
 			$success_count ++;
@@ -1372,7 +1371,7 @@ class DolSendinBlue extends CommonObject
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 		}
-		
+
 		if ($response['error_count'] > 0) {
 			$error ++;
 			foreach ( $response['errors'] as $err ) {
@@ -1607,7 +1606,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSendinBlueCampaignStatus " . $this->error, LOG_ERR);
 			return - 1;
 		}
-	
+
 
 		$opts['campaign_id'] = $this->sendinblue_id;
 		// Call
@@ -1644,9 +1643,9 @@ class DolSendinBlue extends CommonObject
 		try {
 			$response = $this->sendinblue->update_campaign($data);
 			if($response['code']=='failure'){
-					
+
 				$this->error = $response['message'];
-				
+
 				return -1;
 			}
 		} catch ( Exception $e ) {
@@ -1717,7 +1716,7 @@ class DolSendinBlue extends CommonObject
 
 		$this->sendinblue_segmentid = $segment_id;
 		$this->getInstanceSendinBlue();
-		
+
 		$list = $this->sendinblue->get_list(array('id'=>$segment_id));
 		if(!empty($list['data']['total_subscribers'])){
 			$subscribers = ceil($list['data']['total_subscribers']/500);
@@ -1728,8 +1727,8 @@ class DolSendinBlue extends CommonObject
 				$this->email_lines[] = $d['email'];
 			}
 		}
-		
-		
+
+
 		if ($result > 0) {
 			// Try to find for each email if it is already into dolibarr as thirdparty or contact
 			foreach ( $this->email_lines as $email ) {
@@ -1827,7 +1826,7 @@ class DolSendinBlue extends CommonObject
 
 			$result_add_to_list = $this->addEmailToList($this->sendinblue_listid, $this->email_lines);
 
-			
+
 		}
 
 		if ($result_add_to_list < 0) {
@@ -1927,9 +1926,9 @@ class DolSendinBlue extends CommonObject
 			try {
 
 				$response = $this->sendinblue->create_campaign($data);
-				
+
 				if($response['code'] == 'failure'){
-					
+
 					$this->error = $response['message'];
 					return -1;
 				}
@@ -2031,7 +2030,7 @@ class DolSendinBlue extends CommonObject
 
 			$response = $this->sendinblue->get_campaign_v2(array( "id"=>$this->sendinblue_id));
 			//var_dump($response);exit;
-			
+
 			$body_html = $response['data'][0]['html_content'];
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
@@ -2042,7 +2041,7 @@ class DolSendinBlue extends CommonObject
 		// Set Dolibarr campaign with this information from sendinblue
 		require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
 		$mailing = new Mailing($this->db);
-		
+
 		$result = $mailing->fetch($this->fk_mailing);
 		if ($result < 0) {
 			$this->errors[] = "Error class Mailing Dolibarr " . $result . ' ' . $mailing->error;
@@ -2093,10 +2092,10 @@ class DolSendinBlue extends CommonObject
 					}
 
 					// Each activities
-					
+
 
 					if (count($email_activity['activity']) > 0) {
-						
+
 							// dol_syslog(get_class($this)."::getCampaignActivity activities=".var_export($activities,true), LOG_DEBUG);
 							if ($email_activity['activity'] == '' ) {
 								$result = $this->updateTargetMailingStatus($user, 1, $email_activity['email'], 0, $dt_send_unix);
@@ -2110,7 +2109,7 @@ class DolSendinBlue extends CommonObject
 								if ($result < 0) {
 									$error ++;
 								}
-								
+
 							}
 							if ($email_activity['activity'] == 'unsubscribe' ) {
 								$result = $this->updateTargetMailingStatus($user, 3, $email_activity['email'], 0, $dt_send_unix);
@@ -2137,19 +2136,19 @@ class DolSendinBlue extends CommonObject
 									$error ++;
 								}
 							}
-						
+
 					}
 				}
 			}
 		}
 
-		
 
 
-	
 
 
-		
+
+
+
 			// Save email activites into Dolibarr
 			// Find each email for this mailing
 			$result = $this->getEmailMailingDolibarr('simple');
@@ -2181,7 +2180,7 @@ class DolSendinBlue extends CommonObject
 					// }
 				}
 			}
-		
+
 
 		// Commit or rollback
 		if ($error) {
@@ -2423,29 +2422,29 @@ class DolSendinBlue extends CommonObject
 				foreach($reponse['data']['hard_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
 					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
-					
+
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'Hard Bounce';
-					$tmp->timestamp = $camp['event_time'];		
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			}  if(!empty($reponse['data']['soft_bounces'])){
 				foreach($reponse['data']['soft_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
 					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
-					
+
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'Soft Bounce';	
-					$tmp->timestamp = $camp['event_time'];		
+					$tmp->activites = 'Soft Bounce';
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			} if(!empty($reponse['data']['spam'])){
 				foreach($reponse['data']['spam'] as $camp){
@@ -2455,10 +2454,10 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'Spam';		
-					$tmp->timestamp = $camp['event_time'];		
+					$tmp->activites = 'Spam';
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			}  if(!empty($reponse['data']['opened'])){
 				foreach($reponse['data']['opened'] as $camp){
@@ -2468,10 +2467,10 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'opened';		
-					$tmp->timestamp = $camp['event_time'];		
+					$tmp->activites = 'opened';
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			} if(!empty($reponse['data']['clicks'])){
 				foreach($reponse['data']['clicks'] as $camp){
@@ -2481,10 +2480,10 @@ class DolSendinBlue extends CommonObject
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
-					$tmp->activites = 'clicks';	
-					$tmp->timestamp = $camp['event_time'];			
+					$tmp->activites = 'clicks';
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			}  if(!empty($reponse['data']['unsubscription']['user_unsubscribe'])){
 				foreach($reponse['data']['unsubscription']['user_unsubscribe'] as $camp){
@@ -2495,14 +2494,14 @@ class DolSendinBlue extends CommonObject
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'unsubscribe';
-					$tmp->timestamp = $camp['event_time'];				
+					$tmp->timestamp = $camp['event_time'];
 					$this->contactemail_activity[] = $tmp;
-					
+
 				}
 			}
 		}
 
-			
+
 	}
 
 	/**

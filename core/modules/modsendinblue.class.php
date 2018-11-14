@@ -267,7 +267,7 @@ class modsendinblue extends DolibarrModules
 				'current',
 				0
 			),
-			
+
 			16=>array(
 				'SENDINBLUE_ACTIVE_MAILING_ONLY',
 				'chaine',
@@ -277,8 +277,8 @@ class modsendinblue extends DolibarrModules
 				'current',
 				1
 			),
-			
-			
+
+
 		);
 
 		// Array to add new pages in new tabs
@@ -306,10 +306,10 @@ class modsendinblue extends DolibarrModules
 		// 'thirdparty'       to add a tab in third party view
 		// 'user'             to add a tab in user view
         $this->tabs = array(
-				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',	
+				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',
 				'emailing:-targets',
 				'emailing:+tabSendinBlueTarget:SendinBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
-				'contact:+tabSendinBlueActivities:Module104036Name:sendinblue@sendinblue:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
+				'contact:+tabSendinBlueActivites:Module104036Name:sendinblue@sendinblue:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
 		);
 
         // Dictionaries
@@ -344,7 +344,7 @@ class modsendinblue extends DolibarrModules
 		// Permissions
 		$this->rights = array();		// Permission array used by this module
 		$r=0;
-		
+
 		$this->rights[$r][0] = 104037;
 		$this->rights[$r][1] = 'read';
 		$this->rights[$r][3] = 1;
@@ -442,7 +442,7 @@ class modsendinblue extends DolibarrModules
 		'target'=>'',
 		'user'=>2);
 		$r++;
-		
+
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
 		'type'=>'left',
 		'titre'=>'SendinBlueClickReport',
@@ -454,7 +454,7 @@ class modsendinblue extends DolibarrModules
 		'target'=>'',
 		'user'=>2);
 		$r++;
-		
+
 		$this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=sendinblue,fk_leftmenu=SendinBlueMenu',
 		'type'=>'left',
 		'titre'=>'SendinBlueOpenedReport',
@@ -591,12 +591,12 @@ class modsendinblue extends DolibarrModules
 	{
 
 		$sql = array();
-		
+
 		define('INC_FROM_DOLIBARR',true);
 
 		dol_include_once('/sendinblue/config.php');
 		dol_include_once('/sendinblue/script/create-maj-base.php');
-		
+
 		$result=$this->_load_tables('/sendinblue/sql/');
 		return $this->_init($sql, $options);
 	}
@@ -621,7 +621,7 @@ class modsendinblue extends DolibarrModules
 		dolibarr_set_const($db, "MAIN_MAIL_SMTPS_PW",   $conf->global->SENDINBLUE_MAIL_SMTPS_PW_STD , 'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db, "MAIN_MAIL_EMAIL_TLS",   $conf->global->SENDINBLUE_MAIL_EMAIL_TLS_STD ,'chaine',0,'',$conf->entity);
 		dolibarr_set_const($db, "MAIN_MAIL_EMAIL_FROM",   $conf->global->SENDINBLUE_MAIL_EMAIL_FROM_STD ,'chaine',0,'',$conf->entity);
-		dolibarr_del_const($db, "SEND_BY_SENDINBLUE");	
+		dolibarr_del_const($db, "SEND_BY_SENDINBLUE");
 		return $this->_remove($sql, $options);
 	}
 

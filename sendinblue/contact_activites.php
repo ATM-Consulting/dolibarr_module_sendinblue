@@ -127,7 +127,7 @@ $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("Se
 // Show tabs
 $head = contact_prepare_head($object);
 
-$title = $langs->trans("SendinBlueActivites");
+$title = $langs->trans("Contacts");
 dol_fiche_head($head, 'tabSendinBlueActivites', $title, 0, 'contact');
 
 
@@ -260,7 +260,7 @@ print '</div>';
  */
 
 //find is email is in the list
-if($conf->global->SENDINBLUE_API_KEY){	
+if($conf->global->SENDINBLUE_API_KEY){
 
 $result = $sendinblue->getListForEmail($object->email);
 if ($result<0) {
@@ -327,7 +327,7 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 			}else {
 				$statut = 'subscribed';
 			}
- 			
+
  			print "<tr " . $bc[$var] . ">";
  			print '<td width="20%"><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
@@ -352,9 +352,9 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 
  			if($statut != null){
 
-	 			
+
 	 			print $langs->trans("SendinBlueStatus".$statut);
-	 			
+
 			}
  			print "</td>\n";
  			print '</tr>';
@@ -398,17 +398,17 @@ if(is_array($sendinblue->contactemail_activity) && count($sendinblue->contactema
 			print $langs->trans('Activité');
 			print '</td>';
 			print '<td>';
-		
+
 				print '<table class="noborder">';
 					print '<tr class="pair">';
 					print '<td>'.$langs->trans($activites->activites).'</td>';
 					print '<td>'.$activites->timestamp.'</td>';
 					print '</tr>';
 				print '</table>';
-			
+
 			print '</td>';
 			print '</tr>';
-			
+
 			print '<tr><td colspan="2"></td></tr>';
 			}
 
@@ -426,17 +426,17 @@ print "</table>";
 					foreach($TSum as &$t){
 						if($t[0] == $act->activites){
 							$t[1]= $t[1]+1;
-							
+
 							$bool=true;
 						}
 					}
-				
+
 				}
 				if(!$bool){
 					$TSum[] = array($langs->transnoentities($act->activites),1);
 				}
 			}
-		
+
 			print $listeview->renderArray($PDOdb, $TSum
 			,array(
 			'type' => 'chart'
@@ -446,12 +446,12 @@ print "</table>";
 			)
 			)
 			);
-		
+
 		}
 }else{
 	setEventMessage($langs->trans('InvalidAPIKey'),'errors');
 }
-		
+
 dol_fiche_end();
 
 llxFooter();

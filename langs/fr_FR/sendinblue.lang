@@ -61,6 +61,7 @@ SENDINBLUE_API_KEYHelp = Si vous souhaitez acceder à vos informations sendinblu
 SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
 InvalidAPIKey=Clé API Invalide
+InvalidAPIKeyForSTMP=Cette clé ne peut servir à l'envoie des mail Dolibarr via le SMTP SendInBlue
 #
 # Recipients list
 #
