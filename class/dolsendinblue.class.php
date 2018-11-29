@@ -1356,6 +1356,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 
+		self::toLowerCase($array_email);
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::deleteEmailFromList " . $this->error, LOG_ERR);
@@ -1363,7 +1364,6 @@ class DolSendinBlue extends CommonObject
 		}
 		$success_count = 0;
 
-	
 		try {
 			$response = $this->sendinblue->delete_users_list(array('id'=>$listid,'users'=>$array_email));
 			$success_count ++;
@@ -1387,6 +1387,16 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		} else {
 			return $success_count;
+		}
+	}
+
+	/**
+	 * Change mail adresses to lower case
+	 * @param array $TMail
+	 */
+	static function toLowerCase(&$TMail) {
+		if(!empty($TMail)) {
+			foreach($TMail as &$email) $email=strtolower($email);
 		}
 	}
 
