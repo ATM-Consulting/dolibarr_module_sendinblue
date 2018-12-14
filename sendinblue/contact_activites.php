@@ -297,7 +297,7 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
  			print '<td width="20%"><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$line['id'].'">'.$line['name'].'</a></td>';
  			print '<td>';
 
- 			print '<link rel="stylesheet" href="../scripts/style.css" />';
+ 			print '<link rel="stylesheet" href="../script/style.css" />';
  			print "<div style='position:relative;' >";
  			print "<div class='sendinblue_grise'></div>";
  			print img_picto($langs->trans("Enabled"),'switch_off');
