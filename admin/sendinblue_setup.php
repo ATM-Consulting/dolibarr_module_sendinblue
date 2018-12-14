@@ -52,22 +52,22 @@ $refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && ($_SERVER['HTTP
 	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY'),'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 	$sendinblue= new DolSendinBlue($db);
-	$smtp = $sendinblue->getSMTPDetails();
 	
-	if(empty($smtp) || $smtp == -1){
+	$smtp = $sendinblue->getSMTPDetails();
+	if(!$smtp['result']){
 		setEventMessage($langs->trans('InvalidAPIKey'),'errors');
 		$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', null,'chaine',0,'',$conf->entity);
 		if (! $res > 0) $error++;
 	}else if(!$conf->global->SEND_BY_SENDINBLUE){
-		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTP_SERVER', $smtp['relay'],'chaine',0,'',$conf->entity);
+		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTP_SERVER', $smtp['data']['relay'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
-	$res = dolibarr_set_const($db, 'SENDINBLUE_SMTP_PORT', $smtp['port'],'chaine',0,'',$conf->entity);
+	$res = dolibarr_set_const($db, 'SENDINBLUE_SMTP_PORT', $smtp['data']['port'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
-	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_ID',$smtp['username'],'chaine',0,'',$conf->entity);
+	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_ID',$smtp['data']['username'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
-	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_PW',$smtp['password'],'chaine',0,'',$conf->entity);
+	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_PW',$smtp['data']['password'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
-	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_EMAIL_FROM', $smtp['username'],'chaine',0,'',$conf->entity);
+	$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_EMAIL_FROM', $smtp['data']['username'],'chaine',0,'',$conf->entity);
 	if (! $res > 0) $error++;
 
 		if ($error) {

@@ -23,7 +23,7 @@
 // Put here all includes required by your class file
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 // require_once 'MCAPI.class.php';
-require_once DOL_DOCUMENT_ROOT."/custom/sendinblue/class/Sendinblue.class.php";
+dol_include_once('/sendinblue/class/Sendinblue.class.php');
 
 /**
  * Put here description of your class
@@ -674,7 +674,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		} else {
 
-			return $response['data']['relay_data']['data'];
+			return $response['data']['relay_data'];
 		}
 	}
 
@@ -1356,6 +1356,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 
+		self::toLowerCase($array_email);
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::deleteEmailFromList " . $this->error, LOG_ERR);
@@ -1387,6 +1388,16 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		} else {
 			return $success_count;
+		}
+	}
+
+	/**
+	 * Change mail adresses to lower case
+	 * @param array $TMail
+	 */
+	static function toLowerCase(&$TMail) {
+		if(!empty($TMail)) {
+			foreach($TMail as &$email) $email=strtolower($email);
 		}
 	}
 
