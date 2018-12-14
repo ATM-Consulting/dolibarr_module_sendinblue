@@ -101,7 +101,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 			$link = "http://admin.sendinblue.com/campaigns/show?id=".$line['id'];
 			$title = $line['settings']['title'];
 		}else if(!empty($line['campaign_name'])){
-			$link = "https://my.sendinblue.com/camp/step4/type/".$line['type']."/id/".$line['id'];
+			$link = "https://my.sendinblue.com/camp/report/id/".$line['id'];
 			$title = $line['campaign_name'];
 		}
 		

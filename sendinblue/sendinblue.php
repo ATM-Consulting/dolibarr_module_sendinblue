@@ -343,7 +343,7 @@ llxHeader('',$langs->trans("Mailing"));
 if ($action=='updatesendinbluecampaignstatus') {
 	$form = new Form($db);
 	$urlconfirm='id='.$id;
-	$text=$langs->trans("SendinBlueConfirmUpdateCampaignText",dol_buildpath('/sendinblue/scripts/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang.' '.$id);
+	$text=$langs->trans("SendinBlueConfirmUpdateCampaignText",dol_buildpath('/sendinblue/script/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang.' '.$id);
 	$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?'.$urlconfirm,$langs->trans("SendinBlueConfirmUpdateCampaign"),$text,"updatesendinbluecampaignstatus_confirm",'','',1,250);
 	if ($ret == 'html') print '<br>';
 }
