@@ -115,15 +115,21 @@ class DolSendinBlue extends CommonObject
 		$sql .= "fk_user_mod";
 		$sql .= ") VALUES (";
 		$sql .= " " . $conf->entity . ",";
-		$sql .= " " . (! isset($this->fk_mailing) ? 'NULL' : "'" . $this->fk_mailing . "'") . ",";
+		$sql .= " " . (! isset($this->fk_mailing) ? 'NULL' : $this->fk_mailing ) . ",";
 		$sql .= " " . (! isset($this->sendinblue_id) ? 'NULL' : "'" . $this->sendinblue_id . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_webid) ? 'NULL' : "'" . $this->sendinblue_webid . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_listid) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_listid) . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_segmentid) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_segmentid) . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_sender_name) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_sender_name) . "'") . ",";
+<<<<<<< HEAD
 		$sql .= " '" . $user->id . "',";
 		$sql .= " '" . $this->db->idate(dol_now()) . "',";
 		$sql .= " '" . $user->id . "'";
+=======
+		$sql .= " " . $user->id . ",";
+		$sql .= " '" . $this->db->idate(dol_now()) . "',";
+		$sql .= " " . $user->id ;
+>>>>>>> refs/remotes/origin/master
 		$sql .= ")";
 
 		$this->db->begin();
@@ -673,8 +679,12 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
+<<<<<<< HEAD
 
 			return $response['data']['relay_data'];
+=======
+			return $response['data']['relay_data']['data'];
+>>>>>>> refs/remotes/origin/master
 		}
 	}
 
@@ -1405,13 +1415,13 @@ class DolSendinBlue extends CommonObject
 	 * Unsubscribe the given email address from the list
 	 *
 	 * @param string $id
-	 * @param associative_array $email - email string an email address
+	 * @param array $email - email string an email address
 	 *        - euid string the unique id for an email address (not list related) - the email "id" returned from listMemberInfo, Webhooks, Campaigns, etc.
 	 *        - leid string the list email id (previously called web_id) for a list-member-info type call. this doesn't change when the email address changes
 	 * @param boolean $delete_member
 	 * @param boolean $send_goodbye
 	 * @param boolean $send_notify
-	 * @return associative_array with a single entry:
+	 * @return array with a single entry:
 	 *         - complete bool whether the call worked. reallistically this will always be true as errors will be thrown otherwise.
 	 */
 	function unsubscribeEmail($listid, $email, $delete_member = false, $send_goodbye = true, $send_notify = true) {
@@ -1475,10 +1485,10 @@ class DolSendinBlue extends CommonObject
 	 * By default this sends a confirmation email - you will not see new members until the link contained in it is clicked!
 	 *
 	 * @param string $id
-	 * @param associative_array $email - email string an email address - for new subscribers obviously this should be used
+	 * @param array $email - email string an email address - for new subscribers obviously this should be used
 	 *        - euid string the unique id for an email address (not list related) - the email "id" returned from listMemberInfo, Webhooks, Campaigns, etc.
 	 *        - leid string the list email id (previously called web_id) for a list-member-info type call. this doesn't change when the email address changes
-	 * @param associative_array $merge_vars - new-email string set this to change the email address. This is only respected on calls using update_existing or when passed to listUpdateMember().
+	 * @param array $merge_vars - new-email string set this to change the email address. This is only respected on calls using update_existing or when passed to listUpdateMember().
 	 *        - groupings array of Interest Grouping structs. Each should contain:
 	 *        - id int Grouping "id" from lists/interest-groupings (either this or name must be present) - this id takes precedence and can't change (unlike the name)
 	 *        - name string Grouping "name" from lists/interest-groupings (either this or id must be present)
@@ -1494,7 +1504,7 @@ class DolSendinBlue extends CommonObject
 	 *        - note string the note to set. this is required unless you're deleting a note
 	 *        - id int the note id to operate on. not including this (or using an invalid id) causes a new note to be added
 	 *        - action string if the "id" key exists and is valid, an "update" key may be set to "append" (default), "prepend", "replace", or "delete" to handle how we should update existing notes. "delete", obviously, will only work with a valid "id" - passing that along with "note" and an invalid "id" is wrong and will be ignored.
-	 * @return associative_array the ids for this subscriber
+	 * @return array the ids for this subscriber
 	 *         - email string the email address added
 	 *         - euid string the email unique id
 	 *         - leid string the list member's truly unique id
