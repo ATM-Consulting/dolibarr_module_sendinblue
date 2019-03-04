@@ -673,12 +673,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-<<<<<<< HEAD
-
-			return $response['data']['relay_data'];
-=======
 			return $response['data']['relay_data']['data'];
->>>>>>> refs/remotes/origin/master
 		}
 	}
 
