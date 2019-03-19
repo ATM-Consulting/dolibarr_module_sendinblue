@@ -121,15 +121,11 @@ class DolSendinBlue extends CommonObject
 		$sql .= " " . (! isset($this->sendinblue_listid) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_listid) . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_segmentid) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_segmentid) . "'") . ",";
 		$sql .= " " . (! isset($this->sendinblue_sender_name) ? 'NULL' : "'" . $this->db->escape($this->sendinblue_sender_name) . "'") . ",";
-<<<<<<< HEAD
+
 		$sql .= " '" . $user->id . "',";
 		$sql .= " '" . $this->db->idate(dol_now()) . "',";
 		$sql .= " '" . $user->id . "'";
-=======
-		$sql .= " " . $user->id . ",";
-		$sql .= " '" . $this->db->idate(dol_now()) . "',";
-		$sql .= " " . $user->id ;
->>>>>>> refs/remotes/origin/master
+
 		$sql .= ")";
 
 		$this->db->begin();
@@ -679,12 +675,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getSMTPDetails " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-<<<<<<< HEAD
-
 			return $response['data']['relay_data'];
-=======
-			return $response['data']['relay_data']['data'];
->>>>>>> refs/remotes/origin/master
 		}
 	}
 
