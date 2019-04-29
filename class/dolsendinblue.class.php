@@ -776,12 +776,18 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function getCampaignActivity() {
+	function getCampaignActivity($response=null) {
 		global $conf;
-		$response = $this->sendinblue->get_campaign_v2(array( "id"=>$this->sendinblue_id));
-		$r = $this->sendinblue->display_list_users(array('listids'=>($response['data'][0]['listid']),
-      	"page" => 1,
-      	"page_limit" => 500));
+
+        if ($response === null)
+		    $response = $this->sendinblue->get_campaign_v2(array( "id"=>$this->sendinblue_id));
+
+        $r = $this->sendinblue->display_list_users(
+            array('listids' => ($response['data'][0]['listid']),
+            "page" => 1,
+            "page_limit" => 500)
+        );
+
 		foreach($r['data']['data'] as $e){
 			$listuser = $this->sendinblue->get_user(array('email'=>$e['email']));
 			$status = "";
@@ -2090,7 +2096,7 @@ class DolSendinBlue extends CommonObject
 
 		dol_syslog(get_class($this) . "::getCampaignActivity start " . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 
-		$result = $this->getCampaignActivity();
+		$result = $this->getCampaignActivity($response);
 
 		if ($result < 0) {
 			$error ++;
