@@ -89,7 +89,11 @@ $error_sendinblue_control=0;
 $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 if(!empty($createList) && !empty($nameList)){
-	$sendinblue->createList($nameList);
+	$res = $sendinblue->createList($nameList);
+	if ($res < 0)
+    {
+        setEventMessage($langs->trans('SendInBlueReturnError', $sendinblue->error), 'errors');
+    }
 }
 // Action update description of emailing
 if ($action == 'settitre' || $action == 'setemail_from') {

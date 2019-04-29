@@ -86,6 +86,8 @@ SendinBlueUpdateStatus=Mettre à jour le statut des destinataires Dolibarr depui
 SendinBlueConfirmUpdateCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'exécution maximum dépassé <BR> Il est préférable de demander a votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
 SendinBlueConfirmUpdateCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis SendinBlue pour la campagnes
 
+SendInBlueReturnError=Sendinblue a renvoyé l'erreur suivante : %s
+
 #
 # Index
 #

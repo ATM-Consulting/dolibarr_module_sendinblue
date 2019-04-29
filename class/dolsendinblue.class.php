@@ -35,7 +35,8 @@ class DolSendinBlue extends CommonObject
 	var $errors = array(); // !< To return several error codes (or messages)
 	var $element = 'sendinblue'; // !< Id that identify managed objects
 	var $table_element = 'sendinblue'; // !< Name of table without prefix where object is stored
-	var $sendinblue; // API Object
+	/** @var SendinBlue $sendinblue */
+    var $sendinblue; // API Object
 	var $email_lines = array();
 	var $listdest_lines = array();
 	var $listsegment_lines = array();
@@ -1561,6 +1562,13 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 		$response = $this->sendinblue->create_list(array("list_name"=>$namelist,"list_parent"=>1));
+		if ($response['code'] === 'failure')
+        {
+            $this->error = $response['message'];
+            $this->errors[] = $this->error;
+            return -1;
+        }
+
 		return $response['data']['id'];
 	}
 
