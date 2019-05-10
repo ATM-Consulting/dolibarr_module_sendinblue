@@ -165,14 +165,14 @@ if ($result < 0) {
 	setEventMessage($sendinblueactivities->error, 'errors');
 }
 
-print_barre_liste($title, $page, $_SERVEUR['PHP_SELF'], $option, $sortfield, $sortorder, '', $result, $nbtotalofrecords);
+print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $option, $sortfield, $sortorder, '', $result, $nbtotalofrecords);
 
 print '<form method="post" action="' . $_SERVER ['PHP_SELF'] . '" name="search_form">' . "\n";
 
 print '<div class="liste_titre">';
-print $langs->trans('DateValid');
-print $langs->trans('Month') . ':<input class="flat" type="text" size="4" name="search_month" value="' . $search_month . '">';
-print $langs->trans('Year') . ':' . $formother->selectyear($search_year ? $search_year : - 1, 'search_year', 1, 20, 5);
+print $langs->trans('Month') . ': '.$formother->select_month($search_month, 'search_month');
+print '&nbsp;';
+print $langs->trans('Year') . ': ' . $formother->selectyear($search_year ? $search_year : - 1, 'search_year', 1, 20, 5);
 
 
 print '<input class="liste_titre" type="image" src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/search.png" value="' . dol_escape_htmltag($langs->trans("Search")) . '" title="' . dol_escape_htmltag($langs->trans("Search")) . '">';
@@ -183,12 +183,12 @@ print '</div>';
 
 print '<table class="border" width="100%">';
 print '<tr>';
-print_liste_field_titre($langs->trans("SendinBlueCampaign"), $_SERVEUR['PHP_SELF'], "ml.titre", "", $options, '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Date"), $_SERVEUR['PHP_SELF'], "ml.date_creat", "", $options, '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Email"), $_SERVEUR['PHP_SELF'], "t.email", "", $options, '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Company"), $_SERVEUR['PHP_SELF'], "soc.nom", "", $options, '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Link"), $_SERVEUR['PHP_SELF'], "", "", $options, '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Contact"), $_SERVEUR['PHP_SELF'], "", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("SendinBlueCampaign"), $_SERVER['PHP_SELF'], "ml.titre", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Date"), $_SERVER['PHP_SELF'], "ml.date_creat", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Email"), $_SERVER['PHP_SELF'], "t.email", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Company"), $_SERVER['PHP_SELF'], "soc.nom", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Link"), $_SERVER['PHP_SELF'], "", "", $options, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Contact"), $_SERVER['PHP_SELF'], "", "", $options, '', $sortfield, $sortorder);
 print '</tr>';
 print '<tr class="liste_titre">';
 print '<td><input type="text" class="flat" name="search_title" value="' . $search_title . '" size="10"></td>';
