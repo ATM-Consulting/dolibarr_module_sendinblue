@@ -23,8 +23,8 @@ SendinBlueAboutPage = Page à propos de SendinBlue
 #
 # Right
 #
-Permission103021 = Lecture des attributs des campagnes SendinBlue
-Permission103022 = Écriture des attributs des campagnes SendinBlue
+PermissionSendinBlueRead = Lecture des attributs des campagnes SendinBlue
+PermissionSendinBlueRight = Écriture des attributs des campagnes SendinBlue
 
 #
 # Menu
