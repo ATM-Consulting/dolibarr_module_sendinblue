@@ -89,7 +89,11 @@ $error_sendinblue_control=0;
 $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 if(!empty($createList) && !empty($nameList)){
-	$sendinblue->createList($nameList);
+	$res = $sendinblue->createList($nameList);
+	if ($res < 0)
+    {
+        setEventMessage($langs->trans('SendInBlueReturnError', $sendinblue->error), 'errors');
+    }
 }
 // Action update description of emailing
 if ($action == 'settitre' || $action == 'setemail_from') {
@@ -644,13 +648,13 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 if($object->statut == 3){
 		$PDOdb = new TPDOdb;
 		$listeview = new TListviewTBS('graphCampaignActions');
-		$TSum[] = array($langs->transnoentities('unique views'),$sendinblue->sendinblue_webid['data'][0]['unique_views']);
+		$TSum[] = array($langs->transnoentities('unique_views'),$sendinblue->sendinblue_webid['data'][0]['unique_views']);
 		$TSum[] = array($langs->transnoentities('viewed'),$sendinblue->sendinblue_webid['data'][0]['viewed']);	
 		$TSum[] = array($langs->transnoentities('clicked'),$sendinblue->sendinblue_webid['data'][0]['clicked']);	
 		$TSum[] = array($langs->transnoentities('Hard Bounce'),$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);	
 		$TSum[] = array($langs->transnoentities('Soft Bounce'),$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);	
 		$TSum[] = array($langs->transnoentities('unsub'),$sendinblue->sendinblue_webid['data'][0]['unsub']);	
-		$TSum[] = array($langs->transnoentities('mirror click'),$sendinblue->sendinblue_webid['data'][0]['mirror_click']);	
+		$TSum[] = array($langs->transnoentities('mirror_click'),$sendinblue->sendinblue_webid['data'][0]['mirror_click']);
 		$TSum[] = array($langs->transnoentities('complaints'),$sendinblue->sendinblue_webid['data'][0]['complaints']);	
 		
 		if(!empty($sendinblue->sendinblue_webid['data'][0]['delivered'])){

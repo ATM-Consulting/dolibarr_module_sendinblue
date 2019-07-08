@@ -23,8 +23,8 @@ SendinBlueAboutPage = Page à propos de SendinBlue
 #
 # Right
 #
-Permission103021 = Lecture des attributs des campagnes SendinBlue
-Permission103022 = Écriture des attributs des campagnes SendinBlue
+PermissionSendinBlueRead = Lecture des attributs des campagnes SendinBlue
+PermissionSendinBlueRight = Écriture des attributs des campagnes SendinBlue
 
 #
 # Menu
@@ -56,11 +56,12 @@ SendinBlueSenderNameNotValid=Adresse Email non valide
 SendinBlueActiveActivityLocalStorage=Activer le stockage de l'historique de l'activité des contacts dans la base de données de Dolibarr. Attention cela peux augmenter la taille de votre base de données et ralentir la mise à jour des statut des destinataires.
 SENDINBLUE_NB_MAX_LIST=Nombre maximum de listes parcourues
 SENDINBLUE_NB_MAX_LISTHelp= Nombre permettant d'améliorer la vitesse de chargement de l'onglet sendinblue pour un contact, mais ATTENTION cela peut entrainer des pertes d'informations. Ne pas remplir si l'onglet sendinblue d'un contact se charge assez vite.
-SENDINBLUE_API_KEY=Clé API SendinBlue
+SENDINBLUE_API_KEY=Clé API SendinBlue (v2)
 SENDINBLUE_API_KEYHelp = Si vous souhaitez acceder à vos informations sendinblue, veuillez remplir ce champs
 SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
 InvalidAPIKey=Clé API Invalide
+InvalidAPIKeyForSTMP=Cette clé ne peut servir à l'envoie des mail Dolibarr via le SMTP SendInBlue
 #
 # Recipients list
 #
@@ -84,6 +85,8 @@ CreateCampaignOnThisSegment=Crée une campagne sur ce segment
 SendinBlueUpdateStatus=Mettre à jour le statut des destinataires Dolibarr depuis SendinBlue
 SendinBlueConfirmUpdateCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'exécution maximum dépassé <BR> Il est préférable de demander a votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
 SendinBlueConfirmUpdateCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis SendinBlue pour la campagnes
+
+SendInBlueReturnError=Sendinblue a renvoyé l'erreur suivante : %s
 
 #
 # Index
@@ -168,10 +171,10 @@ cleaned=Supprimé
 pending=En attente
 subscribed=Inscrit 
 NoEmail = Pas d'email
-unique views=Vu une seule fois
+unique_views=Vu une seule fois
 viewed=Vu au moins une fois
 unsub=Désinscrit
-mirror click=Cliqué lien mirroir
+mirror_click=Cliqué lien mirroir
 clicked=Cliqué
 complaints=Plaintes
 opened=Ouvert
