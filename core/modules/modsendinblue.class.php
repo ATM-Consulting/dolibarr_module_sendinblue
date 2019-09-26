@@ -355,13 +355,13 @@ class modsendinblue extends DolibarrModules
 		$r = 0;
 
 		$this->rights[$r][0] = 104037;
-		$this->rights[$r][1] = 'read';
+		$this->rights[$r][1] = 'PermissionSendinBlueRight';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'read';
 		$r ++;
 
 		$this->rights[$r][0] = 104038;
-		$this->rights[$r][1] = 'write';
+		$this->rights[$r][1] = 'PermissionSendinBlueRead';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'write';
 		$r ++;

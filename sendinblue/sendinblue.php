@@ -89,7 +89,9 @@ $error_sendinblue_control=0;
 $parameters=array();
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 if(!empty($createList) && !empty($nameList)){
-	$res = $sendinblue->createList($nameList);
+    $res = $sendinblue->createList($nameList);
+    // Auto choose the good list
+    $newList = $res;
 	if ($res < 0)
     {
         setEventMessage($langs->trans('SendInBlueReturnError', $sendinblue->error), 'errors');
@@ -125,10 +127,13 @@ if ($action=='associateconfirm') {
 	$updateonly=GETPOST('updateonly','alpha');
 	$updatesegment=GETPOST('updatesegment','alpha');
 	$segmentid=GETPOST('segmentlist','alpha');
-	$listid=GETPOST('selectlist','alpha');
+	if(empty($newList)) {
+	    $listid=GETPOST('selectlist','alpha');
+	} else {
+	    $listid = $newList;
+	}
 	$newsegmentname=GETPOST('segmentname','alpha');
 	$resetseg=GETPOST('resetseg','int');
-
 	$sendinblue->sendinblue_listid=$listid;
 
 	if (empty($sendinblue->id)) {
@@ -381,31 +386,31 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '<div id="progressbar"></div>';
 	print '</div>';*/
 
-	print '<table class="border" width="100%">';
+	print '<table class="border tableforfield" width="100%">';
 
 	if ((float) DOL_VERSION <= 3.6)	$linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/liste.php">'.$langs->trans("BackToList").'</a>';
 	else $linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/list.php">'.$langs->trans("BackToList").'</a>';
 
-	print '<tr><td width="15%">'.$langs->trans("Ref").'</td>';
+	print '<tr class="impair"><td width="20%">'.$langs->trans("Ref").'</td>';
 	print '<td colspan="3">';
 	print $form->showrefnav($object,'id', $linkback);
 	print '</td></tr>';
 
 	// Description
-	print '<tr><td>'.$form->editfieldkey("MailTitle",'titre',$object->titre,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
+	print '<tr class="pair"><td>'.$form->editfieldkey("MailTitle",'titre',$object->titre,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
 	print $form->editfieldval("MailTitle",'titre',$object->titre,$object,$user->rights->mailing->creer && $object->statut < 3,'string');
 	print '</td></tr>';
 
 	// From
-	print '<tr><td>'.$form->editfieldkey("MailFrom",'email_from',$object->email_from,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
+	print '<tr class="impair"><td>'.$form->editfieldkey("MailFrom",'email_from',$object->email_from,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
 	print $form->editfieldval("MailFrom",'email_from',$object->email_from,$object,$user->rights->mailing->creer && $object->statut < 3,'string');
 	print '</td></tr>';
 
 	// Status
-	print '<tr><td width="15%">'.$langs->trans("Status").'</td><td colspan="3">'.$object->getLibStatut(4).'</td></tr>';
+	print '<tr class="pair"><td>'.$langs->trans("Status").'</td><td colspan="3">'.$object->getLibStatut(4).'</td></tr>';
 
 	// Nb of distinct emails
-	print '<tr><td width="15%">';
+	print '<tr class="impair"><td>';
 	print $langs->trans("TotalNbOfDistinctRecipients");
 	print '</td><td colspan="3">';
 	$nbemail = ($object->nbemail?$object->nbemail:img_warning('').' <font class="warning">'.$langs->trans("SendinBlueSelectSegmentOrList").'</font>');
@@ -435,7 +440,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	}
 
 	// SendinBlue Sender Name
-	print '<tr><td width="15%">';
+	print '<tr class="pair"><td>';
 	print $form->editfieldkey("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
 	print '</td><td colspan="3">';
 	print $form->editfieldval("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
@@ -445,7 +450,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	if (!empty($sendinblue->sendinblue_id)) {
 
 		//Status campaign sendinblue
-		print '<tr><td width="15%">';
+		print '<tr class="impair"><td>';
 		print $langs->trans("SendinBlueStatus");
 		print '</td><td colspan="3">';
 		if (!empty($sendinblue->sendinblue_id)) {
@@ -454,14 +459,14 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '</td></tr>';
 
 		// SendinBlue Campaign
-		print '<tr><td width="15%">';
+		print '<tr class="pair"><td>';
 		print $langs->trans("SendinBlueCampaign");
 		print '</td><td colspan="3">';
 		print '<a target="_blanck" href="https://my.sendinblue.com/camp/listing#draft_c">'.$langs->trans('SendinBlueCampaign').'</a>';
 		print '</td></tr>';
 
 		//List campaign sendinblue
-		print '<tr><td width="15%">';
+		print '<tr class="impair"><td>';
 		print $langs->trans("SendinBlueDestList");
 		print '</td><td colspan="3">';
 		if (!empty($sendinblue->sendinblue_listid)) {
@@ -503,7 +508,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	if (empty($reshook) && ! empty($extrafields->attribute_label)) {
 		foreach($extrafields->attribute_label as $key=>$label) {
 			$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$object->array_options["options_".$key]);
-			print '<tr><td';
+			print '<tr class="impair"><td';
 			if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
 			print '>'.$label.'</td><td colspan="3">';
 			print $extrafields->showInputField($key,$value);
@@ -514,46 +519,52 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '</table>';
 
 	if (empty($sendinblue->sendinblue_id) || $object->statut==0) {
-
 		print '<form name="formmailing" method="post" action="'.$_SERVER["PHP_SELF"].'?id='.$id.'">';
 		print '<input type="hidden" value="associateconfirm" name="action">';
 		print '<input type="hidden" value="'.$_SESSION['newtoken'].'" name="token">';
-
-		print '<table class="border" width="100%">';
-		print '<tr class="pair"><td class="fieldrequired">';
+		
+		print '<br/><br/>';
+		print '<table class="border tableforfield" width="100%" style="border:1px solid #ccc;padding:5px;">';
+		
+		print '<tr class="pair"><td colspan="3"><h3>SendinBlue</h3></td></tr>';
+		print '<tr class="impair"><td width="30%">';
+		print $langs->trans('SendinBlueCreateList');
+		print '</td><td>';
+		print '<input type="text" name="nameList" />';
+		print '<input type="submit" class="button" name="createList" value="'.$langs->trans('Add').'"/>';
+		print '</td><td>';
+		print '</td></tr>';
+		
+		print '</table>';
+		
+		print '<br/><br/>';
+		print '<table class="border tableforfield" width="100%" style="border:1px solid #ccc;padding:5px;">';
+		
+		print '<tr class="pair"><td colspan="3"><h3>SendinBlue</h3></td></tr>';
+		print '<tr class="pair"><td class="fieldrequired" width="30%">';
 		print $langs->trans('SendinBlueUpdateExistingList');
 		print '</td><td>';
 		$events=array();
 		//if ($conf->use_javascript_ajax) {
-			//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
+		//$events[]=array('method' => 'getSegment', 'url' => dol_buildpath('/sendinblue/sendinblue/ajax/sendinblue.php',1), 'htmlname' => 'segmentlist','params' => array('blocksegement' => 'style'));
 		//}
 		print $formsendinblue->select_sendinbluelist('selectlist',1,$sendinblue->sendinblue_listid,0,$events);
 		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
-		print '&nbsp;'.$langs->trans('SendinBlueOr');
-		print '&nbsp;<input type="submit" class="button" name="createList" value="'.$langs->trans('SendinBlueCreateList').'"/>';
-		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
-		
-		print '&nbsp; <input type="text" name="nameList"></input>';
-		
-		print '</td></tr>';
-
-		/*print '<tr class="impair" id="blocksegement"><td class="fieldrequired">';
-		print $langs->trans('SendinBlueUpdateExistingSegments');
 		print '</td><td>';
-		//print $formsendinblue->select_sendinbluesegement($sendinblue->sendinblue_listid,'segmentlist',1,$sendinblue->sendinblue_segmentid);
-		//print '<input type="checkbox" name="resetseg" value="1"/>'.$langs->trans('SendinBlueResetSegment');
-		//print '&nbsp;'.$langs->trans('SendinBlueOr');
-		//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
-		print '</td></tr>';*/
-		print '<tr class="pair"><td colspan="2" style="text-align:center">';
-		//print '<input type="submit" class="button" name="import" value="'.$langs->trans('SendinBlueImportForm').'"/>';
-		print '<input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
-		//print '<input type="submit" class="button" name="export" value="'.$langs->trans('SendinBlueExportTo').'"/>';
-		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
+		print '</td></tr>';
+		
+		print '<tr class="impair"><td colspan="3" style="text-align:center">';
 		print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
-	//	print '<input type="submit" class="button" name="updateonly" value="'.$langs->trans('SendinBlueUpdateOnly').'"/>';
-		//print '<input type="submit" class="button" name="updatesegment" value="'.$langs->trans('SendinBlueUpdateSegmentOnly').'"/>';
-		print '</td></tr></table>';
+		print '</td></tr>';
+		
+		print '<tr class="pair">';
+		print '<td style="text-align:right"><input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
+		print $form->textwithpicto('',$langs->trans('SendinBlueImportFormHelp'));
+		print '</td><td></td><td>';
+		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
+		print $form->textwithpicto('',$langs->trans('SendinBlueExportToHelp'));
+		print '</td></tr>';
+		print '</table>';
 
 		print '<form>';
 	}
