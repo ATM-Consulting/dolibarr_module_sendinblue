@@ -91,7 +91,7 @@ $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);   
 if(!empty($createList) && !empty($nameList)){
     $res = $sendinblue->createList($nameList);
     // Auto choose the good list
-    $_POST["selectlist"] = $res;
+    $newList = $res;
 	if ($res < 0)
     {
         setEventMessage($langs->trans('SendInBlueReturnError', $sendinblue->error), 'errors');
@@ -127,7 +127,11 @@ if ($action=='associateconfirm') {
 	$updateonly=GETPOST('updateonly','alpha');
 	$updatesegment=GETPOST('updatesegment','alpha');
 	$segmentid=GETPOST('segmentlist','alpha');
-	$listid=GETPOST('selectlist','alpha');
+	if(empty($newList)) {
+	    $listid=GETPOST('selectlist','alpha');
+	} else {
+	    $listid = $newList;
+	}
 	$newsegmentname=GETPOST('segmentname','alpha');
 	$resetseg=GETPOST('resetseg','int');
 	$sendinblue->sendinblue_listid=$listid;
