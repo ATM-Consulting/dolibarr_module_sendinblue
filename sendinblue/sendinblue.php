@@ -389,7 +389,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '<table class="border tableforfield" width="100%">';
 
 	if ((float) DOL_VERSION <= 3.6)	$linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/liste.php">'.$langs->trans("BackToList").'</a>';
-	else $linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/list.php">'.$langs->trans("BackToList").'</a>';
+	else $linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
 
 	print '<tr class="impair"><td width="20%">'.$langs->trans("Ref").'</td>';
 	print '<td colspan="3">';
