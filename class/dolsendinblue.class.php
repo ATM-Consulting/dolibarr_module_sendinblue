@@ -2492,6 +2492,7 @@ class DolSendinBlue extends CommonObject
 					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
+
 					$tmp = new stdClass;
 					$tmp->fk_mailing =  $res->rowid;
 					$tmp->activites = 'opened';

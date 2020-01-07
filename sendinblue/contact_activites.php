@@ -38,6 +38,10 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
 require_once '../class/dolsendinblue.class.php';
 require_once '../class/html.formsendinblue.class.php';
 
+require_once(__DIR__ . '/../vendor/autoload.php');
+$config = SendinBlue\Client\Configuration::getDefaultConfiguration()->setApiKey('api-key', $conf->global->SENDINBLUE_API_KEY_V3);
+
+
 $langs->load("companies");
 $langs->load("users");
 $langs->load("other");
@@ -96,17 +100,39 @@ if (empty($reshook))
 }
 
 if ($action=='unsubscribe') {
-	$result = $sendinblue->deleteEmailFromList($listid,array($object->email));
-	if ($result<0) {
-		setEventMessage($sendinblue->error,'errors');
-	}
+    $apiInstance = new SendinBlue\Client\Api\ContactsApi(
+        // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+        // This is optional, `GuzzleHttp\Client` will be used as default.
+        new GuzzleHttp\Client(),
+        $config
+    );
+
+    $contactEmails = new \SendinBlue\Client\Model\RemoveContactFromList(); // \SendinBlue\Client\Model\RemoveContactFromList | Emails adresses of the contact
+    $contactEmails->setEmails(array($object->email));
+
+    try {
+        $result = $apiInstance->removeContactFromList($listid, $contactEmails);
+    } catch (Exception $e) {
+        setEventMessage('Exception when calling ContactsApi->removeContactFromList: ' . $e->getMessage());
+    }
 }
 
 if ($action=='subscribe') {
-	$result = $sendinblue->addEmailToList($listid,array($object->email.'&contact&'.$object->id));
-	if ($result<0) {
-		setEventMessage($sendinblue->error,'errors');
-	}
+    $apiInstance = new SendinBlue\Client\Api\ContactsApi(
+        // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+        // This is optional, `GuzzleHttp\Client` will be used as default.
+        new GuzzleHttp\Client(),
+        $config
+    );
+
+    $contactEmails = new \SendinBlue\Client\Model\AddContactToList(); // \SendinBlue\Client\Model\AddContactToList | Emails addresses of the contacts
+    $contactEmails->setEmails(array($object->email));
+
+    try {
+        $result = $apiInstance->addContactToList($listid, $contactEmails);
+    } catch (Exception $e) {
+        setEventMessage('Exception when calling ContactsApi->addContactToList: ' . $e->getMessage(),'errors');
+    }
 }
 
 /*
@@ -262,24 +288,45 @@ print '</div>';
 //find is email is in the list
 if($conf->global->SENDINBLUE_API_KEY){
 
-$result = $sendinblue->getListForEmail($object->email);
-if ($result<0) {
-	setEventMessage($sendinblue->error,'errors');
-}
-$list_subcribed_id=array();
-if (is_array($sendinblue->listlist_lines) && count($sendinblue->listlist_lines)>0) {
-	foreach ($sendinblue->listlist_lines as $listsubcribed) {
-		$list_subcribed_id[]=$listsubcribed;
-	}
-}
+//$result = $sendinblue->getListForEmail($object->email);
+//
+//
+//var_dump($sendinblue->listlist_lines);
+
+    $list_subcribed_id=array();
+
+    $apiInstance = new SendinBlue\Client\Api\ContactsApi(
+        // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+        // This is optional, `GuzzleHttp\Client` will be used as default.
+        new GuzzleHttp\Client(),
+        $config
+    );
+
+    try {
+        $contact_info = $apiInstance->getContactInfo($object->email);
+        $list_subcribed_id = $contact_info->getListIds();
+    } catch (Exception $e) {
+        setEventMessage('Exception when calling AccountApi->getAccount: ' . $e->getMessage(),'errors');
+    }
 
 
-$result=$sendinblue->getListDestinaries();
-if ($result<0) {
-	setEventMessage($sendinblue->error,'errors');
-}
+    $apiInstance = new SendinBlue\Client\Api\ListsApi(
+        // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+        // This is optional, `GuzzleHttp\Client` will be used as default.
+        new GuzzleHttp\Client(),
+        $config
+    );
+    $limit = 20; // int | Number of documents per page
+    $offset = 0; // int | Index of the first document of the page
 
-if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
+    try {
+        $result = $apiInstance->getLists($limit, $offset);
+    } catch (Exception $e) {
+        setEventMessage('Exception when calling ListsApi->getLists: ' . $e->getMessage(),'errors');
+    }
+
+
+if ($result->getLists()) {
 	print load_fiche_titre($langs->trans("SendinBlueDestList"),'','');
 	print '<table class="border" width="100%">';
 	print '<tr class="liste_titre">';
@@ -288,7 +335,8 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 	print '<td>'.$langs->trans('SendinBlueSubscribersState').'</td>';
 	print '</tr>';
 
-	foreach($sendinblue->listdest_lines['data'] as $line) {
+	foreach($result->getLists() as $line)
+	{
 		//Si le contact n'a pas d'email
 
 		if($object->email == null){
@@ -335,7 +383,7 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
  				print '<a href="'.$_SERVER['PHP_SELF'].'?action=unsubscribe&id='.$object->id.'&listid='.$line['id'].'">';
  				print img_picto($langs->trans("Disabled"),'switch_on');
  				print '</a>';
- 			}  else if($sendinblue->isUnsubscribed($line['id'], $object->email) || $object->statut == 0){
+ 			}  else if(in_array($line['id'], $list_subcribed_id) || $object->statut == 0){
  				print '<link rel="stylesheet" href="../script/style.css" />';
  				print "<div style='position:relative;' >";
  				print "<div class='sendinblue_grise'></div>";
@@ -370,6 +418,17 @@ if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>
 /*
  * SendinBlue Campagin Actvites
  */
+
+//    $contact_info->getStatistics();
+//    $apiInstance = new SendinBlue\Client\Api\EmailCampaignsApi(
+//    // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
+//    // This is optional, `GuzzleHttp\Client` will be used as default.
+//        new GuzzleHttp\Client(),
+//        $config
+//    );
+//    $result = $apiInstance->getEmailCampaigns(null, null, null, null, $limit, $offset);
+//    var_dump($result->getCampaigns());
+
 
 $result=$sendinblue->getEmailcontactActivites($object->email);
 
