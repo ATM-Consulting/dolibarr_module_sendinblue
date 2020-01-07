@@ -1208,10 +1208,16 @@ class DolSendinBlue extends CommonObject
 	 * @return int <0 if KO, >0 if OK
 	 */
 	function addEmailToList($listid = 0, $array_email = array()) {
-		global $conf;
+		global $conf, $db;
 
 		require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 		require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+        require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+
+        $extrafields_societe = new ExtraFields($db);
+        $extrafields_societe->fetch_name_optionals_label('societe');
+        $extrafields_contact = new ExtraFields($db);
+        $extrafields_contact->fetch_name_optionals_label('socpeople');
 
 		$error = 0;
 
@@ -1237,11 +1243,15 @@ class DolSendinBlue extends CommonObject
 
 		dol_syslog(get_class($this) . '::addEmailToList count($$array_email)=' . count($array_email), LOG_DEBUG);
 
+        $TExtSociete = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED);
+        $TExtContact = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED);
+
 		foreach ( $array_email as $email ) {
 
 			// email is formated like email&type&id where type=contact for contact or thirdparty and id is the id of contact or thridparty
 			$tmp_array = explode('&', $email);
 			$merge_vars = new stdClass();
+            $merge_extrafields = new stdClass();
 			if (! empty($tmp_array[0]) && isValidEmail($tmp_array[0]) && ! in_array($tmp_array[0], $email_added)) {
 
 				if ($tmp_array[1] == 'contact') {
@@ -1257,6 +1267,14 @@ class DolSendinBlue extends CommonObject
 						$merge_vars->FNAME = $contactstatic->firstname;
 						$merge_vars->LNAME = $contactstatic->lastname;
 						$merge_vars->EMAIL = $tmp_array[0];
+
+						if (!empty($TExtContact))
+                        {
+                            foreach ($extrafields_contact->attribute_label as $code => $label)
+                            {
+                                if (in_array($code, $TExtContact)) $merge_extrafields->{$code} = $contactstatic->array_options['options_'.$code];
+                            }
+                        }
 					}
 				}
 				if ($tmp_array[1] == 'thirdparty') {
@@ -1270,6 +1288,14 @@ class DolSendinBlue extends CommonObject
 					if (! empty($socstatic->id)) {
 						$merge_vars->FNAME = $socstatic->name;
 						$merge_vars->EMAIL = $tmp_array[0];
+
+						if (!empty($TExtSociete))
+                        {
+                            foreach ($extrafields_societe->attribute_label as $code => $label)
+                            {
+                                if (in_array($code, $TExtSociete)) $merge_extrafields->{$code} = $socstatic->array_options['options_'.$code];
+                            }
+                        }
 					}
 				}
 
@@ -1283,7 +1309,8 @@ class DolSendinBlue extends CommonObject
 						'email_address' => $tmp_array[0],
 						'status'=>'subscribed',
 						'email_type' => 'html',
-						'merge_vars' => $merge_vars
+						'merge_vars' => $merge_vars,
+                        'merge_extrafields' => $merge_extrafields
 				);
 			}
 		}
@@ -1309,10 +1336,24 @@ class DolSendinBlue extends CommonObject
 
 				if(!empty($email)){
 					try {
-						$data = array("email" => $email['email_address'],
-						"attributes"=>array("PRENOM"=>$email['merge_vars']->FNAME, "NOM"=>$email['merge_vars']->LNAME),
-						"listid"=>array($listid)
-						);
+                        $data = array(
+                            "email" => $email['email_address'],
+                            "attributes" => array(
+                                "PRENOM" => $email['merge_vars']->FNAME,
+                                "NOM" => $email['merge_vars']->LNAME,
+                            ),
+                            "listid" => array($listid)
+                        );
+
+                        if (!empty($email['merge_extrafields']))
+                        {
+                            foreach ($email['merge_extrafields'] as $code => $val)
+                            {
+                                // strtoupper car sendinblue force les majuscules et remplace les espaces par des _
+                                $data['attributes'][strtoupper($code)] = $val;
+                            }
+                        }
+
 						$response = $this->sendinblue->create_update_user($data);
 					} catch ( Exception $e ) {
 						$this->errors[] = $e->getMessage();
