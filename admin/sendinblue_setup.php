@@ -32,6 +32,13 @@ if (! $res) {
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/sendinblue.lib.php';
 dol_include_once('/sendinblue/class/dolsendinblue.class.php');
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+
+$extrafields_societe = new ExtraFields($db);
+$extralabels_societe = $extrafields_societe->fetch_name_optionals_label('societe');
+$extrafields_contact = new ExtraFields($db);
+$extralabels_contact = $extrafields_contact->fetch_name_optionals_label('socpeople');
+
 // Translations
 $langs->load("sendinblue@sendinblue");
 
@@ -53,6 +60,16 @@ if ($action == 'setvar') {
 	if (! $res > 0) {
 		$error ++;
 	}
+
+    $SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED = GETPOST('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', 'array');
+    $res = dolibarr_set_const($db, 'SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', implode(',', $SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED), 'chaine', 0, '', $conf->entity);
+    if (! $res > 0)
+        $error ++;
+
+    $SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED = GETPOST('SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED', 'array');
+    $res = dolibarr_set_const($db, 'SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED', implode(',', $SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED), 'chaine', 0, '', $conf->entity);
+    if (! $res > 0)
+        $error ++;
 
 	if (! $conf->global->SEND_BY_SENDINBLUE) {
 		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTP_SERVER', $smtp['relay'], 'chaine', 0, '', $conf->entity);
@@ -200,6 +217,23 @@ print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_API_KEYHelp"), 1, 'help');
 print '</td>';
 print '</tr>';
+
+print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED") . '</td>';
+print '<td align="left">';
+print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', $extralabels_societe, explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED));
+print '<td align="left">';
+print $form->textwithpicto('', $langs->trans("SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWEDHelp"), 1, 'help');
+print '</td>';
+print '</tr>';
+
+print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED") . '</td>';
+print '<td align="left">';
+print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED', $extralabels_contact, explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED));
+print '<td align="left">';
+print $form->textwithpicto('', $langs->trans("SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWEDHelp"), 1, 'help');
+print '</td>';
+print '</tr>';
+
 print '<tr class="liste_titre"><td colspan="3" align="center"><input type="submit" class="button" value="' . $langs->trans("Save") . '"></td></tr>';
 
 print '</table>';

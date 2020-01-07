@@ -125,7 +125,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 print '<table>';
 
 print "\n\n<div class=\"tabsAction\">\n";
-if ($user->rights->mailing->creer && count($sendinblue->listcampaign_lines)>0) {
+if ($user->rights->mailing->creer && is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign_lines)>0) {
 	print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updateallcampagin">'.$langs->trans("SendinBlueUpdateAllCampaign").'</a>';
 }
 print '<br><br></div>';

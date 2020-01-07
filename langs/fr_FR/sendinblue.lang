@@ -62,6 +62,10 @@ SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
 InvalidAPIKey=Clé API Invalide
 InvalidAPIKeyForSTMP=Cette clé ne peut servir à l'envoie des mail Dolibarr via le SMTP SendInBlue
+
+SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWEDHelp=Sélectionnez ici les attributs supplémentaires que vous souhaitez synchoniser<br />Pour que cela fonctionne correctement vous devez créer ce/ces même attributs côté Sendinblue dans la séction "Paramètre > Attributs des contacts et CRM > Champs attributs" en utilisant le code de l'attribut Dolibarr comme nom de l'attribut sur Sendinblue
+SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWEDHelp=Sélectionnez ici les attributs supplémentaires que vous souhaitez synchoniser<br />Pour que cela fonctionne correctement vous devez créer ce/ces même attributs côté Sendinblue dans la séction "Paramètre > Attributs des contacts et CRM > Champs attributs" en utilisant le code de l'attribut Dolibarr comme nom de l'attribut sur Sendinblue
+
 #
 # Recipients list
 #
