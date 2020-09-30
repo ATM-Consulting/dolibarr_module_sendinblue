@@ -172,8 +172,7 @@ print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $option, $sortfield, $sor
 print '<form method="post" action="' . $_SERVER ['PHP_SELF'] . '" name="search_form">' . "\n";
 
 print '<div class="liste_titre">';
-print $langs->trans('DateValid');
-print $langs->trans('Month') . ':<input class="flat" type="text" size="4" name="search_month" value="' . $search_month . '">';
+print $langs->trans('Month') . ': '.$formother->select_month($search_month, 'search_month');
 print $langs->trans('Year') . ':' . $formother->selectyear($search_year ? $search_year : - 1, 'search_year', 1, 20, 5);
 
 
