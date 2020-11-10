@@ -56,7 +56,7 @@ $refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && ($_SERVER['HTTP
  */
 if ($action == 'setvar') {
 
-	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY'), 'chaine', 0, '', $conf->entity);
+	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY', 'none'), 'chaine', 0, '', $conf->entity);
 	if (! $res > 0) {
 		$error ++;
 	}
@@ -96,7 +96,7 @@ if ($action == 'setvar') {
 	}
 }
 if ($action == 'activsendinblue') {
-	dolibarr_set_const($db, "SEND_BY_SENDINBLUE", GETPOST("value"), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, "SEND_BY_SENDINBLUE", GETPOST("value", 'none'), 'chaine', 0, '', $conf->entity);
 }
 if ($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE && ! $refreshButtonPressed) {
 	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE, 'chaine', 0, '', $conf->entity);

@@ -66,13 +66,13 @@ if (! $sortfield) $sortfield="email";
 
 $id=GETPOST('id','int');
 $rowid=GETPOST('rowid','int');
-$action=GETPOST("action");
-$search_lastname=GETPOST("search_lastname");
-$search_firstname=GETPOST("search_firstname");
-$search_email=GETPOST("search_email");
-$search_dest_status=GETPOST('search_dest_status');
-$search_contact=GETPOST('search_contact');
-$search_socname=GETPOST('search_socname');
+$action=GETPOST("action", 'alpha');
+$search_lastname=GETPOST("search_lastname", 'none');
+$search_firstname=GETPOST("search_firstname", 'none');
+$search_email=GETPOST("search_email", 'none');
+$search_dest_status=GETPOST('search_dest_status', 'none');
+$search_contact=GETPOST('search_contact', 'none');
+$search_socname=GETPOST('search_socname', 'none');
 
 // Search modules dirs
 $modulesdir = dolGetModulesDirs('/mailings');
@@ -87,7 +87,7 @@ $formsendinblue = new FormSendinBlue($db);
 
 if ($action == 'add')
 {
-	$module=GETPOST("module");
+	$module=GETPOST("module", 'none');
 	$result=-1;
 
 	$var=true;
@@ -113,7 +113,7 @@ if ($action == 'add')
 
 			// Add targets into database
 			$obj = new $classname($db);
-			
+
 			$result=$obj->add_to_target($id,$filtersarray);
 		}
 	}
@@ -133,25 +133,25 @@ if ($action == 'add')
 	}
 }
 else if($action=='exportlist') {
-    
-    $sql = base64_decode(GETPOST('sql'));
+
+    $sql = base64_decode(GETPOST('sql', 'none'));
     $resql=$db->query($sql);
-    
+
     $first = true;
     $f1  =tmpfile();
     $tmpName = tempnam(sys_get_temp_dir(), 'data');
     $f1 = fopen($tmpName, 'w');
-    
+
     while($obj=$db->fetch_object($resql)) {
-    
+
         $obj->adresse1='';
         $obj->adresse2='';
         $obj->adresse3='';
         $obj->adresse4 = '';
-    
+
         list($obj->adresse1,$obj->adresse2,$obj->adresse3,$obj->adresse4) = explode("\n", $obj->address);
         unset($obj->address);
-        
+
         if($first) {
             $first = false;
             $THeader=array();
@@ -160,21 +160,21 @@ else if($action=='exportlist') {
             }
            fputcsv($f1, $THeader,";",'"');
         }
-        
+
         fputcsv($f1,  (array) $obj,";",'"');
     }
-  
+
     header('Content-Type: application/csv');
     header('Content-Disposition: attachment; filename=liste.csv');
     header('Pragma: no-cache');
-    
+
     readfile($tmpName);
-    
+
     exit;
 }
 
 
-if (GETPOST('clearlist'))
+if (GETPOST('clearlist', 'none'))
 {
 	// Chargement de la classe
 	$classname = "MailingTargets";
@@ -423,7 +423,7 @@ if ($object->fetch($id) >= 0)
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as soc ON (soc.rowid=socp.fk_soc)";
         $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople_extrafields as socex ON (socp.rowid=socex.fk_object)";
         $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_civility as civ ON (civ.code=socp.civility)";
-        
+
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as soccom ON soccom.fk_soc=socp.fk_soc";
 	//}
 	$sql .= " WHERE mc.fk_mailing=".$object->id;
@@ -660,11 +660,11 @@ if ($object->fetch($id) >= 0)
             print '<input type="hidden" name="sql" value="'.base64_encode($sql).'">';
             print '<input type="hidden" name="id" value="'.$object->id.'">';
             print '<input type="hidden" name="action" value="exportlist">';
-    
+
             print ''.$langs->trans("ExportList").': '.'<input type="submit" name="exportlist" class="button" value="'.$langs->trans("Export").'" />';
-            
+
             print '</form>';
-            
+
         }
 
 		$db->free($resql);
