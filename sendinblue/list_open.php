@@ -85,7 +85,7 @@ $search_title=GETPOST('search_title','alpha');
 $search_mail=GETPOST('search_mail','alpha');
 $search_link=GETPOST('search_link','alpha');
 $search_socname=GETPOST('search_socname','alpha');
-$contact_id=GETPOST('contactid', 'int');
+$contact_id=(int)GETPOST('contactid', 'int');
 
 if ($page == - 1) {
 	$page = 0;

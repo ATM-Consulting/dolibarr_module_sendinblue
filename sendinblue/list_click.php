@@ -64,7 +64,7 @@ $search_year = GETPOST('search_year', 'int');
 $sortorder = GETPOST('sortorder', 'alpha');
 $sortfield = GETPOST('sortfield', 'alpha');
 $page = GETPOST('page', 'int');
-$contact_id=GETPOST('contactid', 'int');
+$contact_id=(int)GETPOST('contactid', 'int');
 
 
 if (empty($search_year)) {

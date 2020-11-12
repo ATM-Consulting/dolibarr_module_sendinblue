@@ -33,7 +33,7 @@ $get=GETPOST('get', 'none');
 $set=GETPOST('set', 'none');
 
 if (empty($listid)) $listid = GETPOST('listid', 'none');
-if (empty($fk_mailing)) $fk_mailing = GETPOST('fk_mailing', 'int');
+if (empty($fk_mailing)) $fk_mailing = (int)GETPOST('fk_mailing', 'int');
 
 if (empty($listid)) return __out('listid param missing');
 if (empty($fk_mailing)) return __out('fk_mailing param missing');
