@@ -85,7 +85,7 @@ $search_title=GETPOST('search_title','alpha');
 $search_mail=GETPOST('search_mail','alpha');
 $search_link=GETPOST('search_link','alpha');
 $search_socname=GETPOST('search_socname','alpha');
-$contact_id=GETPOST('contactid');
+$contact_id=(int)GETPOST('contactid', 'int');
 
 if ($page == - 1) {
 	$page = 0;
@@ -93,7 +93,7 @@ if ($page == - 1) {
 
 $offset = $conf->liste_limit * $page;
 
-if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) {
+if (GETPOST("button_removefilter_x", 'none') || GETPOST("button_removefilter", 'none')) {
 	$search_month = '';
 	$search_year = '';
 	$search_title='';
@@ -156,7 +156,7 @@ $form = new Form($db);
  */
 
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
-	
+
 	$nbtotalofrecords = $sendinblueactivities->getEmailcontactActivitesOpen($sortorder, $sortfield, 0, 0, $filter);
 }
 
@@ -202,7 +202,7 @@ $sendinbluestatic = new DolSendinBlue($db);
 $contact_array=array();
 if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
 	foreach ( $sendinblueactivities->contactemail_clickactivity as $activites ) {
-		
+
 		if (!array_key_exists($activites->contactid, $contact_array) && !empty($activites->contactid)) {
 			$result=$contact->fetch($activites->contactid);
 			if ($result<0) {
@@ -210,8 +210,8 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 			} else {
 				$contact_array[$activites->contactid]=$contact->getNomUrl();
 			}
-		} 
-		
+		}
+
 		if (is_array($activites->activites) && count($activites->activites) > 0) {
 			foreach ( $activites->activites as $act ) {
 				$var = ! $var;
@@ -226,7 +226,7 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print dol_print_date($activites->datec);
 				print '</td>';
 				print '<td>';
-				print $activites->email;	
+				print $activites->email;
 				print '</td>';
 				print '<td>';
 				print $activites->socname;
@@ -237,7 +237,7 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print '<td>';
 				print $contact_array[$activites->contactid];
 				print '</td>';
-				
+
 				print '</tr>';
 			}
 		}

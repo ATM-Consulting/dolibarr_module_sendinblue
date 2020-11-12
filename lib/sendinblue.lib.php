@@ -37,22 +37,22 @@ function sendinblueAdminPrepareHead() {
 
 /**
  * TODO remove because function is useless and unuse
- * 
+ *
  * @param unknown $fk_category
  * @return NULL[]
  */
 function getEmailToRemove($fk_category)
 {
 	global $db, $conf;
-	
-	$sql = 'SELECT DISTINCT c.email 
-			FROM '.MAIN_DB_PREFIX.'socpeople c 
+
+	$sql = 'SELECT DISTINCT c.email
+			FROM '.MAIN_DB_PREFIX.'socpeople c
 			INNER JOIN '.MAIN_DB_PREFIX.'categorie_contact cc ON (c.rowid = cc.fk_socpeople)
-			WHERE cc.fk_categorie = '. (int) $fk_category.' 
-			AND c.entity = '.$conf->entity.' 
+			WHERE cc.fk_categorie = '. (int) $fk_category.'
+			AND c.entity = '.$conf->entity.'
 			AND (c.statut = 0 OR c.no_email = 1)';
 	dol_syslog(__FILE__. " function::getEmailToRemove SQL = " .$sql, LOG_DEBUG);
-	
+
 	$TEmail = array();
 	$resql = $db->query($sql);
 	if ($resql)
@@ -62,7 +62,7 @@ function getEmailToRemove($fk_category)
 			if (isValidEmail($row->email)) $TEmail[] = $row->email;
 		}
 	}
-	
+
 	return $TEmail;
 }
 
@@ -74,16 +74,16 @@ function getEmailToRemove($fk_category)
 function getEmailToAdd($fk_category, $TEntity)
 {
 	global $db, $conf;
-	
-	$sql = 'SELECT DISTINCT c.email 
+
+	$sql = 'SELECT DISTINCT c.email
 			FROM '.MAIN_DB_PREFIX.'socpeople c
 			INNER JOIN '.MAIN_DB_PREFIX.'categorie_contact cc ON (c.rowid = cc.fk_socpeople)
-			WHERE cc.fk_categorie = '.(int) $fk_category.'   
-			AND c.entity IN ('.implode(',', $TEntity).') 
+			WHERE cc.fk_categorie = '.(int) $fk_category.'
+			AND c.entity IN ('.implode(',', $TEntity).')
 			AND c.statut = 1
 			AND c.no_email = 0';
 	dol_syslog(__FILE__. " function::getEmailToAdd SQL = " .$sql, LOG_DEBUG);
-	
+
 	$TEmail = array();
 	$resql = $db->query($sql);
 	if ($resql)
@@ -93,7 +93,7 @@ function getEmailToAdd($fk_category, $TEntity)
 			if (isValidEmail($row->email)) $TEmail[] = strtolower($row->email);
 		}
 	}
-	
+
 	return $TEmail;
 }
 
@@ -105,19 +105,19 @@ function getEmailToAdd($fk_category, $TEntity)
 function getSendinBlueInfoFromCategorie($fk_categorie)
 {
 	global $db, $conf;
-	
+
 	$sql = 'SELECT sendinblue_listid, sendinblue_segmentid FROM '.MAIN_DB_PREFIX.'sendinblue_category_contact WHERE fk_category = ' . (int) $fk_categorie. ' AND entity = ' . $conf->entity;
 	dol_syslog(__FILE__. " function::getSendinBlueInfoFromCategorie SQL = " .$sql, LOG_DEBUG);
-	
+
 	$resql = $db->query($sql);
 	if ($resql && $db->num_rows($resql) > 0)
 	{
 		$TInfo = array();
 		while ($row = $db->fetch_object($resql)) $TInfo[] = $row;
-		
+
 		return $TInfo;
 	}
-	
+
 	return false;
 }
 
@@ -129,36 +129,36 @@ function getSendinBlueInfoFromCategorie($fk_categorie)
 function setSendinBlueInfoFromCategorie(&$category)
 {
 	global $db, $conf;
-	
+
 	$r = deleteSendinBlueInfoFromCategorie($category);
 	if ($r)
 	{
 		// TODO à faire évoluer plus tard en tableau avec un multiselect côté html
-		$sendinblue_listid = GETPOST('sendinblue_listid');
-		$sendinblue_segmentid = GETPOST('sendinblue_segmentid');
-		
+		$sendinblue_listid = GETPOST('sendinblue_listid', 'none');
+		$sendinblue_segmentid = GETPOST('sendinblue_segmentid', 'none');
+
 		// Si aucune association alors pas besoin de faire d'insert
 		if (empty($sendinblue_listid) && empty($sendinblue_segmentid)) return 1;
-		
+
 		$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'sendinblue_category_contact (
-			entity, 
-			sendinblue_listid, 
-			sendinblue_segmentid, 
-			fk_category) 
+			entity,
+			sendinblue_listid,
+			sendinblue_segmentid,
+			fk_category)
 		VALUES (
 			'.$conf->entity.',
 			"'.$db->escape($sendinblue_listid).'",
 			"'.$db->escape($sendinblue_segmentid).'",
 			'.$category->id.'
 		)';
-		
+
 		dol_syslog(__FILE__. " function::setSendinBlueInfoFromCategorie SQL = " .$sql, LOG_DEBUG);
-		
+
 		$resql = $db->query($sql);
-		
+
 		if ($resql) return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -170,12 +170,12 @@ function setSendinBlueInfoFromCategorie(&$category)
 function deleteSendinBlueInfoFromCategorie(&$category)
 {
 	global $db, $conf;
-	
+
 	$sql = 'DELETE FROM '.MAIN_DB_PREFIX.'sendinblue_category_contact WHERE fk_category = ' . (int) $category->id . ' AND entity = ' . $conf->entity;
 	dol_syslog(__FILE__. " function::deleteSendinBlueInfoFromCategorie SQL = " .$sql, LOG_DEBUG);
-	
+
 	$resql = $db->query($sql);
-	
+
 	if ($resql) return 1;
 	else return 0;
 }
@@ -191,27 +191,27 @@ function deleteSendinBlueInfoFromCategorie(&$category)
 function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $sendinblue_segmentid = 0, $fromCron = false)
 {
 	global $db,$langs;
-	
+
 	if (empty($fk_category) || empty($sendinblue_listid)) return false;
-	
+
 	$sendinblue = new DolSendinBlue($db);
-	
+
 	if ($fromCron)
 	{
 		echo 'fk_category = '.$fk_category."\n";
 		echo 'sendinblue_listid = '.$sendinblue_listid."\n";
 		echo 'sendinblue_segmentid = '.$sendinblue_segmentid."\n";
 	}
-			
+
 	// Emails à ajouter depuis Dolibarr
 	$TEmailToAdd = getEmailToAdd($fk_category, $TEntity);
-	
+
 	// Emails déjà présent sur SendinBlue
 	$sendinblue->sendinblue_listid = $sendinblue_listid;
 	$sendinblue->sendinblue_segmentid = $sendinblue_segmentid;
-	
+
 	if (empty($sendinblue->sendinblue_segmentid)) $sendinblue->getEmailList(); // @see $sendinblue->email_lines after that
-	else 
+	else
 	{
 		// Je stock les emails présent dans la liste juste avant de travailler avec la liste des emails du segment, car si j'ajoute un email dans le segment qui n'est pas présent dans la liste, l'API n'ajoute pas l'adresse
 		$sendinblue->getEmailList();
@@ -219,9 +219,9 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 
 		$sendinblue->getEmailSegment();
 	}
-	
+
 	$TEmailAlreadyExists = &$sendinblue->email_lines;
-	
+
 	// Tableau qui contiendra un diff des emails à ajouter et/ou supprimer
 	$TEmailDiff = array('add' => array(), 'del' => array());
 	foreach ($TEmailToAdd as $email)
@@ -233,10 +233,10 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 			//if ($fromCron) echo '[ADD] '.$email."\n";
 		}
 	}
-	
+
 	if ($fromCron) echo '[COUNT ADD] = '.count($TEmailDiff['add'])."\n\n";
-	
-	// [UNIQUEMENT SUR CRON] Si l'action est déclenché depuis l'interface alors on ne gère que l'ajout et surtout pas la suppression car une même catégorie peut être associé à la même list et segment depuis une autre entité avec un listing d'email différent 
+
+	// [UNIQUEMENT SUR CRON] Si l'action est déclenché depuis l'interface alors on ne gère que l'ajout et surtout pas la suppression car une même catégorie peut être associé à la même list et segment depuis une autre entité avec un listing d'email différent
 	if ($fromCron)
 	{
 		foreach ($TEmailAlreadyExists as $email)
@@ -249,7 +249,7 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 			}
 		}
 		if ($fromCron) echo '[COUNT DEL] = '.count($TEmailDiff['del'])."\n\n";
-		
+
 		// Update d'un segment mais il faut aussi ce préocupper des emails présents dans la liste et non dans le segment
 		if (!empty($TEmailInList))
 		{
@@ -263,26 +263,26 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 			}
 		}
 	}
-	
+
 	// Check email, si ajout dans segment je doit vérifier que l'email est bien présent dans la liste (si l'email n'est pas dans la liste je doit l'ajouter avant de l'ajouter au segment)
 	$TEmailToAddInListBeforeSegment = array();
 	foreach ($TEmailDiff['add'] as $email)
 	{
 		if (!in_array($email, $TEmailInList)) $TEmailToAddInListBeforeSegment[] = $email;
 	}
-	
-	
+
+
 	/**
-	 * 
-	 * ATTENTION : 	si des adresses mails reviennent souvent en ajout mais qu'elles ne sont finalement pas 
-	 * 				ajouté sur la liste et/ou segment sur la plat forme SendinBlue, il est probable que 
-	 * 				l'email en question est "cleaned" ou "unsubcribed", donc ne peut pas être ajouté de 
+	 *
+	 * ATTENTION : 	si des adresses mails reviennent souvent en ajout mais qu'elles ne sont finalement pas
+	 * 				ajouté sur la liste et/ou segment sur la plat forme SendinBlue, il est probable que
+	 * 				l'email en question est "cleaned" ou "unsubcribed", donc ne peut pas être ajouté de
 	 * 				manière classic
-	 * 
+	 *
 	 */
-	
-	
-	
+
+
+
 	if (!empty($TEmailToAddInListBeforeSegment))
 	{
 		if ($fromCron) {
@@ -292,7 +292,7 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 		$sendinblue->addEmailToList($sendinblue->sendinblue_listid, $TEmailToAddInListBeforeSegment);
 		unset($TEmailToAddInListBeforeSegment);
 	}
-	
+
 	if (!empty($TEmailDiff['add']))
 	{
 		if (empty($sendinblue->sendinblue_segmentid)){
@@ -301,7 +301,7 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 				var_dump($TEmailDiff['add']);
 			}
 			$r = $sendinblue->addEmailToList($sendinblue->sendinblue_listid, $TEmailDiff['add']);
-		} 
+		}
 		else {
 			if ($fromCron) {
 				echo "\n".'[ADD SEGMENT] Tableau des emails qui seront ajoutés dans le segment :';
@@ -318,10 +318,10 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 				else setEventMessage($langs->trans('sendinblue_error_syn', $sendinblue->error), 'errors');
 			}
 		}
-		
+
 		//unset($TEmailDiff['add']);
 	}
-	
+
 	if (!empty($TEmailDiff['del']))
 	{
 		if (empty($sendinblue->sendinblue_segmentid)) {
@@ -339,7 +339,7 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 			$r = $sendinblue->deleteEmailFromSegment($sendinblue->sendinblue_listid, $sendinblue->sendinblue_segmentid, $TEmailDiff['del']);
 			if ($r >= 0 && !empty($TEmailToRemoveFromList)) $r = $sendinblue->deleteEmailFromList($sendinblue->sendinblue_listid, $TEmailToRemoveFromList);
 		}
-		
+
 		if ($r < 0)
 		{
 			if ($fromCron) exit('[CATCH ERROR ON DEL] = '.$sendinblue->error);
@@ -348,9 +348,9 @@ function _doUpdateSendinBlueList($TEntity, $fk_category, $sendinblue_listid, $se
 				else setEventMessage($langs->trans('sendinblue_error_syn', $sendinblue->error), 'error');
 			}
 		}
-		
+
 		//unset($TEmailDiff['del']);
 	}
-	
+
 	return $TEmailDiff;
 }
