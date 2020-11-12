@@ -352,7 +352,7 @@ class Actionssendinblue
 						&& array_key_exists('total_items', $result)
 						&& $result['total_items']>0
 						&& $action == 'update'
-						&& $contact->email != GETPOST('email', 'custom', 0, FILTER_SANITIZE_EMAIL)) {
+						&& $contact->email != ((floatval(DOL_VERSION) > 4) ? GETPOST('email', 'custom', 0, FILTER_SANITIZE_EMAIL) : GETPOST('email', 'none'))) {
 					$action = 'edit';
 				}
 			}
