@@ -356,19 +356,19 @@ class modsendinblue extends DolibarrModules
 
 		$this->rights[$r][0] = 104037;
 		$this->rights[$r][1] = 'PermissionSendinBlueRight';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'read';
 		$r ++;
 
 		$this->rights[$r][0] = 104038;
 		$this->rights[$r][1] = 'PermissionSendinBlueRead';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'write';
 		$r ++;
 
 		$this->rights[$r][0] = 104039;
 		$this->rights[$r][1] = 'Autoriser la synchronisation manuelle';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'sync';
 		$r ++;
 
