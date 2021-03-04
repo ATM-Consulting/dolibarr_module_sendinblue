@@ -344,7 +344,7 @@ class SendinBlueActivites extends CommonObject
 		$sql .= " t.fk_user_mod,";
 		$sql .= " ml.titre,";
 		$sql .= " soc.nom as socname,";
-		$sql .= " socp.rowid as contactid,";
+		$sql .= " socp.rowid as contact_id,";
 		$sql .= " t.tms";
 
 		$sql .= " FROM " . MAIN_DB_PREFIX . "sendinblue_activites as t";
@@ -418,7 +418,7 @@ class SendinBlueActivites extends CommonObject
 						$line->tms = $this->db->jdate($obj->tms);
 						$line->campaign_title = $obj->title;
 						$line->socname = $obj->socname;
-						$line->contactid = $obj->contactid;
+						$line->contact_id = $obj->contact_id;
 
 						$this->contactemail_clickactivity[] = $line;
 					}
@@ -587,7 +587,7 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 		$sql .= " t.fk_user_mod,";
 		$sql .= " ml.titre,";
 		$sql .= " soc.nom as socname,";
-		$sql .= " socp.rowid as contactid,";
+		$sql .= " socp.rowid as contact_id,";
 		$sql .= " t.tms";
 
 		$sql .= " FROM " . MAIN_DB_PREFIX . "sendinblue_activites as t";
@@ -661,7 +661,7 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 						$line->tms = $this->db->jdate($obj->tms);
 						$line->campaign_title = $obj->title;
 						$line->socname = $obj->socname;
-						$line->contactid = $obj->contactid;
+						$line->contact_id = $obj->contact_id;
 
 						$this->contactemail_clickactivity[] = $line;
 					}
@@ -809,7 +809,7 @@ class SendinBlueActivitesLineDb
 	public $tms = '';
 	public $campaign_title;
 	public $socname;
-	public $contactid;
+	public $contact_id;
 
 	/**
 	 * Constructor

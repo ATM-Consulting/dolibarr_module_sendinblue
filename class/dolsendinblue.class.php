@@ -2580,10 +2580,15 @@ class DolSendinBlue extends CommonObject
 	function getNomUrl() {
 		require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
 		$object = new Mailing($this->db);
+		// Gestion changements v13
+        // Gestion de la rétrocompatibilité
+        $title = $object->title;
+        if (empty ($title)) $title = $object->titre;
+
 		$result = $object->fetch($this->fk_mailing);
 
 		$result = '<a href="' . dol_buildpath('/sendinblue/sendinblue/sendinblue.php', 1) . '?id=' . $object->id . '">';
-		$result .= $object->titre;
+		$result .= $title;
 		$result .= '</a>';
 
 		return $result;

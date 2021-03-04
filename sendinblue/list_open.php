@@ -85,13 +85,13 @@ $search_title=GETPOST('search_title','alpha');
 $search_mail=GETPOST('search_mail','alpha');
 $search_link=GETPOST('search_link','alpha');
 $search_socname=GETPOST('search_socname','alpha');
-$contact_id=(int)GETPOST('contactid', 'int');
+$contact_id=(int)GETPOST('contact_id', 'int');
 
 if ($page == - 1) {
 	$page = 0;
 }
 
-$offset = $conf->liste_limit * $page;
+$offset = $conf->liste_limit * doubleval($page);
 
 if (GETPOST("button_removefilter_x", 'none') || GETPOST("button_removefilter", 'none')) {
 	$search_month = '';
@@ -130,7 +130,7 @@ if (! empty($search_socname)) {
 }
 if (! empty($contact_id)) {
 	$filter['socp.rowid'] = $contact_id;
-	$options .= '&amp;contactid=' . $contact_id;
+	$options .= '&amp;contact_id=' . $contact_id;
 }
 
 $sendinblue = new DolSendinBlue($db);
@@ -196,19 +196,19 @@ print '<td></td>';
 print '<td><input type="text" class="flat" name="search_mail" value="' . $search_mail . '" size="10	"></td>';
 print '<td><input type="text" class="flat" name="search_socname" value="' . $search_socname . '" size="10	"></td>';
 print '<td></td>';
-print '<td>'.$form->selectcontacts(0,'contactid','contactid',1).'</td>';
+print '<td>'.$form->selectcontacts(0,'contact_id','contact_id',1).'</td>';
 print '</tr>';
 $sendinbluestatic = new DolSendinBlue($db);
 $contact_array=array();
 if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
 	foreach ( $sendinblueactivities->contactemail_clickactivity as $activites ) {
 
-		if (!array_key_exists($activites->contactid, $contact_array) && !empty($activites->contactid)) {
-			$result=$contact->fetch($activites->contactid);
+		if (!array_key_exists($activites->contact_id, $contact_array) && !empty($activites->contact_id)) {
+			$result=$contact->fetch($activites->contact_id);
 			if ($result<0) {
 				setEventMessage($contact->error,'errors');
 			} else {
-				$contact_array[$activites->contactid]=$contact->getNomUrl();
+				$contact_array[$activites->contact_id]=$contact->getNomUrl();
 			}
 		}
 
@@ -219,6 +219,11 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print '<td>';
 				$sendinbluestatic->fk_mailing = $activites->fk_mailing;
 				$object = new Mailing($db);
+				// Gestion changements v13
+                // Gestion de la rétrocompatibilité
+                $title = $object->title;
+                if (empty ($title)) $title = $object->titre;
+
 				$result = $object->fetch($sendinbluestatic->fk_mailing);
 				print $sendinbluestatic->getNomUrl();
 				print '</td>';
@@ -232,10 +237,10 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print $activites->socname;
 				print '</td>';
 				print '<td>';
-				print '<a href="https://my.sendinblue.com/camp/preview/id/'.$activites->sendinblue_id.'">'.$object->titre.'</a>';
+				print '<a href="https://my.sendinblue.com/camp/preview/id/'.$activites->sendinblue_id.'">'.$title.'</a>';
 				print '</td>';
 				print '<td>';
-				print $contact_array[$activites->contactid];
+				print $contact_array[$activites->contact_id];
 				print '</td>';
 
 				print '</tr>';

@@ -54,6 +54,11 @@ if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_
 }
 
 $object=new Mailing($db);
+// Gestion changements v13
+// Gestion de la rétrocompatibilité
+$title = $object->title;
+if (empty ($title)) $title = $object->titre;
+
 $result=$object->fetch($id);
 if ($result<0) {
 	setEventMessage($object->error,'errors');
@@ -100,10 +105,10 @@ if(!empty($createList) && !empty($nameList)){
 // Action update description of emailing
 if ($action == 'settitre' || $action == 'setemail_from') {
 
-	if ($action == 'settitre')					$object->titre          = trim(GETPOST('titre','alpha'));
+	if ($action == 'settitre')					$title          = trim(GETPOST('titre','alpha'));
 	else if ($action == 'setemail_from')		$object->email_from     = trim(GETPOST('email_from','alpha'));
 
-	else if ($action == 'settitre' && empty($object->titre))		$mesg.=($mesg?'<br>':'').$langs->trans("ErrorFieldRequired",$langs->transnoentities("MailTitle"));
+	else if ($action == 'settitre' && empty($title))		$mesg.=($mesg?'<br>':'').$langs->trans("ErrorFieldRequired",$langs->transnoentities("MailTitle"));
 	else if ($action == 'setfrom' && empty($object->email_from))	$mesg.=($mesg?'<br>':'').$langs->trans("ErrorFieldRequired",$langs->transnoentities("MailFrom"));
 
 	if (empty($mesg)) {
@@ -397,8 +402,8 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '</td></tr>';
 
 	// Description
-	print '<tr class="pair"><td>'.$form->editfieldkey("MailTitle",'titre',$object->titre,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
-	print $form->editfieldval("MailTitle",'titre',$object->titre,$object,$user->rights->mailing->creer && $object->statut < 3,'string');
+	print '<tr class="pair"><td>'.$form->editfieldkey("MailTitle",'titre',$title,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
+	print $form->editfieldval("MailTitle",'titre',$title,$object,$user->rights->mailing->creer && $object->statut < 3,'string');
 	print '</td></tr>';
 
 	// From
