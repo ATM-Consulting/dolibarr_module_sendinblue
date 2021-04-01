@@ -30,35 +30,36 @@ dol_include_once('/sendinblue/class/Sendinblue.class.php');
  */
 class DolSendinBlue extends CommonObject
 {
-	var $db; // !< To store db handler
-	var $error; // !< To return error code (or message)
-	var $errors = array(); // !< To return several error codes (or messages)
-	var $element = 'sendinblue'; // !< Id that identify managed objects
-	var $table_element = 'sendinblue'; // !< Name of table without prefix where object is stored
+	public $db; // !< To store db handler
+	public $error; // !< To return error code (or message)
+	public $errors = array(); // !< To return several error codes (or messages)
+	public $element = 'sendinblue'; // !< Id that identify managed objects
+	public $table_element = 'sendinblue'; // !< Name of table without prefix where object is stored
 	/** @var SendinBlue $sendinblue */
-    var $sendinblue; // API Object
-	var $email_lines = array();
-	var $listdest_lines = array();
-	var $listsegment_lines = array();
-	var $listcampaign_lines = array();
-	var $listlist_lines = array();
-	var $email_activity = array();
-	var $contactemail_activity = array();
-	var $id;
-	var $entity;
-	var $fk_mailing;
+    public $sendinblue; // API Object
+	public $email_lines = array();
+	public $listdest_lines = array();
+	public $listsegment_lines = array();
+	public $listcampaign_lines = array();
+	public $total_campaign_records;
+	public $listlist_lines = array();
+	public $email_activity = array();
+	public $contactemail_activity = array();
+	public $id;
+	public $entity;
+	public $fk_mailing;
 
-	var $sendinblue_id;
-	var $sendinblue_webid;
-	var $sendinblue_listid;
-	var $sendinblue_segmentid;
-	var $sendinblue_sender_name;
-	var $fk_user_author;
-	var $datec = '';
-	var $fk_user_mod;
-	var $tms = '';
-	var $currentmailing;
-	var $lines = array();
+	public $sendinblue_id;
+	public $sendinblue_webid;
+	public $sendinblue_listid;
+	public $sendinblue_segmentid;
+	public $sendinblue_sender_name;
+	public $fk_user_author;
+	public $datec = '';
+	public $fk_user_mod;
+	public $tms = '';
+	public $currentmailing;
+	public $lines = array();
 
 	/**
 	 * Constructor
@@ -552,7 +553,8 @@ class DolSendinBlue extends CommonObject
 					return - 1;
 				}
 
-				$sendinblue = new SendinBlue('https://api.sendinblue.com/v2.0', $conf->global->SENDINBLUE_API_KEY);
+				$timeout = !empty($conf->global->SENDINBLUE_API_TIMEOUT) ? $conf->global->SENDINBLUE_API_TIMEOUT * 1000 : 0;
+				$sendinblue = new SendinBlue('https://api.sendinblue.com/v2.0', $conf->global->SENDINBLUE_API_KEY, $timeout);
 				$this->sendinblue = $sendinblue;
 			}
 
@@ -1148,31 +1150,103 @@ class DolSendinBlue extends CommonObject
 	/**
 	 * Populate an array with campaign
 	 *
-	 * @return int <0 if KO, 1 if OK
+	 * @param 	int		$page			Page to get
+	 * @param 	int		$page_limit		Nb records to get
+	 * @param 	int		$record_id		Specific record to get
+	 * @return	int						<0 if KO, 1 if OK
 	 */
-	function getListCampaign() {
+	function getListCampaign($page = 1, $page_limit = 10, $record_id = 0)
+	{
+		$this->total_campaign_records = 0;
+		$this->listcampaign_lines = array();
 
 		$result = $this->getInstanceSendinBlue();
-		if ($result < 0 ) {
+		if ($result < 0) {
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
+		}
+
+		// Clean parameters
+		$page = ($page > 0 ? ($page <= 499 ? $page : 499) : 0) + 1;
+		$page_limit = ($page_limit > 0 ? ($page_limit <= 1000 ? $page_limit : 1000) : 1) + 1;
+
+		// Call
+		try {
+			$options = array("type" => "classic", "page" => $page, "page_limit" => $page_limit);
+			if ($record_id > 0) $options['id'] = $record_id;
+			$responseSendinBlue = $this->sendinblue->get_campaigns_v2($options);
+		} catch (Exception $e) {
+			$this->error = $e->getMessage();
+			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
+			return -1;
+		}
+
+		$this->total_campaign_records = $responseSendinBlue['data']['total_campaign_records'];
+		$this->listcampaign_lines = $responseSendinBlue['data']['campaign_records'];
+
+		return 1;
+	}
+
+	/**
+	 *  Set object value with send in blue campaign get
+	 *
+	 * @param 	int			$campaign_id	Campaign ID to get
+	 * @return	int|array					<0 if KO, Data campaign if OK
+	 */
+	function getCampaignData($campaign_id)
+	{
+		$result = $this->getInstanceSendinBlue();
+		if ($result < 0) {
+			dol_syslog(__METHOD__ . " " . $this->error, LOG_ERR);
+			return -1;
 		}
 
 		// Call
 		try {
-			if(!($result<0)){
-				$responseSendinBlue = $this->sendinblue->get_campaigns_v2(array("type"=>"classic", "page"=>1,"page_limit"=>10));
-			}
-		} catch ( Exception $e ) {
+			$response = $this->sendinblue->get_campaign_v2(array('id' => $campaign_id));
+		} catch (Exception $e) {
 			$this->error = $e->getMessage();
-			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			dol_syslog(__METHOD__ . " " . $this->error, LOG_ERR);
+			return -1;
 		}
-		if(!($result<0)){
 
-			$this->listcampaign_lines=$responseSendinBlue['data']['campaign_records'];
+		return is_array($response['data']) && count($response['data']) ? reset($response['data']) : array();
+	}
+
+	/**
+	 *  Get an array with list associated to a campaign
+	 *
+	 * @param 	int			$campaign_id	Campaign ID
+	 * @return	int|array					<0 if KO, array if OK
+	 */
+	function getCampaignListArray($campaign_id)
+	{
+		// Get campaign sendinblue data
+		$campaign_data = $this->getCampaignData($campaign_id);
+		if (!is_array($campaign_data)) {
+			return -1;
 		}
-		return 1;
+
+		$list_array = array();
+		if (!empty($campaign_data['listid'])) {
+			foreach ($campaign_data['listid'] as $list_id) {
+				// Call
+				try {
+					$response = $this->sendinblue->get_list(array("id" => $list_id));
+					if ($response['code'] == 'failure') {
+						$this->error = $response['message'];
+						return -1;
+					}
+				} catch (Exception $e) {
+					$this->error = $e->getMessage();
+					return -1;
+				}
+
+				$list_array[$list_id] = $response['data']['name'];
+			}
+		}
+
+		return $list_array;
 	}
 
 	/**
@@ -1605,12 +1679,13 @@ class DolSendinBlue extends CommonObject
 	}
 
 	function createList($namelist){
+		global $conf;
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
 			return - 1;
 		}
-		$response = $this->sendinblue->create_list(array("list_name"=>$namelist,"list_parent"=>1));
+		$response = $this->sendinblue->create_list(array("list_name"=>(!empty($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE) ? $conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE : '') . $namelist,"list_parent"=>1));
 		if ($response['code'] === 'failure')
         {
             $this->error = $response['message'];
@@ -1698,28 +1773,38 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function sendSendinBlueCampaign() {
+	function sendSendinBlueCampaign()
+	{
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
-		$data = array("id"=>$this->sendinblue_id,
-				"listid"=>array($this->sendinblue_listid),
-				"send_now"=>1);
+
+		// Get campaign sendinblue data
+		$campaign_data = $this->getCampaignData($this->sendinblue_id);
+		if (!is_array($campaign_data)) {
+			return -1;
+		}
+
+		$data = array(
+			"id" => $this->sendinblue_id,
+			"listid" => array_flip(array_flip(array_merge(is_array($campaign_data['listid']) ? $campaign_data['listid'] : array(), array($this->sendinblue_listid)))),
+			"send_now" => 1
+		);
 
 		try {
 			$response = $this->sendinblue->update_campaign($data);
-			if($response['code']=='failure'){
+			if ($response['code'] == 'failure') {
 
 				$this->error = $response['message'];
 
 				return -1;
 			}
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
 
 		return 1;
@@ -1935,6 +2020,133 @@ class DolSendinBlue extends CommonObject
 			return 1;
 		}
 	}*/
+
+	/**
+	 * Create the emailing on Dolibarr from the capaign on SendinBlue
+	 *
+	 * @param	user		$user			User who make this action
+	 * @param 	int			$campaign_id	SendinBlue campaign ID to get
+	 * @param 	int			$list_id		SendinBlue list ID specified (if not create new from emailing)
+	 * @param 	int			$list_name		SendinBlue list name specified (if create new from emailing)
+	 * @return	int							<0 if KO, >0 if OK
+	 */
+	function createDolibarrEmailingFromSendinBlueCampaign($user, $campaign_id, $list_id = 0, $list_name = '')
+	{
+		global $conf, $langs;
+		$langs->loadLangs(array('mails', 'sendinblue@sendinblue'));
+
+		$error = 0;
+		$this->error = '';
+		$this->errors = array();
+
+		// Clear parameters
+		$campaign_id = $campaign_id > 0 ? $campaign_id : 0;
+		$list_id = $list_id > 0 ? $list_id : 0;
+
+		// Check parameters
+		if (empty($campaign_id)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("SendinBlueCampaignID"));
+			$error++;
+		}
+		if ($error) {
+			dol_syslog(__METHOD__ . " - check params - " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		}
+
+		// Get campaign sendinblue data
+		$campaign_data = $this->getCampaignData($campaign_id);
+		if (!is_array($campaign_data)) {
+			return -1;
+		}
+
+		$emailing_title = !empty($list_name) ? $list_name : trim($campaign_data["campaign_name"]);
+
+		// Create list on Sendinblue if not specified
+		if (empty($list_id)) {
+			$list_id = $this->createList($emailing_title);
+			if ($list_id < 0) {
+				return -1;
+			}
+
+			// Update list on campaign
+			$data = array(
+				"id" => $campaign_id,
+				"listid" => array_flip(array_flip(array_merge(is_array($campaign_data['listid']) ? $campaign_data['listid'] : array(), array($list_id)))),
+			);
+			try {
+				$response = $this->sendinblue->update_campaign($data);
+				if ($response['code'] == 'failure') {
+					$this->error = $response['message'];
+					return -1;
+				}
+			} catch (Exception $e) {
+				$this->error = $e->getMessage();
+				dol_syslog(__METHOD__ . " - link new list to campaign - " . $this->error, LOG_ERR);
+				return -1;
+			}
+		}
+
+		// Create emailing with campaign data
+		require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
+		$mailing = new Mailing($this->db);
+		$mailing->email_from = trim($campaign_data["from_email"]);
+		$mailing->email_replyto = trim($campaign_data["reply_to"]);
+		$mailing->email_errorsto = trim(!empty($conf->global->MAILING_EMAIL_ERRORSTO) ? $conf->global->MAILING_EMAIL_ERRORSTO : $conf->global->MAIN_MAIL_ERRORS_TO);
+		$mailing->titre = $emailing_title;
+		$mailing->sujet = trim($campaign_data["subject"]);
+		$mailing->body = trim($campaign_data["html_content"]);
+		$mailing->bgcolor = "";
+		$mailing->bgimage = "";
+
+		if (empty($mailing->titre)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailTitle"));
+			$error++;
+		}
+		if (empty($mailing->sujet)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailTopic"));
+			$error++;
+		}
+		if (empty($mailing->body)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailMessage"));
+			$error++;
+		}
+		if ($error) {
+			dol_syslog(__METHOD__ . " - check mailing params - " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		}
+
+		$this->db->begin();
+
+		$mailing_id = $mailing->create($user);
+		if ($mailing_id < 0) {
+			$this->error = $mailing->error;
+			$this->errors = $mailing->errors;
+			$error++;
+		}
+
+		// Create link emailing with sendinblue
+		$sendinblue = new DolSendinblue($this->db);
+		$sendinblue->fk_mailing = $mailing_id;
+		$sendinblue->sendinblue_id = $campaign_id;
+		$sendinblue->sendinblue_webid = null;
+		$sendinblue->sendinblue_listid = $list_id > 0 ? $list_id : null;
+		$sendinblue->sendinblue_segmentid = null;
+		$sendinblue->sendinblue_sender_name = trim($campaign_data["from_name"]);
+
+		$id = $sendinblue->create($user);
+		if ($id < 0) {
+			$this->error = $sendinblue->error;
+			$this->errors = $sendinblue->errors;
+			$error++;
+		}
+
+		if ($error) {
+			$this->db->rollback();
+		}
+
+		$this->db->commit();
+		return $id;
+	}
 
 	/**
 	 * Create the capaign on SendinBlue

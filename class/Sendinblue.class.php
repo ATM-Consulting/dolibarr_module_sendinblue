@@ -30,9 +30,9 @@ class Sendinblue
         $auth_header = 'api-key:'.$this->api_key;
         $content_header = "Content-Type:application/json";
         $timeout = ($this->timeout!='')?($this->timeout):30000; //default timeout: 30 secs
-        if ($timeout!='' && ($timeout <= 0 || $timeout > 60000)) {
-            throw new Exception('value not allowed for timeout');
-        }
+//        if ($timeout!='' && ($timeout <= 0 || $timeout > 60000)) {
+//            throw new Exception('value not allowed for timeout');
+//        }
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             // Windows only over-ride
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

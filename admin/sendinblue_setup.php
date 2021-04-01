@@ -61,7 +61,17 @@ if ($action == 'setvar') {
 		$error ++;
 	}
 
-    $SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED = GETPOST('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', 'array');
+	$res = dolibarr_set_const($db, 'SENDINBLUE_API_TIMEOUT', GETPOST('SENDINBLUE_API_TIMEOUT', 'int'), 'chaine', 0, '', $conf->entity);
+	if (! $res > 0) {
+		$error ++;
+	}
+
+	$res = dolibarr_set_const($db, 'SENDINBLUE_PREFIXNEWLISTONSENDINBLUE', GETPOST('SENDINBLUE_PREFIXNEWLISTONSENDINBLUE', 'san_alpha'), 'chaine', 0, '', $conf->entity);
+	if (! $res > 0) {
+		$error ++;
+	}
+
+	$SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED = GETPOST('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', 'array');
     $res = dolibarr_set_const($db, 'SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', implode(',', $SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED), 'chaine', 0, '', $conf->entity);
     if (! $res > 0)
         $error ++;
@@ -215,6 +225,24 @@ print '<td align="left">';
 print '<input type="password" name="SENDINBLUE_API_KEY" value="' . $conf->global->SENDINBLUE_API_KEY . '" size="20" ></td>';
 print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_API_KEYHelp"), 1, 'help');
+print '</td>';
+print '</tr>';
+
+// SENDINBLUE_API_TIMEOUT
+print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_API_TIMEOUT") . '</td>';
+print '<td align="left">';
+print '<input type="number" name="SENDINBLUE_API_TIMEOUT" value="' . $conf->global->SENDINBLUE_API_TIMEOUT . '" size="20" ></td>';
+print '<td align="left">';
+print $form->textwithpicto('', $langs->trans("SENDINBLUE_API_TIMEOUTHelp"), 1, 'help');
+print '</td>';
+print '</tr>';
+
+// SENDINBLUE_PREFIXNEWLISTONSENDINBLUE
+print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_PREFIXNEWLISTONSENDINBLUE") . '</td>';
+print '<td align="left">';
+print '<input type="text" name="SENDINBLUE_PREFIXNEWLISTONSENDINBLUE" value="' . dol_escape_js($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE, 2) . '" size="20" ></td>';
+print '<td align="left">';
+print $form->textwithpicto('', $langs->trans("SENDINBLUE_PREFIXNEWLISTONSENDINBLUEHelp"), 1, 'help');
 print '</td>';
 print '</tr>';
 

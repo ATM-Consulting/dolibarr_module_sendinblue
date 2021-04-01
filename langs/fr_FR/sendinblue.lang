@@ -62,6 +62,10 @@ SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
 InvalidAPIKey=Clé API Invalide
 InvalidAPIKeyForSTMP=Cette clé ne peut servir à l'envoie des mail Dolibarr via le SMTP SendInBlue
+SENDINBLUE_API_TIMEOUT=Temps de réponse API
+SENDINBLUE_API_TIMEOUTHelp=Temps de réponse maximum de l'API SendinBlue (en seconde, défaut: 30s)
+SENDINBLUE_PREFIXNEWLISTONSENDINBLUE=Préfix nouvelles listes SendinBlue
+SENDINBLUE_PREFIXNEWLISTONSENDINBLUEHelp=Préfix pour les nouvelles listes de diffusion créées sur SendinBlue depuis Dolibarr
 
 SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED=Champs supplémentaires société pour synchronisation
 SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED=Champs supplémentaires contact pour synchronisation
@@ -103,6 +107,12 @@ DolibarrCampaignLink=Campagne Dolibarr liée
 SendinBlueUpdateAllCampaign=Mettre à jour le statut des destinataires Dolibarr depuis SendinBlue pour toutes les campagnes
 SendinBlueConfirmUpdateAllCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'execution maximum dépassé <BR> Il est préférable de demander à votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
 SendinBlueConfirmUpdateAllCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis SendinBlue pour toutes les campagnes
+SendinBlueCreateEmailingFromCampaign=Créer l'emailing associé à la campagne
+SendinBlueConfirmCreateEmailingFromCampaign=Êtes-vous sûr de vouloir créer un emailing associé à la campagne "%s" ?
+SendinBlueCampaignID=Campagne ID (SendinBlue)
+SendinBlueAssociateCampaignList=Liste de diffusion assoccié
+SendinBlueChoiceExistingCampaignList=Choisir une liste existante
+SendinBlueCreateNewCampaignList=Créer une nouvelle liste
 
 #
 # Status
