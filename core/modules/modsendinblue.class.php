@@ -57,7 +57,7 @@ class modsendinblue extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "SendinBlue Connector";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.0.3';
+		$this->version = '1.1.1';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -356,19 +356,19 @@ class modsendinblue extends DolibarrModules
 
 		$this->rights[$r][0] = 104037;
 		$this->rights[$r][1] = 'PermissionSendinBlueRight';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'read';
 		$r ++;
 
 		$this->rights[$r][0] = 104038;
 		$this->rights[$r][1] = 'PermissionSendinBlueRead';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'write';
 		$r ++;
 
 		$this->rights[$r][0] = 104039;
 		$this->rights[$r][1] = 'Autoriser la synchronisation manuelle';
-		$this->rights[$r][3] = 1;
+		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'sync';
 		$r ++;
 

@@ -257,7 +257,7 @@ class Actionssendinblue
 		}*/
 		if (in_array('contactcard', $hookmanager->contextarray)) {
 
-			if ($action == 'edit' && GETPOST('action') == 'update') {
+			if ($action == 'edit' && GETPOST('action', 'alpha') == 'update') {
 				echo '<div id="dialog" title="' . $langs->trans('UpdateSendinBlueObject') . '">';
 				echo $langs->trans('ConfirmUpdateSendinBlueObject');
 				echo "</div>";
@@ -307,7 +307,7 @@ class Actionssendinblue
 			$langs->load("user");
 
 			// Change substitution array
-			
+
 
 			if ($action == '' || $action == 'valid') {
 				$error_sendinblue_control = 0;
@@ -346,13 +346,13 @@ class Actionssendinblue
 				dol_include_once('/sendinblue/class/dolsendinblue.class.php');
 				$sendinblue = new DolSendinBlue($this->db);
 				$contact = new Contact($db);
-				$contact->fetch(GETPOST('id'));
+				$contact->fetch(GETPOST('id', 'int'));
 				$result=$sendinblue->getListForEmail($contact->email);
 				if ($result != - 1
 						&& array_key_exists('total_items', $result)
 						&& $result['total_items']>0
 						&& $action == 'update'
-						&& $contact->email != GETPOST('email')) {
+						&& $contact->email != ((floatval(DOL_VERSION) > 4) ? GETPOST('email', 'custom', 0, FILTER_SANITIZE_EMAIL) : GETPOST('email', 'none'))) {
 					$action = 'edit';
 				}
 			}

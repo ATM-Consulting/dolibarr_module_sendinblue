@@ -46,7 +46,7 @@ $langs->load("sendinblue@sendinblue");
 $productid = GETPOST('productid', 'int');
 $action = GETPOST('action', 'alpha');
 $type = GETPOST('type', 'alpha');
-$nameList = GETPOST('nameList');
+$nameList = GETPOST('nameList', 'none');
 
 //Set page var
 $refemail=false;
@@ -79,14 +79,14 @@ if ($action=='associateconfirm') {
 	} else {
 		$listid=GETPOST('selectlist','alpha');
 	}
-	$emailtoadd=GETPOST('emailtoadd');
+	$emailtoadd=GETPOST('emailtoadd', 'custom', 0, FILTER_SANITIZE_EMAIL);
 	if (empty($listid)) {
 		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("SendinBlueUpdateExistingList")),'errors');
 		$error++;
 	}
-	
 
-	
+
+
 
 	if (!is_array($emailtoadd)) {
 		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentities("EMail")),'errors');
@@ -99,11 +99,11 @@ if ($action=='associateconfirm') {
 		$result=$sendinblue->addEmailToList($listid,$emailtoadd);
 		if ($result<0) {
 			setEventMessage($sendinblue->error,'errors');
-		} 
+		}
 	}else {
 		$action='associate';
 	}
-	
+
 }
 
 $result=$sendinblue->getListDestinaries();
@@ -123,15 +123,15 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 
 	//View associate
 	if ($action=='associate') {
-		
+
 		print_fiche_titre($langs->trans('SendinBlueDestListAction'));
-		
+
 		print '<form name="formsoc" method="post" action="'.$_SERVER["PHP_SELF"].'" enctype="multipart/form-data">';
 		print '<input type="hidden" value="associateconfirm" name="action">';
 		print '<input type="hidden" value="'.$_SESSION['newtoken'].'" name="token">';
 		print '<input type="hidden" value="'.$productid.'" name="productid">';
 		print '<input type="hidden" value="'.$type.'" name="type">';
-	
+
 		print '<table class="border" width="100%">';
 		print '<tr class="liste_titre">';
 		print '<td>'.$langs->trans('EMail').'</td>';
@@ -146,11 +146,11 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 		}
 
 		if (is_array($sendinblue->email_lines) && count($sendinblue->email_lines)>0) {
-			
+
 			$refemail=true;
-			
+
 			foreach ($sendinblue->email_lines as $line) {
-					
+
 				$var=!$var;
 
 				print "<tr " . $bc[$var] . ">";
@@ -175,10 +175,10 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 		}
 
 		print '</table>';
-		
-		
+
+
 		if ($refemail) {
-			
+
 			print '<center><br>';
 			print $langs->trans('SendinBlueUpdateExistingList');
 			$events=array();
@@ -187,26 +187,26 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			}
 			print $formsendinblue->select_sendinbluelist('selectlist',1,'',0,$events);
 			print '<br>'.$langs->trans('SendinBlueOr');
-			
+
 			print ' '.$langs->trans('SendinBlueCreateList').' : ';
 		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
-		
+
 			print '&nbsp; <input type="text" name="nameList"></input>';
 			print '</td></tr>';
 			print '<div id="blocksegement" >';
 		//	print $langs->trans('SendinBlueUpdateExistingSegments');
 			//print $formsendinblue->select_sendinbluesegement(0,'segmentlist');
 			//print '<br>'.$langs->trans('SendinBlueOr');
-				
+
 			//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
-			
+
 			print '<br><input type="submit" class="button" value="'.$langs->trans('Save').'"/>';
 			print '</div>';
 			print '</center>';
-					
+
 		}
 	}
-	
+
 	print '<form>';
 
 	print '<BR>';
@@ -222,7 +222,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 	$sendinbluesegment= new DolSendinBlue($db);
 	if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
 		foreach($sendinblue->listdest_lines['data'] as $dest_line) {
-	
+
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
 			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'">'.$dest_line['name'].'</a></td>';
@@ -230,24 +230,24 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			print '<td>'.$dest_line['total_subscribers'].'</td>';
 			print '<td>'.$dest_line['entered'].'</td>';
 			print '</tr>';
-			
+
 			/*$result=$sendinbluesegment->getListSegmentDestinaries($dest_line['id']);
 			if ($result<0) {
 				setEventMessage($sendinbluesegment->error,'errors');
 			}
-			
+
 			if (is_array($sendinbluesegment->listsegment_lines) && count($sendinbluesegment->listsegment_lines)>0) {
 				foreach($sendinbluesegment->listsegment_lines as $seg_line) {
-					
+
 					print "<tr " . $bc[$var] . ">";
 					print '<td>&nbsp;&nbsp;&nbsp;&nbsp;'.$langs->trans('SendinBlueSegment').' : '.$seg_line['name'].'</td>';
 					print '<td>'.$seg_line['member_count'].'</td>';
 					print '<td>'.$seg_line['created_at'].'</td>';
 					print '</tr>';
 				}
-				
+
 			}*/
-	
+
 		}
 	}
 	else {

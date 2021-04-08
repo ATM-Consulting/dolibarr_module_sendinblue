@@ -42,7 +42,7 @@ if (! $res) {
 require_once 'class/dolsendinblue.class.php';
 
 $action=GETPOST('action','alpha');
-$confirm = GETPOST('confirm');
+$confirm = GETPOST('confirm', 'none');
 
 if ($action=='updateallcampagin_confirm' && $confirm='yes' && $user->rights->mailing->creer) {
 	$sendinblue= new DolSendinblue($db);
@@ -91,7 +91,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		$var=!$var;
 		$sendinblue_dolibarr= new DolSendinBlue($db);
 		if (!empty($line['id'])) {
-			
+
 			$result=$sendinblue_dolibarr->fetch_by_sendinblueid($line['id']);
 			if ($result<0) {
 				setEventMessage($sendinblue_dolibarr->error,'errors');
@@ -104,7 +104,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 			$link = "https://my.sendinblue.com/camp/report/id/".$line['id'];
 			$title = $line['campaign_name'];
 		}
-		
+
 		print "<tr " . $bc[$var] . ">";
 		print '<td><a target="_blanck" href='.$link.'>'.$title.'</a></td>';
 		print '<td>';

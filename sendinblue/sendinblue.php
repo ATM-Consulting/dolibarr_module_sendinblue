@@ -42,9 +42,9 @@ $langs->load("mails");
 // Get parameters
 $id = GETPOST('id', 'int');
 $action = GETPOST('action', 'alpha');
-$confirm = GETPOST('confirm');
-$createList = GETPOST('createList');
-$nameList = GETPOST('nameList');
+$confirm = GETPOST('confirm', 'none');
+$createList = GETPOST('createList', 'none');
+$nameList = GETPOST('nameList', 'none');
 
 $error=0;
 
@@ -183,7 +183,7 @@ if ($action == 'createsendinbluecampaign') {
 
 	$result=$sendinblue->createSendinBlueCampaign($user);
 	if ($result<0) {
-		
+
 		setEventMessage($sendinblue->error,'errors');
 	}
 }
@@ -275,9 +275,9 @@ if(!empty($conf->global->SENDINBLUE_API_KEY)){
 		else {
 			if (!empty($sendinblue->sendinblue_listid)) {
 				$result=$sendinblue->getEmailList();
-				
+
 				if ($result<0) {
-					
+
 					setEventMessage($sendinblue->error,'errors');
 				} else {
 					foreach($sendinblue->email_lines as $l){
@@ -309,13 +309,13 @@ if(!empty($conf->global->SENDINBLUE_API_KEY)){
 
 		}else {
 			foreach($email_seg_array as $emailadress){
-				$email_sb_array[]=$emailadress; 
+				$email_sb_array[]=$emailadress;
 			}
 
 			//if count is same compare email by email
 			foreach($email_dol_array as $emailadress) {
 				if (!in_array($emailadress,$email_sb_array)) {
-					
+
 					$warning_destnotsync=true;
 					break;
 				}
@@ -333,7 +333,7 @@ if(!empty($conf->global->SENDINBLUE_API_KEY)){
 } else {
 	$warning_destnotsync=true;
 }
-	
+
 }
 
 
@@ -389,7 +389,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '<table class="border tableforfield" width="100%">';
 
 	if ((float) DOL_VERSION <= 3.6)	$linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/liste.php">'.$langs->trans("BackToList").'</a>';
-	else $linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/list.php">'.$langs->trans("BackToList").'</a>';
+	else $linkback = '<a href="'.DOL_URL_ROOT.'/comm/mailing/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';
 
 	print '<tr class="impair"><td width="20%">'.$langs->trans("Ref").'</td>';
 	print '<td colspan="3">';
@@ -475,10 +475,10 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 				setEventMessage($sendinblue->error,'errors');
 			}
 			if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
-				
-					
+
+
 				print $sendinblue->listdest_lines['data']['name'];
-				
+
 			}
 		}
 		print '</td></tr>';
@@ -522,10 +522,10 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '<form name="formmailing" method="post" action="'.$_SERVER["PHP_SELF"].'?id='.$id.'">';
 		print '<input type="hidden" value="associateconfirm" name="action">';
 		print '<input type="hidden" value="'.$_SESSION['newtoken'].'" name="token">';
-		
+
 		print '<br/><br/>';
 		print '<table class="border tableforfield" width="100%" style="border:1px solid #ccc;padding:5px;">';
-		
+
 		print '<tr class="pair"><td colspan="3"><h3>SendinBlue</h3></td></tr>';
 		print '<tr class="impair"><td width="30%">';
 		print $langs->trans('SendinBlueCreateList');
@@ -534,12 +534,12 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '<input type="submit" class="button" name="createList" value="'.$langs->trans('Add').'"/>';
 		print '</td><td>';
 		print '</td></tr>';
-		
+
 		print '</table>';
-		
+
 		print '<br/><br/>';
 		print '<table class="border tableforfield" width="100%" style="border:1px solid #ccc;padding:5px;">';
-		
+
 		print '<tr class="pair"><td colspan="3"><h3>SendinBlue</h3></td></tr>';
 		print '<tr class="pair"><td class="fieldrequired" width="30%">';
 		print $langs->trans('SendinBlueUpdateExistingList');
@@ -552,11 +552,11 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '&nbsp;&nbsp;<input type="submit" class="button" name="save" value="'.$langs->trans('Save').'" />';
 		print '</td><td>';
 		print '</td></tr>';
-		
+
 		print '<tr class="impair"><td colspan="3" style="text-align:center">';
 		print img_picto($langs->trans('SendinBlue_SyncLoading'), 'sync_loading.gif@sendinblue', 'id="sendinblue_loading" style="display:none;margin:20px auto 0"');
 		print '</td></tr>';
-		
+
 		print '<tr class="pair">';
 		print '<td style="text-align:right"><input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
 		print $form->textwithpicto('',$langs->trans('SendinBlueImportFormHelp'));
@@ -659,14 +659,14 @@ if($object->statut == 3){
 		$PDOdb = new TPDOdb;
 		$listeview = new TListviewTBS('graphCampaignActions');
 		$TSum[] = array($langs->transnoentities('unique_views'),$sendinblue->sendinblue_webid['data'][0]['unique_views']);
-		$TSum[] = array($langs->transnoentities('viewed'),$sendinblue->sendinblue_webid['data'][0]['viewed']);	
-		$TSum[] = array($langs->transnoentities('clicked'),$sendinblue->sendinblue_webid['data'][0]['clicked']);	
-		$TSum[] = array($langs->transnoentities('Hard Bounce'),$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);	
-		$TSum[] = array($langs->transnoentities('Soft Bounce'),$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);	
-		$TSum[] = array($langs->transnoentities('unsub'),$sendinblue->sendinblue_webid['data'][0]['unsub']);	
+		$TSum[] = array($langs->transnoentities('viewed'),$sendinblue->sendinblue_webid['data'][0]['viewed']);
+		$TSum[] = array($langs->transnoentities('clicked'),$sendinblue->sendinblue_webid['data'][0]['clicked']);
+		$TSum[] = array($langs->transnoentities('Hard Bounce'),$sendinblue->sendinblue_webid['data'][0]['hard_bounce']);
+		$TSum[] = array($langs->transnoentities('Soft Bounce'),$sendinblue->sendinblue_webid['data'][0]['soft_bounce']);
+		$TSum[] = array($langs->transnoentities('unsub'),$sendinblue->sendinblue_webid['data'][0]['unsub']);
 		$TSum[] = array($langs->transnoentities('mirror_click'),$sendinblue->sendinblue_webid['data'][0]['mirror_click']);
-		$TSum[] = array($langs->transnoentities('complaints'),$sendinblue->sendinblue_webid['data'][0]['complaints']);	
-		
+		$TSum[] = array($langs->transnoentities('complaints'),$sendinblue->sendinblue_webid['data'][0]['complaints']);
+
 		if(!empty($sendinblue->sendinblue_webid['data'][0]['delivered'])){
 			print $listeview->renderArray($PDOdb, $TSum
 			,array(
@@ -678,7 +678,7 @@ if($object->statut == 3){
 			)
 			);
 		}
-		
+
 }
 
 //unset($_SESSION['SENDINBLUE_PID_ACTIVE']);
@@ -691,24 +691,24 @@ if($object->statut == 3){
 <script type="text/javascript">
 	sendInBlueTimer = null;
 	TSendInBluePid = [];
-	<?php 
-	if (!empty($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id])) { 
+	<?php
+	if (!empty($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id])) {
 		foreach ($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id] as $lid => $TPid) {
-			foreach ($TPid as $pid) { 
+			foreach ($TPid as $pid) {
 			?>
 				TSendInBluePid.push(<?php echo $pid; ?>);
 			<?php
-			} 
+			}
 		}
 	}
 	?>
-	
-	
+
+
 	triggerIntervalChecker = function() {
 		$('#bt_send_export').prop('disabled',true);
 		$('#bt_send_import').prop('disabled',true);
 		$('#sendinblue_loading').css('display', 'block');
-		
+
 		sendInBlueTimer = setInterval(function() {
 			var listid = $('#selectlist').val();
 			var fk_mailing = <?php echo $object->id; ?>;
@@ -730,19 +730,19 @@ if($object->statut == 3){
 			});
 		}, 5000);
 	};
-	
+
 	if (TSendInBluePid.length > 0) {
 		triggerIntervalChecker();
 	}
-	
+
 	sendInBlueCallExport = function() {
 		sendInBlueCallAjax('export', '');
 	};
-	
+
 	sendInBlueCallImport = function() {
 		sendInBlueCallAjax('import', '');
 	};
-	
+
 	sendInBlueCallAjax = function(set, get) {
 		var listid = $('#selectlist').val();
 		var fk_mailing = <?php echo $object->id; ?>;
@@ -765,7 +765,7 @@ if($object->statut == 3){
 			}
 		});
 	};
-	
+
 </script>
 <?php
 // End of page

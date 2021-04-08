@@ -64,7 +64,7 @@ $search_year = GETPOST('search_year', 'int');
 $sortorder = GETPOST('sortorder', 'alpha');
 $sortfield = GETPOST('sortfield', 'alpha');
 $page = GETPOST('page', 'int');
-$contact_id=GETPOST('contactid');
+$contact_id=(int)GETPOST('contactid', 'int');
 
 
 if (empty($search_year)) {
@@ -95,7 +95,7 @@ if ($page == - 1) {
 
 $offset = $conf->liste_limit * $page;
 
-if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) {
+if (GETPOST("button_removefilter_x", 'none') || GETPOST("button_removefilter", 'none')) {
 	$search_month = '';
 	$search_year = '';
 	$search_title='';
@@ -157,7 +157,7 @@ $form = new Form($db);
  */
 
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST)) {
-	
+
 	$nbtotalofrecords = $sendinblueactivities->getEmailcontactActivitesClick($sortorder, $sortfield, 0, 0, $filter);
 }
 
@@ -172,8 +172,7 @@ print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $option, $sortfield, $sor
 print '<form method="post" action="' . $_SERVER ['PHP_SELF'] . '" name="search_form">' . "\n";
 
 print '<div class="liste_titre">';
-print $langs->trans('DateValid');
-print $langs->trans('Month') . ':<input class="flat" type="text" size="4" name="search_month" value="' . $search_month . '">';
+print $langs->trans('Month') . ': '.$formother->select_month($search_month, 'search_month');
 print $langs->trans('Year') . ':' . $formother->selectyear($search_year ? $search_year : - 1, 'search_year', 1, 20, 5);
 
 
@@ -204,7 +203,7 @@ $sendinbluestatic = new DolSendinBlue($db);
 $contact_array=array();
 if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
 	foreach ( $sendinblueactivities->contactemail_clickactivity as $activites ) {
-		
+
 		if (!array_key_exists($activites->contactid, $contact_array) && !empty($activites->contactid)) {
 			$result=$contact->fetch($activites->contactid);
 			if ($result<0) {
@@ -212,8 +211,8 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 			} else {
 				$contact_array[$activites->contactid]=$contact->getNomUrl();
 			}
-		} 
-		
+		}
+
 		if (is_array($activites->activites) && count($activites->activites) > 0) {
 			foreach ( $activites->activites as $act ) {
 				$var = ! $var;
@@ -228,7 +227,7 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print dol_print_date($activites->datec);
 				print '</td>';
 				print '<td>';
-				print $activites->email;	
+				print $activites->email;
 				print '</td>';
 				print '<td>';
 				print $activites->socname;
@@ -239,7 +238,7 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print '<td>';
 				print $contact_array[$activites->contactid];
 				print '</td>';
-				
+
 				print '</tr>';
 			}
 		}
