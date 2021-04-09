@@ -189,16 +189,10 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			print '<br>'.$langs->trans('SendinBlueOr');
 
 			print ' '.$langs->trans('SendinBlueCreateList').' : ';
-		//print '&nbsp;<a href="https://my.sendinblue.com/lists" target="_blanck" >'.$langs->trans('SendinBlueNewListName').'</a>';
 
 			print '&nbsp; <input type="text" name="nameList"></input>';
 			print '</td></tr>';
 			print '<div id="blocksegement" >';
-		//	print $langs->trans('SendinBlueUpdateExistingSegments');
-			//print $formsendinblue->select_sendinbluesegement(0,'segmentlist');
-			//print '<br>'.$langs->trans('SendinBlueOr');
-
-			//print '&nbsp;'.$langs->trans('SendinBlueNewSegmentName').': <input type="text" class="flat" size="8" maxsize="50" name="segmentname">';
 
 			print '<br><input type="submit" class="button" value="'.$langs->trans('Save').'"/>';
 			print '</div>';
@@ -209,7 +203,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 
 	print '<form>';
 
-	print '<BR>';
+	print '<br/>';
 	print_fiche_titre($langs->trans('SendinBlueDestList'));
 
 	print '<table class="border" width="100%">';
@@ -226,8 +220,8 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
 			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'">'.$dest_line['name'].'</a></td>';
-			if(empty($dest_line['total_subscribers'])) $dest_line['total_subscribers']=0;
-			print '<td>'.$dest_line['total_subscribers'].'</td>';
+			if(empty($dest_line['totalSubscribers'])) $dest_line['totalSubscribers']=0;
+			print '<td>'.$dest_line['totalSubscribers'].'</td>';
 			print '<td>'.$dest_line['entered'].'</td>';
 			print '</tr>';
 
