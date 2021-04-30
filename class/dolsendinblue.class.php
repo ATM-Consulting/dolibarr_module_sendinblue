@@ -2489,7 +2489,7 @@ class DolSendinBlue extends CommonObject
 			if(!empty($reponse['data']['hard_bounces'])){
 				foreach($reponse['data']['hard_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
@@ -2503,7 +2503,7 @@ class DolSendinBlue extends CommonObject
 			}  if(!empty($reponse['data']['soft_bounces'])){
 				foreach($reponse['data']['soft_bounces'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
@@ -2517,7 +2517,7 @@ class DolSendinBlue extends CommonObject
 			} if(!empty($reponse['data']['spam'])){
 				foreach($reponse['data']['spam'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
@@ -2530,7 +2530,7 @@ class DolSendinBlue extends CommonObject
 			}  if(!empty($reponse['data']['opened'])){
 				foreach($reponse['data']['opened'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
@@ -2543,7 +2543,7 @@ class DolSendinBlue extends CommonObject
 			} if(!empty($reponse['data']['clicks'])){
 				foreach($reponse['data']['clicks'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;
@@ -2556,7 +2556,7 @@ class DolSendinBlue extends CommonObject
 			}  if(!empty($reponse['data']['unsubscription']['user_unsubscribe'])){
 				foreach($reponse['data']['unsubscription']['user_unsubscribe'] as $camp){
 					$result = $this->sendinblue->get_campaign_v2(array('id'=>$camp['camp_id']));
-					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$result['data'][0]['campaign_name']."'";
+					$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."mailing WHERE titre ='".$this->db->escape($result['data'][0]['campaign_name'])."'";
 					$res = $this->db->query($sql);
 					$res=$this->db->fetch_object($res);
 					$tmp = new stdClass;

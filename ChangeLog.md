@@ -9,3 +9,4 @@ All notable changes to this project will be documented in this file.
 
 ### Fix
 - remove unused boxe folder  
+- FIX add db escape **30/04/2021**  *1.1.2*
