@@ -666,7 +666,6 @@ class DolSendinBlue extends CommonObject
 		// Call
 		try {
 			$response = $this->sendinblue->get_smtp_details();
-			var_dump($response);
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			$error ++;
