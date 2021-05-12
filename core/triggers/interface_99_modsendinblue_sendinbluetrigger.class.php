@@ -113,14 +113,14 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
-     
+
 		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE')))
 		{
 				define ('INC_FROM_DOLIBARR',true);
 				dol_include_once('/sendinblue/class/dolsendinblue.class.php');
 				$sendinblue= new DolSendinBlue($this->db);
-				$sendinblue->delete_user(array('email'=>$object->email));
-		
+				$sendinblue->delete_user($object->email);
+
 		}
 
 
@@ -129,7 +129,7 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
 				//TODO Faire pop un message d'alerte pour prévenir que l'adresse antérieure est abonnée
 			}
 		}
-	
+
 		return 0;
 	}
 }

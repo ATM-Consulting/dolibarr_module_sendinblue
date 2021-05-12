@@ -68,13 +68,12 @@ if ($action=='updateallcampagin') {
 
 $sendinblue= new DolSendinBlue($db);
 $result=$sendinblue->getListCampaign();
-
 if ($result<0) {
 	setEventMessage($sendinblue->error,'errors');
 }
 $langs->load('products');
 
-dol_htmloutput_mesg($langs->trans('SendinBlueExplainIndex',$langs->transnoentities('Reference'),$langs->transnoentities('ProductServiceCard')),'','warning',1);
+dol_htmloutput_mesg($langs->transnoentities('SendinBlueExplainIndex',$langs->transnoentities('Reference'),$langs->transnoentities('ProductServiceCard')),'','warning',1);
 
 print_fiche_titre($langs->trans('SendinBlueCampaign'));
 
@@ -100,16 +99,16 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		if(!empty($line['settings']['title'])){
 			$link = "http://admin.sendinblue.com/campaigns/show?id=".$line['id'];
 			$title = $line['settings']['title'];
-		}else if(!empty($line['campaign_name'])){
+		}else if(!empty($line['name'])){
 			$link = "https://my.sendinblue.com/camp/report/id/".$line['id'];
-			$title = $line['campaign_name'];
+			$title = $line['name'];
 		}
 
 		print "<tr " . $bc[$var] . ">";
 		print '<td><a target="_blanck" href='.$link.'>'.$title.'</a></td>';
 		print '<td>';
 		if (!empty($sendinblue_dolibarr->fk_mailing)) {
-			print '<a target="_blanck" href="'.dol_buildpath('/comm/mailing/card.php',1).'?id='.$sendinblue_dolibarr->fk_mailing.'">'.$line['campaign_name'].'</a>';
+			print '<a target="_blanck" href="'.dol_buildpath('/comm/mailing/card.php',1).'?id='.$sendinblue_dolibarr->fk_mailing.'">'.$line['name'].'</a>';
 		} else {
 			print '-';
 		}

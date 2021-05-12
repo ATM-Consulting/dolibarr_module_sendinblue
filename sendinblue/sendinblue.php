@@ -256,84 +256,79 @@ if (empty($sendinblue->sendinblue_sender_name)) {
 $warning_destnotsync=false;
 //Check dolibarr dest versus list segment define
 if(!empty($conf->global->SENDINBLUE_API_KEY)){
-	if (!empty($sendinblue->id)) {
-
-	if ($object->statut==0 || $object->statut==1) {
-		$email_seg_array=array();
-
-		//retrive email for segment and Or List
-		if (!empty($sendinblue->sendinblue_segmentid)) {
-			$result=$sendinblue->getEmailList();
-			if ($result<0) {
-				setEventMessage($sendinblue->error,'errors');
-			} else {
-				foreach($sendinblue->email_lines as $l){
-					$email_seg_array[]=$l['email'];
-				}
-			}
-		}
-		else {
-			if (!empty($sendinblue->sendinblue_listid)) {
+	if (!empty($sendinblue->id))
+	{
+		if ($object->statut==0 || $object->statut==1) {
+			$email_seg_array=array();
+			//retrive email for segment and Or List
+			if (!empty($sendinblue->sendinblue_segmentid)) {
 				$result=$sendinblue->getEmailList();
-
 				if ($result<0) {
-
 					setEventMessage($sendinblue->error,'errors');
 				} else {
 					foreach($sendinblue->email_lines as $l){
-					$email_seg_array[]=$l['email'];
-				}
+						$email_seg_array[]=$l['email'];
+					}
 				}
 			}
-		}
-
-
-		//Retreive mail from mailling destinaries
-		$sendinblue->fk_mailing=$id;
-		$result=$sendinblue->getEmailMailingDolibarr();
-		if ($result<0) {
-			setEventMessage($sendinblue->error,'errors');
-		} else {
-			$email_dol_array=$sendinblue->email_lines;
-		}
-
-		$email_in_dol_not_in_sendinblue=array();
-		//First compare count easy and quick
-		if (count($email_dol_array)!=count($email_seg_array)) {
-			$warning_destnotsync=true;
-			foreach ($email_dol_array as $emailadress) {
-				if (array_search($emailadress, $email_seg_array)===false) {
-					$email_in_dol_not_in_sendinblue[]=$emailadress;
+			else {
+				if (!empty($sendinblue->sendinblue_listid)) {
+					$result=$sendinblue->getEmailList();
+					if ($result<0) {
+						setEventMessage($sendinblue->error,'errors');
+					} else {
+						foreach($sendinblue->email_lines as $l){
+						$email_seg_array[]=$l['email'];
+					}
+					}
 				}
 			}
 
-		}else {
-			foreach($email_seg_array as $emailadress){
-				$email_sb_array[]=$emailadress;
+			//Retreive mail from mailling destinaries
+			$sendinblue->fk_mailing=$id;
+			$result=$sendinblue->getEmailMailingDolibarr();
+			if ($result<0) {
+				setEventMessage($sendinblue->error,'errors');
+			} else {
+				$email_dol_array=$sendinblue->email_lines;
 			}
 
-			//if count is same compare email by email
-			foreach($email_dol_array as $emailadress) {
-				if (!in_array($emailadress,$email_sb_array)) {
-
-					$warning_destnotsync=true;
-					break;
+			$email_in_dol_not_in_sendinblue=array();
+			//First compare count easy and quick
+			if (count($email_dol_array)!=count($email_seg_array)) {
+				$warning_destnotsync=true;
+				foreach ($email_dol_array as $emailadress) {
+					if (array_search($emailadress, $email_seg_array)===false) {
+						$email_in_dol_not_in_sendinblue[]=$emailadress;
+					}
 				}
-			}
-			if(!empty($email_sb_array)){
-				foreach($email_sb_array as $emailadress) {
-					if (!in_array($emailadress,$email_dol_array)) {
+
+			}else {
+				foreach($email_seg_array as $emailadress){
+					$email_sb_array[]=$emailadress;
+				}
+
+				//if count is same compare email by email
+				foreach($email_dol_array as $emailadress) {
+					if (!in_array($emailadress,$email_sb_array)) {
+
 						$warning_destnotsync=true;
 						break;
 					}
 				}
+				if(!empty($email_sb_array)){
+					foreach($email_sb_array as $emailadress) {
+						if (!in_array($emailadress,$email_dol_array)) {
+							$warning_destnotsync=true;
+							break;
+						}
+					}
+				}
 			}
 		}
+	} else {
+		$warning_destnotsync=true;
 	}
-} else {
-	$warning_destnotsync=true;
-}
-
 }
 
 
@@ -352,8 +347,8 @@ llxHeader('',$langs->trans("Mailing"));
 if ($action=='updatesendinbluecampaignstatus') {
 	$form = new Form($db);
 	$urlconfirm='id='.$id;
-	$text=$langs->trans("SendinBlueConfirmUpdateCampaignText",dol_buildpath('/sendinblue/script/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang.' '.$id);
-	$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?'.$urlconfirm,$langs->trans("SendinBlueConfirmUpdateCampaign"),$text,"updatesendinbluecampaignstatus_confirm",'','',1,250);
+	$text=$langs->transnoentities("SendinBlueConfirmUpdateCampaignText",dol_buildpath('/sendinblue/script/update_all_campagin_target.php').' '.$user->login.' '.$langs->defaultlang.' '.$id);
+	$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?'.$urlconfirm,$langs->transnoentities("SendinBlueConfirmUpdateCampaign"),$text,"updatesendinbluecampaignstatus_confirm",'','',1,250);
 	if ($ret == 'html') print '<br>';
 }
 
@@ -696,7 +691,7 @@ if($object->statut == 3){
 		foreach ($_SESSION['SENDINBLUE_PID_ACTIVE'][$object->id] as $lid => $TPid) {
 			foreach ($TPid as $pid) {
 			?>
-				TSendInBluePid.push(<?php echo $pid; ?>);
+				TSendInBluePid.push("<?php echo $pid; ?>");
 			<?php
 			}
 		}

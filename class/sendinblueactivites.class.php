@@ -304,7 +304,7 @@ class SendinBlueActivites extends CommonObject
 					$line->fk_mailing = $obj->fk_mailing;
 					$line->sendinblue_id = $obj->sendinblue_id;
 					$line->email = $obj->email;
-					$line->activites = unserialize($obj->activites);
+					$line->activites = $obj->activites;
 					$line->fk_user_author = $obj->fk_user_author;
 					$line->datec = $this->db->jdate($obj->datec);
 					$line->fk_user_mod = $obj->fk_user_mod;
@@ -342,7 +342,7 @@ class SendinBlueActivites extends CommonObject
 		$sql .= " ml.date_creat as datec,";
 		$sql .= " ml.date_valid,";
 		$sql .= " t.fk_user_mod,";
-		$sql .= " ml.titre,";
+		$sql .= " ml.titre campaign_title,";
 		$sql .= " soc.nom as socname,";
 		$sql .= " socp.rowid as contactid,";
 		$sql .= " t.tms";
@@ -354,14 +354,14 @@ class SendinBlueActivites extends CommonObject
 		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as soc ON socp.fk_soc=soc.rowid";
 
 		$sql .= " WHERE t.activites LIKE '%Click%'";
-		
+
 		if (count($filter) > 0) {
 			foreach ( $filter as $key => $value ) {
 				if ($key == 'ml.titre' || $key == 't.email' || $key == 'soc.nom') {
 					$sql .= ' AND ' . $key . ' LIKE \'%' . $this->db->escape($value) . '%\'';
 				}elseif ($key == 'socp.rowid'){
 					$sql .=' AND '.$key.' = '.$value;
-					
+
 				}  elseif ($key != 'link') {
 					$sql .= ' AND ' . $key . ' IN (' . $value . ')';
 				}
@@ -380,31 +380,13 @@ class SendinBlueActivites extends CommonObject
 		if ($resql) {
 			$num = $this->db->num_rows($resql);
 			if ($num) {
-				
+
 				$this->contactemail_clickactivity = array();
 
 				while ( $obj = $this->db->fetch_object($resql) ) {
 
 					$line = new SendinBlueActivitesLineDb();
-				
-					$addline = false;
-					$activites = ($obj->activites);
-					if (!empty($activites) && count($activites) > 0) {
 
-						
-						
-								if (array_key_exists('link', $filter) && ! empty($filter['link'])) {
-									if (strpos($act['url'], $filter['link']) !== false) {
-										$addline = true;
-									}
-								} else {
-									$addline = true;
-								}
-								$line->activites[] = $act;
-							
-						
-					}
-					if ($addline) {
 						$line->id = $obj->rowid;
 
 						$line->entity = $obj->entity;
@@ -416,12 +398,11 @@ class SendinBlueActivites extends CommonObject
 						$line->datec = $this->db->jdate($obj->datec);
 						$line->fk_user_mod = $obj->fk_user_mod;
 						$line->tms = $this->db->jdate($obj->tms);
-						$line->campaign_title = $obj->title;
+						$line->campaign_title = $obj->campaign_title;
 						$line->socname = $obj->socname;
 						$line->contactid = $obj->contactid;
 
 						$this->contactemail_clickactivity[] = $line;
-					}
 				}
 			}
 			$this->db->free($resql);
@@ -455,16 +436,6 @@ class SendinBlueActivites extends CommonObject
 		if (isset($this->fk_user_mod))
 			$this->fk_user_mod = trim($this->fk_user_mod);
 
-			// Check parameters
-			// Put here code to add a control on parameters values
-		if (is_array($this->activites)) {
-			$activites = serialize($this->activites);
-		} else {
-			$activites = trim($this->activites);
-		}
-
-		// Check parameters
-		// Put here code to add a control on parameters values
 
 		// Update request
 		$sql = "UPDATE " . MAIN_DB_PREFIX . "sendinblue_activites SET";
@@ -472,7 +443,7 @@ class SendinBlueActivites extends CommonObject
 		$sql .= " fk_mailing=" . (isset($this->fk_mailing) ? $this->fk_mailing : "null") . ",";
 		$sql .= " sendinblue_id=" . (isset($this->sendinblue_id) ? "'" . $this->db->escape($this->sendinblue_id) . "'" : "null") . ",";
 		$sql .= " email=" . (isset($this->email) ? "'" . $this->db->escape($this->email) . "'" : "null") . ",";
-		$sql .= " activites=" . (! empty($activites) ? "'" . $this->db->escape($activites) . "'" : "null") . ",";
+		$sql .= " activites=" . (! empty($activites) ? "'" . $this->db->escape($this->activites) . "'" : "null") . ",";
 		$sql .= " fk_user_mod=" . $user->id;
 
 		$sql .= " WHERE rowid=" . $this->id;
@@ -573,6 +544,7 @@ class SendinBlueActivites extends CommonObject
 
 function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid', $limit = 0, $offset = 0, $filter = array()) {
 		global $langs;
+
 		$sql = "SELECT";
 		$sql .= " t.rowid,";
 
@@ -585,7 +557,7 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 		$sql .= " ml.date_creat as datec,";
 		$sql .= " ml.date_valid,";
 		$sql .= " t.fk_user_mod,";
-		$sql .= " ml.titre,";
+		$sql .= " ml.titre campaign_title,";
 		$sql .= " soc.nom as socname,";
 		$sql .= " socp.rowid as contactid,";
 		$sql .= " t.tms";
@@ -596,15 +568,15 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "socpeople as socp ON t.email=socp.email";
 		$sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as soc ON socp.fk_soc=soc.rowid";
 
-		$sql .= " WHERE t.activites LIKE '%Open%'";
-		
+		$sql .= " WHERE t.activites LIKE '%opened%'";
+
 		if (count($filter) > 0) {
 			foreach ( $filter as $key => $value ) {
 				if ($key == 'ml.titre' || $key == 't.email' || $key == 'soc.nom') {
 					$sql .= ' AND ' . $key . ' LIKE \'%' . $this->db->escape($value) . '%\'';
 				} elseif ($key == 'socp.rowid'){
 					$sql .=' AND '.$key.' = '.$value;
-					
+
 				} elseif ($key != 'link') {
 					$sql .= ' AND ' . $key . ' IN (' . $value . ')';
 				}
@@ -623,48 +595,23 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 		if ($resql) {
 			$num = $this->db->num_rows($resql);
 			if ($num) {
-				
 				$this->contactemail_clickactivity = array();
-
 				while ( $obj = $this->db->fetch_object($resql) ) {
-
 					$line = new SendinBlueActivitesLineDb();
-				
-					$addline = false;
-					$activites = ($obj->activites);
-					if (!empty($activites) && count($activites) > 0) {
-
-						
-						
-								if (array_key_exists('link', $filter) && ! empty($filter['link'])) {
-									if (strpos($act['url'], $filter['link']) !== false) {
-										$addline = true;
-									}
-								} else {
-									$addline = true;
-								}
-								$line->activites[] = $act;
-							
-						
-					}
-					if ($addline) {
-						$line->id = $obj->rowid;
-
-						$line->entity = $obj->entity;
-						$line->fk_mailing = $obj->fk_mailing;
-						$line->sendinblue_id = $obj->sendinblue_id;
-						$line->email = $obj->email;
-
-						$line->fk_user_author = $obj->fk_user_author;
-						$line->datec = $this->db->jdate($obj->datec);
-						$line->fk_user_mod = $obj->fk_user_mod;
-						$line->tms = $this->db->jdate($obj->tms);
-						$line->campaign_title = $obj->title;
-						$line->socname = $obj->socname;
-						$line->contactid = $obj->contactid;
-
-						$this->contactemail_clickactivity[] = $line;
-					}
+					$line->id = $obj->rowid;
+					$line->entity = $obj->entity;
+					$line->fk_mailing = $obj->fk_mailing;
+					$line->sendinblue_id = $obj->sendinblue_id;
+					$line->email = $obj->email;
+					$line->fk_user_author = $obj->fk_user_author;
+					$line->datec = $this->db->jdate($obj->datec);
+					$line->fk_user_mod = $obj->fk_user_mod;
+					$line->tms = $this->db->jdate($obj->tms);
+					$line->campaign_title = $obj->campaign_title;
+					$line->socname = $obj->socname;
+					$line->contactid = $obj->contactid;
+					$line->activites = $obj->activites;
+					$this->contactemail_clickactivity[] = $line;
 				}
 			}
 			$this->db->free($resql);
@@ -674,7 +621,7 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 			dol_syslog(get_class($this) . "::getEmailcontactActivitesClick " . $this->error, LOG_ERR);
 			return - 1;
 		}
-		}
+	}
 
 	/**
 	 * Load an object from its id and create a new one in database
@@ -776,7 +723,7 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 							$error ++;
 					} else {
 						// There is already an activity check if we need to update
-						if (count($this->activites) <= count($activites->activites)) {
+						if (is_array($this->activites) && count($this->activites) <= count($activites->activites)) {
 							dol_syslog(get_class($this) . "::saveEmailContactActivites update Ativites for " . $email, LOG_DEBUG);
 							$this->activites = $activites->activites;
 							$result = $this->update($user);
