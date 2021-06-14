@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## 2.0 *2021-05-17*
 
+- FIX - Compatibility V14 : Edit the descriptor: editor_name, editor_url and family - *2021-06-10* - 2.0.1
 - NEW : Sendinblue API.V3 compatibility and remove API.V2 support *2021-05-17* - 2.0.0
 
 ## 1.1 *2020-12-16*
