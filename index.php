@@ -55,32 +55,42 @@ if ($limit > 0 && $limit != $conf->liste_limit) $param.='&limit='.urlencode($lim
 $param2='';
 if ($page > 0) $param2 .= '&page=' . urlencode($page);
 
+// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks(array('sendinblueindex'));
+
+
 /*
  * Actions
  */
 
-if ($action=='updateallcampagin_confirm' && $confirm='yes' && $user->rights->mailing->creer) {
-	$sendinblue= new DolSendinblue($db);
-	$result=$sendinblue->updateSendinBlueAllCampaignStatus($user);
-	if ($result<0) {
-		setEventMessage($sendinblue->error,'errors');
-	}
-} elseif ($action == 'createemailing_confirm' && $confirm = 'yes' && !empty($user->rights->mailing->creer)) {
-	$sendinblue_id = GETPOST('sendinblueid', 'int');
-	$list_choice = GETPOST('listchoice', 'int');
-	$list_id = GETPOST('listid', 'int');
-	$list_name = GETPOST('listname', 'san_alpha');
+$parameters=array();
+$reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
-	$sendinblue = new DolSendinBlue($db);
-	$result = $sendinblue->createDolibarrEmailingFromSendinBlueCampaign($user, $sendinblue_id, $list_choice == 1 ? $list_id : 0, $list_choice == 2 ? $list_name : '');
-	if ($result < 0) {
-		setEventMessages($sendinblue->error, $sendinblue->errors, 'errors');
-	} else {
-		$parameters = ltrim($param . $param2, '&');
-		header("Location: " . $_SERVER['PHP_SELF'] . (!empty($parameters) ? '?' . $parameters : ''));
+if (empty($reshook)) {
+	if ($action == 'updateallcampagin_confirm' && $confirm = 'yes' && $user->rights->mailing->creer) {
+		$sendinblue = new DolSendinblue($db);
+		$result = $sendinblue->updateSendinBlueAllCampaignStatus($user);
+		if ($result < 0) {
+			setEventMessage($sendinblue->error, 'errors');
+		}
+	} elseif ($action == 'createemailing_confirm' && $confirm = 'yes' && !empty($user->rights->mailing->creer)) {
+		$sendinblue_id = GETPOST('sendinblueid', 'int');
+		$list_choice = GETPOST('listchoice', 'int');
+		$list_id = GETPOST('listid', 'int');
+		$list_name = GETPOST('listname', 'san_alpha');
+
+		$sendinblue = new DolSendinBlue($db);
+		$result = $sendinblue->createDolibarrEmailingFromSendinBlueCampaign($user, $sendinblue_id,
+			$list_choice == 1 ? $list_id : 0, $list_choice == 2 ? $list_name : '');
+		if ($result < 0) {
+			setEventMessages($sendinblue->error, $sendinblue->errors, 'errors');
+		} else {
+			$parameters = ltrim($param . $param2, '&');
+			header("Location: " . $_SERVER['PHP_SELF'] . (!empty($parameters) ? '?' . $parameters : ''));
+		}
 	}
 }
-
 
 /*
  * View
@@ -90,12 +100,22 @@ $form = new Form($db);
 
 llxHeader('',$langs->trans("Module104036Name"));
 
+$formconfirm = '';
+
 if ($action == 'updateallcampagin') {
 	$text = $langs->trans("SendinBlueConfirmUpdateAllCampaignText", dol_buildpath('/sendinblue/script/update_all_campagin_target.php') . ' ' . $user->login . ' ' . $langs->defaultlang);
 	$parameters = ltrim($param . $param2, '&');
-	$ret = $form->form_confirm($_SERVER['PHP_SELF'] . (!empty($parameters) ? '?' . $parameters : ''), $langs->trans("SendinBlueConfirmUpdateAllCampaign"),
-		$text, "updateallcampagin_confirm", '', '', 1, 250);
-	if ($ret == 'html') print '<br>';
+	if (method_exists($form, '')) {
+		$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . (!empty($parameters) ? '?' . $parameters : ''), $langs->trans("SendinBlueConfirmUpdateAllCampaign"),
+			$text, "updateallcampagin_confirm", '', '', 1, 250);
+	} else {
+		ob_start();
+		$ret = $form->form_confirm($_SERVER['PHP_SELF'] . (!empty($parameters) ? '?' . $parameters : ''), $langs->trans("SendinBlueConfirmUpdateAllCampaign"),
+			$text, "updateallcampagin_confirm", '', '', 1, 250);
+		if ($ret == 'html') print '<br>';
+		$formconfirm = ob_get_contents();
+		ob_clean();
+	}
 } elseif ($action == 'createemailing') {
 	$sendinblue_id = GETPOST('sendinblueid', 'int');
 
@@ -104,7 +124,7 @@ if ($action == 'updateallcampagin') {
 	if (!is_array($list_array)) {
 		setEventMessages($sendinblue->error, $sendinblue->errors, 'errors');
 	} else {
-		$campaignname = GETPOST('campaignname', 'san_alpha');
+		$campaignname = GETPOST('campaignname', 'alpha');
 		$list_choice = GETPOST('listchoice', 'int');
 		$list_id = GETPOST('listid', 'int');
 		$list_name = GETPOST('listname', 'san_alpha');
@@ -123,9 +143,18 @@ if ($action == 'updateallcampagin') {
 				"value" => $list_name),
 			array("name" => "listchoice"),
 		);
-		$ret = $form->form_confirm($_SERVER['PHP_SELF'] . '?sendinblueid=' . $sendinblue_id . $param . $param2, $langs->trans("SendinBlueCreateEmailingFromCampaign"),
-			$langs->trans("SendinBlueConfirmCreateEmailingFromCampaign", $campaignname), "createemailing_confirm", $formquestion, '', 1, 230, 800);
-		print <<<SCRIPT
+		if (method_exists($form, '')) {
+			$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?sendinblueid=' . $sendinblue_id . $param . $param2, $langs->trans("SendinBlueCreateEmailingFromCampaign"),
+				$langs->trans("SendinBlueConfirmCreateEmailingFromCampaign", $campaignname), "createemailing_confirm", $formquestion, '', 1, 230, 800);
+		} else {
+			ob_start();
+			$ret = $form->form_confirm($_SERVER['PHP_SELF'] . '?sendinblueid=' . $sendinblue_id . $param . $param2, $langs->trans("SendinBlueCreateEmailingFromCampaign"),
+				$langs->trans("SendinBlueConfirmCreateEmailingFromCampaign", $campaignname), "createemailing_confirm", $formquestion, '', 1, 230, 800);
+			if ($ret == 'html') print '<br>';
+			$formconfirm = ob_get_contents();
+			ob_clean();
+		}
+		$formconfirm .= <<<SCRIPT
     <script type="text/javascript" language="javascript">
         jQuery(document).ready(function(){
             jQuery('.radioselect').on('click', function(){
@@ -134,9 +163,17 @@ if ($action == 'updateallcampagin') {
         });
     </script>
 SCRIPT;
-		if ($ret == 'html') print '<br>';
 	}
 }
+
+// Call Hook formConfirm
+$parameters = array();
+$reshook = $hookmanager->executeHooks('formConfirm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+if (empty($reshook)) $formconfirm.=$hookmanager->resPrint;
+elseif ($reshook > 0) $formconfirm=$hookmanager->resPrint;
+
+// Print form confirm
+print $formconfirm;
 
 
 $sendinblue= new DolSendinBlue($db);
