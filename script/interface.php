@@ -18,7 +18,6 @@ if (substr($sapi_type, 0, 3) == 'cli')
 		if (preg_match('/fk_user=([^\s]+)$/',$val,$reg)) $fk_user=$reg[1];
 	}
 }
-
 require '../config.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
 dol_include_once('/sendinblue/class/dolsendinblue.class.php');
@@ -31,6 +30,10 @@ if (!empty($fk_user) && $user->id != $fk_user)
 
 $get=GETPOST('get', 'none');
 $set=GETPOST('set', 'none');
+if (substr($sapi_type, 0, 3) != 'cli')
+{
+	$async_action= GETPOST('async_action', 'none');
+}
 
 if (empty($listid)) $listid = GETPOST('listid', 'none');
 if (empty($fk_mailing)) $fk_mailing = (int)GETPOST('fk_mailing', 'int');

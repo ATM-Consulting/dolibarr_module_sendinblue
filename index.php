@@ -182,7 +182,7 @@ if ($result<0) {
 	setEventMessage($sendinblue->error,'errors');
 }
 
-dol_htmloutput_mesg($langs->trans('SendinBlueExplainIndex',$langs->transnoentities('Reference'),$langs->transnoentities('ProductServiceCard')),'','warning',1);
+dol_htmloutput_mesg($langs->transnoentities('SendinBlueExplainIndex',$langs->transnoentities('Reference'),$langs->transnoentities('ProductServiceCard')),'','warning',1);
 
 print '<form method="POST" name="searchFormList" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -217,9 +217,9 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		if(!empty($line['settings']['title'])){
 			$link = "http://admin.sendinblue.com/campaigns/show?id=".$line['id'];
 			$title = $line['settings']['title'];
-		}else if(!empty($line['campaign_name'])){
+		}else if(!empty($line['name'])){
 			$link = "https://my.sendinblue.com/camp/report/id/".$line['id'];
-			$title = $line['campaign_name'];
+			$title = $line['name'];
 		}
 
 		print "<tr " . $bc[$var] . ">";
@@ -240,7 +240,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 	}
 }else {
 	print "<tr " . $bc[$var] . ">";
-	print '<td>'.$langs->trans('NoRecords').'</td>';
+	print '<td colspan="3">'.$langs->trans('NoRecords').'</td>';
 	print '</tr>';
 }
 print '<table>';

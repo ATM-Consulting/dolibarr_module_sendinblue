@@ -30,7 +30,7 @@ class FormSendinBlue
 {
 	var $db;
 	var $error;
-	
+
 	var $num;
 
 
@@ -71,10 +71,10 @@ class FormSendinBlue
 	 *  @return string 		HTML input
 	 */
 	function select_sendinbluelist($htmlname='selectlist',$showempty=0,$selected='',$option_only=0, $event=array(), $filters = array(),$start=0, $limit=100, $sort_field='created', $sort_dir='DESC') {
-			
+
 		$error=0;
 		$out='';
-			
+
 		$sendinblue= new DolSendinBlue($this->db);
 		$result=$sendinblue->getListDestinaries();
 		if ($result<0) {
@@ -82,22 +82,22 @@ class FormSendinBlue
 			dol_syslog(get_class($this)."::select_sendinbluelist Error : ".$this->error, LOG_ERR);
 			return -1;
 		}
-		
+
 		if (empty($option_only)) {
 			if (count($event)>0) {
 				$out .= "\n".'<script type="text/javascript">
 					$(document).ready(function () {
 						$("select#'.$htmlname.'").change(function() {
-						
+
 				    			var obj = '.json_encode($event).';
 				    			$.each(obj, function(key,values) {
 				    				if (values.method.length) {
 				    					getMethod(values);
 				    				}
 								});
-						
+
 						});
-							
+
 						function getMethod(obj) {
 							var id = $("select#'.$htmlname.'").val();
 							var method = obj.method;
@@ -124,7 +124,7 @@ class FormSendinBlue
 									});
 						}
 					});';
-	
+
 				$out.= "</script>\n";
 			}
 			$out.= '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'">';
@@ -137,7 +137,7 @@ class FormSendinBlue
 				$out.= '<option value="">&nbsp;</option>';
 			}
 		}
-			
+
 		if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
 			foreach($sendinblue->listdest_lines['data'] as $line) {
 				if ($selected == $line['id'])
@@ -153,74 +153,14 @@ class FormSendinBlue
 
 			}
 		}
-			
+
 		if (empty($option_only)) {
 			$out.= '</select>';
 		}
 		return $out;
 	}
-	
-	/**
-	 *	Select list with current SendinBlue List
-	 *
-	 * 	@param 		string 		$id 			id of list
-	 *  @param		string		$htmlname     	HTML name input
-	 *  @param		int			$showempty      display empty options
-	 *  @param		string		$selected      	Id of preselected option
-	 *  @param		int			$option_only 	output only options
-	 * 
-	 *  @return string 		HTML input
-	 */
-	function select_sendinbluesegement($id,$htmlname='segmentlist',$showempty=0,$selected='',$option_only=0) {
-		
-		$error=0;
-		$out='';
-		
-		if (!empty($id)) {
-			$sendinblue= new DolSendinBlue($this->db);
-			$result=$sendinblue->getListSegmentDestinaries($id);
-			if ($result<0) {
-				$this->error=$sendinblue->errors;
-				dol_syslog(get_class($this)."::select_sendinbluesegement Error : ".$this->error, LOG_ERR);
-				return -1;
-			}
-		}
-		$this->num=1;
-		
-		if (empty($option_only)) {
-			$out= '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'">';
-		}
 
-		if (!empty($showempty)) {
-			if (empty($selected)) {
-				$out.= '<option value="" selected="selected">&nbsp;</option>';
-			}else {
-				$out.= '<option value="">&nbsp;</option>';
-			}
-		}
-			
-		if (is_array($sendinblue->listsegment_lines) && count($sendinblue->listsegment_lines)>0) {
-			foreach($sendinblue->listsegment_lines as $line) {
 
-				if ($selected == $line['id'])
-				{
-					$out.= '<option value="'.$line['id'].'" selected="selected">';
-				}
-				else
-				{
-					$out.= '<option value="'.$line['id'].'">';
-				}
-				$out.=$line['name'];
-				$out.= '</option>';
-			}
-		}
-			
-		if (empty($option_only)) {
-			$out.= '</select>';
-		}
-		return $out;
-	}
-	
 	/**
 	 * HTLM select dest status
 	 * @param string $selectedid
@@ -229,19 +169,19 @@ class FormSendinBlue
 	 * @return string
 	 */
 	public function selectDestinariesStatus($selectedid='',$htmlname='dest_status', $show_empty=0) {
-	
+
 		global $langs;
 		$langs->load("mails");
-	
+
 		require_once DOL_DOCUMENT_ROOT.'/comm/mailing/class/mailing.class.php';
 		$mailing = new Mailing($this->db);
-	
-	
+
+
 		$array = $mailing->statut_dest;
 		//Cannot use form->selectarray because empty value is defaulted to -1 in this method and we use here status -1...
-	
+
 		$out = '<select name="'.$htmlname.'" class="flat">';
-	
+
 		if ($show_empty) {
 			$out .= '<option value=""></option>';
 		}
@@ -260,7 +200,7 @@ class FormSendinBlue
 			}
 			$out .= '<option '.$selected.' value="'.$id.'">'.$langs->trans($status).'</option>';
 		}
-	
+
 		$out .= '</select>';
 		return $out;
 	}

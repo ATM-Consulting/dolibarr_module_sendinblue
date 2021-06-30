@@ -51,6 +51,15 @@ if (! $user->admin) {
 $action = GETPOST('action', 'alpha');
 $refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && ($_SERVER['HTTP_CACHE_CONTROL'] === 'max-age=0' || $_SERVER['HTTP_CACHE_CONTROL'] === 'no-cache');
 
+
+if(!empty($conf->global->SEND_BY_SENDINBLUE)){
+	// retrait permanent de cette conf, elle créée plus de problème qu'elle n'en résous
+	$TConfToDelete = array('SEND_BY_SENDINBLUE','SENDINBLUE_MAIL_SMTP_SERVER', 'SENDINBLUE_SMTP_PORT', 'SENDINBLUE_MAIL_SMTPS_ID', 'SENDINBLUE_MAIL_SMTPS_PW', 'SENDINBLUE_MAIL_EMAIL_FROM');
+	foreach ($TConfToDelete as $conToDel){
+		dolibarr_del_const($db, $conToDel, $conf->entity);
+	}
+}
+
 /*
  * Actions
  */
@@ -81,105 +90,9 @@ if ($action == 'setvar') {
     if (! $res > 0)
         $error ++;
 
-	if (! $conf->global->SEND_BY_SENDINBLUE) {
-		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTP_SERVER', $smtp['relay'], 'chaine', 0, '', $conf->entity);
-		if (! $res > 0)
-			$error ++;
-		$res = dolibarr_set_const($db, 'SENDINBLUE_SMTP_PORT', $smtp['port'], 'chaine', 0, '', $conf->entity);
-		if (! $res > 0)
-			$error ++;
-		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_ID', $smtp['username'], 'chaine', 0, '', $conf->entity);
-		if (! $res > 0)
-			$error ++;
-		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_SMTPS_PW', $smtp['password'], 'chaine', 0, '', $conf->entity);
-		if (! $res > 0)
-			$error ++;
-		$res = dolibarr_set_const($db, 'SENDINBLUE_MAIL_EMAIL_FROM', $smtp['username'], 'chaine', 0, '', $conf->entity);
-		if (! $res > 0)
-			$error ++;
 
-		if ($error) {
-			setEventMessage('Error', 'errors');
-		} else {
-			setEventMessage($langs->trans('SendinBlueSuccessSave'), 'mesgs');
-		}
-	}
 }
-if ($action == 'activsendinblue') {
-	dolibarr_set_const($db, "SEND_BY_SENDINBLUE", GETPOST("value", 'none'), 'chaine', 0, '', $conf->entity);
-}
-if ($action == 'activsendinblue' && $conf->global->SEND_BY_SENDINBLUE && ! $refreshButtonPressed) {
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_SENDMODE_STD", $conf->global->MAIN_MAIL_SENDMODE, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_SMTP_PORT_STD", $conf->global->MAIN_MAIL_SMTP_PORT, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTP_SERVER_STD", $conf->global->MAIN_MAIL_SMTP_SERVER, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTPS_ID_STD", $conf->global->MAIN_MAIL_SMTPS_ID, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_SMTPS_PW_STD", $conf->global->MAIN_MAIL_SMTPS_PW, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_EMAIL_TLS_STD", $conf->global->MAIN_MAIL_EMAIL_TLS, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "SENDINBLUE_MAIL_EMAIL_FROM_STD", $conf->global->MAIN_MAIL_EMAIL_FROM, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
 
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", 'smtps', 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT", $conf->global->SENDINBLUE_SMTP_PORT, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTP_SERVER", $conf->global->SENDINBLUE_MAIL_SMTP_SERVER, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTPS_ID", $conf->global->SENDINBLUE_MAIL_SMTPS_ID, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTPS_PW", $conf->global->SENDINBLUE_MAIL_SMTPS_PW, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_EMAIL_FROM", $conf->global->SENDINBLUE_MAIL_EMAIL_FROM, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAILING_EMAIL_FROM", $conf->global->SENDINBLUE_MAIL_EMAIL_FROM, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_DISABLE_ALL_MAILS", 0, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-}
-if ($action == 'activsendinblue' && ! $conf->global->SEND_BY_SENDINBLUE) {
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", $conf->global->SENDINBLUE_MAIL_SENDMODE_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT", $conf->global->SENDINBLUE_SMTP_PORT_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTP_SERVER", $conf->global->SENDINBLUE_MAIL_SMTP_SERVER_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTPS_ID", $conf->global->SENDINBLUE_MAIL_SMTPS_ID_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_SMTPS_PW", $conf->global->SENDINBLUE_MAIL_SMTPS_PW_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_EMAIL_TLS", $conf->global->SENDINBLUE_MAIL_EMAIL_TLS_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-	$res = dolibarr_set_const($db, "MAIN_MAIL_EMAIL_FROM", $conf->global->SENDINBLUE_MAIL_EMAIL_FROM_STD, 'chaine', 0, '', $conf->entity);
-	if (! $res > 0)
-		$error ++;
-}
 /*
  * View
  */
@@ -267,39 +180,8 @@ print '<tr class="liste_titre"><td colspan="3" align="center"><input type="submi
 print '</table>';
 print '</form>';
 
-print '<BR>';
+print '<br/>';
 
-if (! empty($conf->global->SENDINBLUE_API_KEY)) {
-
-	$sendinblue = new DolSendinBlue($db);
-	$smtp = $sendinblue->getSMTPDetails();
-	if (! empty($smtp) && $smtp != - 1) {
-
-		print '<form method="post" action="' . $_SERVER['PHP_SELF'] . '" enctype="multipart/form-data" >';
-		print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
-		print '<input type="hidden" name="action" value="activsendinblue">';
-		print '<table class="noborder" width="100%">';
-		print '<tr class="liste_titre">';
-		print '<td width="40%">' . $langs->trans("SendBySendinblue") . '</td>';
-		print '<td align="center">';
-
-		if (! empty($conf->global->SEND_BY_SENDINBLUE)) {
-			print '<a href="' . $_SERVER['PHP_SELF'] . '?action=activsendinblue&value=0">';
-			print img_picto($langs->trans("Enabled"), 'switch_on');
-			print "</a></td>\n";
-		} else {
-			print '<a href="' . $_SERVER['PHP_SELF'] . '?action=activsendinblue&value=1">';
-			print img_picto($langs->trans("Disabled"), 'switch_off');
-			print "</a></td>\n";
-		}
-
-
-		print '</td>';
-		print '</tr>';
-		print '</table>';
-		print '</form>';
-	}
-}
 llxFooter();
 
 $db->close();

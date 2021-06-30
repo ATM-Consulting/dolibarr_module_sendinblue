@@ -1,11 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## Version 1.1.1 [ 2020-12-16 ]
+## UNRELEASED
 
-### Added
+## 2.0 *2021-05-17*
 
-### Changed
+- FIX - Compatibility V14 : Edit the descriptor: editor_name, editor_url and family - *2021-06-10* - 2.0.1
+- NEW : Sendinblue API.V3 compatibility and remove API.V2 support *2021-05-17* - 2.0.0
 
-### Fix
+## 1.1 *2020-12-16*
+
 - remove unused boxe folder  
+- FIX add db escape *30/04/2021* - 1.1.2

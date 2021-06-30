@@ -35,19 +35,66 @@
  */
 class Interfacesendinbluetrigger extends DolibarrTriggers
 {
-	public $family = 'sendinblue';
-	public $description = "Triggers of this module are empty functions. They have no effect. They are provided for tutorial purpose only.";
+    /**
+     * Constructor
+     *
+     * 	@param		DoliDB		$db		Database handler
+     */
+    public function __construct($db)
+    {
+        $this->db = $db;
 
-	/**
-	 * Version of the trigger
-	 * @var string
-	 */
-	public $version = self::VERSION_DOLIBARR;
+        $this->name = preg_replace('/^Interface/i', '', get_class($this));
+        $this->family = "demo";
+        $this->description = "Triggers of this module are empty functions."
+            . "They have no effect."
+            . "They are provided for tutorial purpose only.";
+        // 'development', 'experimental', 'dolibarr' or version
+        $this->version = 'development';
+        $this->picto = 'sendinblue@sendinblue';
+    }
 
-	/**
-	 * @var string Image of the trigger
-	 */
-	public $picto = 'sendinblue@sendinblue';
+    /**
+     * Trigger name
+     *
+     * 	@return		string	Name of trigger file
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Trigger description
+     *
+     * 	@return		string	Description of trigger file
+     */
+    public function getDesc()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Trigger version
+     *
+     * 	@return		string	Version of trigger file
+     */
+    public function getVersion()
+    {
+        global $langs;
+        $langs->load("admin");
+
+        if ($this->version == 'development') {
+            return $langs->trans("Development");
+        } elseif ($this->version == 'experimental')
+
+                return $langs->trans("Experimental");
+        elseif ($this->version == 'dolibarr') return DOL_VERSION;
+        elseif ($this->version) return $this->version;
+        else {
+            return $langs->trans("Unknown");
+        }
+    }
 
 	/**
 	 * Function called when a Dolibarrr business event is done.
@@ -65,11 +112,11 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
 		if (empty($conf->sendinblue->enabled)) return 0;     // Module not active, we do nothing
 
 		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE'))) {
-			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 			define('INC_FROM_DOLIBARR', true);
 			dol_include_once('/sendinblue/class/dolsendinblue.class.php');
 			$sendinblue = new DolSendinBlue($this->db);
-			$sendinblue->delete_user(array('email' => $object->email));
+			$sendinblue->delete_user($object->email);
 		}
 
 		if ($action == 'CONTACT_MODIFY') {
@@ -79,7 +126,7 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
 		}
 
 		if ($action == 'MAILING_DELETE') {
-			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
 			dol_include_once('/sendinblue/class/dolsendinblue.class.php');
 			$sendinblue = new DolSendinBlue($this->db);
 			$result = $sendinblue->fetch_by_mailing($object->id);

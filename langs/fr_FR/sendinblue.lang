@@ -46,7 +46,7 @@ SendinBlueActiveSending=Tous les emails seront envoyés par SendinBlue
 SendinblueByDol=Tous vos emails continueront de partir via le SMTP défini dans la configuration de Dolibarr.
 SendinBlueActiveSendingForMailingOnlyHelp= La configuration email de Dolibarr n'est pas affectée, le module ne servira qu'à alimenter/synchroniser vos listes et segments SendinBlue
 SendinBlueSuccessSave=Configuration sauvegardée
-SendinBlueDolibarrSettings=La configuration actuelle (<a href="%s">Configuration email</a>) sera sauvegardée lors de l'activation de cette option.<BR> Pour retrouver la configuration d'origine il vous suffit de désactiver le module par ce bouton.
+SendinBlueDolibarrSettings=La configuration actuelle (<a href="%s">Configuration email</a>) sera sauvegardée lors de l'activation de cette option.<br> Pour retrouver la configuration d'origine il vous suffit de désactiver le module par ce bouton.
 SendinBlueDolibarrCheckSettings = Allez ici : <a href="%s">Configuration email</a> pour tester votre configuration
 SendinBlueAPIKeyNotSet=Clé API obligatoire
 MandrillSecretKeyNotSet=Clé API Mandrill obligatoire
@@ -56,7 +56,7 @@ SendinBlueSenderNameNotValid=Adresse Email non valide
 SendinBlueActiveActivityLocalStorage=Activer le stockage de l'historique de l'activité des contacts dans la base de données de Dolibarr. Attention cela peux augmenter la taille de votre base de données et ralentir la mise à jour des statut des destinataires.
 SENDINBLUE_NB_MAX_LIST=Nombre maximum de listes parcourues
 SENDINBLUE_NB_MAX_LISTHelp= Nombre permettant d'améliorer la vitesse de chargement de l'onglet sendinblue pour un contact, mais ATTENTION cela peut entrainer des pertes d'informations. Ne pas remplir si l'onglet sendinblue d'un contact se charge assez vite.
-SENDINBLUE_API_KEY=Clé API SendinBlue (v2)
+SENDINBLUE_API_KEY=Clé API SendinBlue (v3)
 SENDINBLUE_API_KEYHelp = Si vous souhaitez acceder à vos informations sendinblue, veuillez remplir ce champs
 SendBySendinblue=Les emails seront envoyés par SendinBlue
 SendinblueAPIKeyNotSet=Clé API SendinBlue non configuré
@@ -93,7 +93,7 @@ SendinBlueResetSegment = Vider le segment avant d'ajouter le(s) email(s)
 SendinBlueSegment=Segment
 CreateCampaignOnThisSegment=Crée une campagne sur ce segment
 SendinBlueUpdateStatus=Mettre à jour le statut des destinataires Dolibarr depuis SendinBlue
-SendinBlueConfirmUpdateCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'exécution maximum dépassé <BR> Il est préférable de demander a votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
+SendinBlueConfirmUpdateCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'exécution maximum dépassé <br/> Il est préférable de demander a votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
 SendinBlueConfirmUpdateCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis SendinBlue pour la campagnes
 
 SendInBlueReturnError=Sendinblue a renvoyé l'erreur suivante : %s
@@ -102,10 +102,10 @@ SendInBlueReturnError=Sendinblue a renvoyé l'erreur suivante : %s
 # Index
 #
 SendinBlueCampaign = Campagne
-SendinBlueExplainIndex=Pour créer une campagne SendinBlue, vous avez besoins de définir une liste/segment de destinataires.<BR>Pour créer une liste, rendez-vous sur <a href="http://www.sendinblue.com/" target="_blank">SendinBlue</a>. <BR> Vous pouvez trouver un assistant sur l'onglet <b>%s</b> de <b>%s</b>. <BR> ou <BR> après avoir créé un emailing Dolibarr et ciblé des destinataires sur l'onglet SendinBlue.
+SendinBlueExplainIndex=Pour créer une campagne SendinBlue, vous avez besoins de définir une liste/segment de destinataires.<br/>Pour créer une liste, rendez-vous sur <a href="http://www.sendinblue.com/" target="_blank">SendinBlue</a>. <br/> Vous pouvez trouver un assistant sur l'onglet <b>%s</b> de <b>%s</b>  ou après avoir créé un emailing Dolibarr et ciblé des destinataires sur l'onglet SendinBlue.
 DolibarrCampaignLink=Campagne Dolibarr liée
 SendinBlueUpdateAllCampaign=Mettre à jour le statut des destinataires Dolibarr depuis SendinBlue pour toutes les campagnes
-SendinBlueConfirmUpdateAllCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'execution maximum dépassé <BR> Il est préférable de demander à votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
+SendinBlueConfirmUpdateAllCampaignText=Cette opération peux être très longue et provoquer un message d'erreur suite au temps d'execution maximum dépassé <br/> Il est préférable de demander à votre administrateur Dolibarr de lancer cette tache en mode Batch via la ligne de commande <br><textarea cols="60" rows="2" wrap="soft">php %s</textarea>;
 SendinBlueConfirmUpdateAllCampaign=Confirmer la mise à jour des statuts des destinataires Dolibarr depuis SendinBlue pour toutes les campagnes
 SendinBlueCreateEmailingFromCampaign=Créer l'emailing associé à la campagne
 SendinBlueConfirmCreateEmailingFromCampaign=Êtes-vous sûr de vouloir créer un emailing associé à la campagne "%s" ?
@@ -227,3 +227,4 @@ ConfirmUpdateSendinBlueObject=L'adresse mail ne sera pas modifié sur SendinBlue
 ExportList=Exporter la liste
 MailingModuleDescContactCompanies=Contacts tiers (prospects, clients, fournisseur...)
 MailingModuleDescDolibarrContractsLinesExpired=Tiers avec des lignes de contrat expirées
+NoRecords = Aucun résultat

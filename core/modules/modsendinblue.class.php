@@ -49,15 +49,18 @@ class modsendinblue extends DolibarrModules
 		                        // Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'sendinblue';
 
+		$this->editor_name = 'ATM Consulting';
+
+		$this->editor_url = "https://www.atm-consulting.fr";
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
-		$this->family = "other";
+		$this->family = "ATM Consulting - CRM";
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i', '', get_class($this));
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "SendinBlue Connector";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.1.1';
+		$this->version = '2.0.1';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -143,152 +146,6 @@ class modsendinblue extends DolibarrModules
 						'current',
 						1
 				),
-				1 => array(
-						'SENDINBLUE_MAIL_SENDMODE_STD',
-						'chaine',
-						'',
-						'Normal Send mode',
-						0,
-						'current',
-						0
-				),
-				2 => array(
-						'SENDINBLUE_SMTP_PORT_STD',
-						'chaine',
-						'',
-						'Normal SMTP port',
-						0,
-						'current',
-						0
-				),
-				3 => array(
-						'SENDINBLUE_MAIL_SMTP_SERVER_STD',
-						'chaine',
-						'',
-						'Normal SMTP server',
-						0,
-						'current',
-						0
-				),
-				4 => array(
-						'SENDINBLUE_MAIL_SMTPS_ID_STD',
-						'chaine',
-						'',
-						'Normal SMTP identification credential id',
-						0,
-						'current',
-						0
-				),
-				5 => array(
-						'SENDINBLUE_MAIL_SMTPS_PW_STD',
-						'chaine',
-						'',
-						'Normal SMTP identification credential  password',
-						0,
-						'current',
-						0
-				),
-				6 => array(
-						'SENDINBLUE_MAIL_EMAIL_TLS_STD',
-						'chaine',
-						'',
-						'Normal SMTP server use of TSL(SSL)',
-						0,
-						'current',
-						0
-				),
-				7 => array(
-						'SENDINBLUE_MAIL_SENDMODE',
-						'chaine',
-						'',
-						'MailChimp Send mode',
-						0,
-						'current',
-						1
-				),
-				8 => array(
-						'SENDINBLUE_SMTP_PORT',
-						'chaine',
-						'',
-						'MailChimp SMTP port',
-						0,
-						'current',
-						1
-				),
-				9 => array(
-						'SENDINBLUE_MAIL_SMTP_SERVER',
-						'chaine',
-						'',
-						'MailChimp SMTP server',
-						0,
-						'current',
-						1
-				),
-				10 => array(
-						'SENDINBLUE_MAIL_SMTPS_ID',
-						'chaine',
-						'',
-						'MailChimp SMTP identification credential id',
-						0,
-						'current',
-						1
-				),
-				11 => array(
-						'SENDINBLUE_MAIL_SMTPS_PW',
-						'chaine',
-						'',
-						'MailChimp SMTP identification credential  password',
-						0,
-						'current',
-						1
-				),
-				12 => array(
-						'SENDINBLUE_MAIL_EMAIL_TLS',
-						'chaine',
-						'0',
-						'Normal SMTP server use of TSL(SSL)',
-						0,
-						'current',
-						1
-				),
-				13 => array(
-						'SENDINBLUE_ACTIVE',
-						'chaine',
-						'0',
-						'Module is active',
-						0,
-						'current',
-						1
-				),
-
-				14 => array(
-						'SENDINBLUE_MAIL_EMAIL_FROM',
-						'chaine',
-						'',
-						'MailChimp default senders',
-						0,
-						'current',
-						0
-				),
-				15 => array(
-						'SENDINBLUE_MAIL_EMAIL_FROM_STD',
-						'chaine',
-						'',
-						'Normal default mail sender',
-						0,
-						'current',
-						0
-				),
-
-				16 => array(
-						'SENDINBLUE_ACTIVE_MAILING_ONLY',
-						'chaine',
-						'0',
-						'Module is active only for mailing',
-						0,
-						'current',
-						1
-				)
 		);
 
 		// Array to add new pages in new tabs
@@ -631,14 +488,6 @@ class modsendinblue extends DolibarrModules
 		include_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 		global $db, $conf;
 		$sql = array();
-		dolibarr_set_const($db, "MAIN_MAIL_SENDMODE", $conf->global->SENDINBLUE_MAIL_SENDMODE_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_SMTP_PORT", $conf->global->SENDINBLUE_SMTP_PORT_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_SMTP_SERVER", $conf->global->SENDINBLUE_MAIL_SMTP_SERVER_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_SMTPS_ID", $conf->global->SENDINBLUE_MAIL_SMTPS_ID_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_SMTPS_PW", $conf->global->SENDINBLUE_MAIL_SMTPS_PW_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_EMAIL_TLS", $conf->global->SENDINBLUE_MAIL_EMAIL_TLS_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "MAIN_MAIL_EMAIL_FROM", $conf->global->SENDINBLUE_MAIL_EMAIL_FROM_STD, 'chaine', 0, '', $conf->entity);
-		dolibarr_del_const($db, "SEND_BY_SENDINBLUE");
 		return $this->_remove($sql, $options);
 	}
 }

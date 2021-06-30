@@ -64,6 +64,7 @@ $search_year = GETPOST('search_year', 'int');
 $sortorder = GETPOST('sortorder', 'alpha');
 $sortfield = GETPOST('sortfield', 'alpha');
 $page = GETPOST('page', 'int');
+$page = intval($page);
 $contact_id=(int)GETPOST('contactid', 'int');
 
 
@@ -111,7 +112,7 @@ if (! empty($search_year)) {
 	$options .= '&amp;search_year=' . $search_year;
 }
 if (! empty($search_month)) {
-	$filter['date_format(ml.date_valid,\'%m\')'] = $search_month;
+	$filter['date_format(ml.date_valid,\'%c\')'] = $search_month;
 	$options .= '&amp;search_month=' . $search_month;
 }
 if (! empty($search_title)) {
@@ -171,7 +172,8 @@ print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $option, $sortfield, $sor
 
 print '<form method="post" action="' . $_SERVER ['PHP_SELF'] . '" name="search_form">' . "\n";
 
-print '<div class="liste_titre">';
+print '<div class="liste_titre liste_titre_bydiv centpercent">';
+print '<div class="divsearchfield" >';
 print $langs->trans('Month') . ': '.$formother->select_month($search_month, 'search_month');
 print $langs->trans('Year') . ':' . $formother->selectyear($search_year ? $search_year : - 1, 'search_year', 1, 20, 5);
 
@@ -181,9 +183,11 @@ print '&nbsp; ';
 print '<input type="image" class="liste_titre" name="button_removefilter" src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/searchclear.png" value="' . dol_escape_htmltag($langs->trans("RemoveFilter")) . '" title="' . dol_escape_htmltag($langs->trans("RemoveFilter")) . '">';
 
 print '</div>';
+print '</div>';
 
-print '<table class="border" width="100%">';
-print '<tr>';
+print '<table class="tagtable liste listwithfilterbefore" width="100%">';
+print '<tbody>';
+print '<tr  class="liste_titre" >';
 print_liste_field_titre($langs->trans("SendinBlueCampaign"), $_SERVER['PHP_SELF'], "ml.titre", "", $options, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Date"), $_SERVER['PHP_SELF'], "ml.date_creat", "", $options, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Email"), $_SERVER['PHP_SELF'], "t.email", "", $options, '', $sortfield, $sortorder);
@@ -213,10 +217,7 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 			}
 		}
 
-		if (is_array($activites->activites) && count($activites->activites) > 0) {
-			foreach ( $activites->activites as $act ) {
-				$var = ! $var;
-				print "<tr $bc[$var]>";
+		print '<tr class="oddeven" >';
 				print '<td>';
 				$sendinbluestatic->fk_mailing = $activites->fk_mailing;
 				$object = new Mailing($db);
@@ -240,11 +241,11 @@ if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendin
 				print '</td>';
 
 				print '</tr>';
-			}
-		}
+
 	}
 }
 
+print '</tbody>';
 print "</table>";
 print '</form>';
 
