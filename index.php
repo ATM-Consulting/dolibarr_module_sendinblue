@@ -204,6 +204,7 @@ print '</tr>';
 
 if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign_lines)>0) {
 
+	$idx = 0;
 	foreach($sendinblue->listcampaign_lines as $line) {
 		$var=!$var;
 		$sendinblue_dolibarr= new DolSendinBlue($db);
@@ -237,6 +238,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		print '</td>';
 		print '<td>'.DolSendinBlue::getLibStatus($line['status']).'</td>';
 		print '</tr>';
+		if (++$idx >= $limit) break;
 	}
 }else {
 	print "<tr " . $bc[$var] . ">";

@@ -1153,10 +1153,9 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @param 	int		$page			Page to get
 	 * @param 	int		$page_limit		Nb records to get
-	 * @param 	int		$record_id		Specific record to get
 	 * @return	int						<0 if KO, 1 if OK
 	 */
-	function getListCampaign($page = 1, $page_limit = 10, $record_id = 0)
+	function getListCampaign($page = 1, $page_limit = 10)
 	{
 		$this->total_campaign_records = 0;
 		$this->listcampaign_lines = array();
@@ -1168,14 +1167,19 @@ class DolSendinBlue extends CommonObject
 		}
 
 		// Clean parameters
-		$page = ($page > 0 ? ($page <= 499 ? $page : 499) : 0) + 1;
+		$page = ($page > 0 ? ($page <= 500 ? $page : 500) : 0);
 		$page_limit = ($page_limit > 0 ? ($page_limit <= 1000 ? $page_limit : 1000) : 1) + 1;
+		$offset = $page * ($page_limit - 1);
 
 		// Call
 		try {
-			$options = array("type" => "classic", "page" => $page, "page_limit" => $page_limit);
-			if ($record_id > 0) $options['id'] = $record_id;
+			$options = array("type" => "classic", "offset" => $offset, "limit" => $page_limit);
 			$responseSendinBlue = $this->sendinblue->get_campaigns($options);
+			if (!empty($responseSendinBlue['code'])) {
+				$this->error = $responseSendinBlue['message'];
+				$this->errors[] = $this->error;
+				return -1;
+			}
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
@@ -1205,6 +1209,10 @@ class DolSendinBlue extends CommonObject
 		// Call
 		try {
 			$response = $this->sendinblue->get_campaign($campaign_id);
+			if(!empty($response['code'])){
+				$this->error = $response['message'];
+				return -1;
+			}
 		} catch (Exception $e) {
 			$this->error = $e->getMessage();
 			dol_syslog(__METHOD__ . " " . $this->error, LOG_ERR);
@@ -1883,11 +1891,21 @@ class DolSendinBlue extends CommonObject
 			$this->sendinblue_segmentid = $segment_id;
 			$this->getInstanceSendinBlue();
 			$list = $this->sendinblue->get_list(array('id' => $segment_id));
-			$subscribers = !empty($list['totalSubscribers']) ? ceil($list['totalSubscribers'] / 500) : 0;
+			if(!empty($list['code'])){
+				$this->error = $list['message'];
+				return -1;
+			}
+			$block_size = 50;
+			$subscribers = !empty($list['uniqueSubscribers']) ? ceil($list['uniqueSubscribers'] / $block_size) : 0;
 			$this->email_lines = array();
-			for ($i = 1; $i <= $subscribers; $i++) {
-				$result = $this->sendinblue->display_list_users($segment_id, array('page' => $i, 'page_limit' => 500));
+			for ($i = 0; $i < $subscribers; $i++) {
+				$result = $this->sendinblue->display_list_users($segment_id, array('offset' => $i * $block_size, 'limit' => $block_size));
+				if(!empty($result['code'])){
+					$this->error = $result['message'];
+					return -1;
+				}
 				foreach ($result['contacts'] as $d) {
+					if ($d['emailBlacklisted']) continue;
 					$this->email_lines[$d['email']] = $d['email'];
 				}
 			}
@@ -2307,13 +2325,14 @@ class DolSendinBlue extends CommonObject
 
 		// Update campaign/contacts status
 		if (!$error && ($mailing->statut == 3)) {
-			$result = $sendinblue->updateSendinBlueCampaignStatus($user);
-			if ($result < 0) {
-				$this->error = $sendinblue->error;
-				$this->errors = $sendinblue->errors;
-				dol_syslog(__METHOD__ . " - Update status SendinBlue campaign ID $campaign_id - " . $sendinblue->errorsToString(), LOG_ERR);
-				$error++;
-			}
+			// todo uncomment when the code is compatible with API v3
+//			$result = $sendinblue->updateSendinBlueCampaignStatus($user);
+//			if ($result < 0) {
+//				$this->error = $sendinblue->error;
+//				$this->errors = $sendinblue->errors;
+//				dol_syslog(__METHOD__ . " - Update status SendinBlue campaign ID $campaign_id - " . $sendinblue->errorsToString(), LOG_ERR);
+//				$error++;
+//			}
 		}
 
 		if ($error) {

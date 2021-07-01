@@ -98,12 +98,12 @@ class Sendinblue
         @param {Array} data contains php array with key value pair.
         @options data {String} type: Type of campaign. Possible values – classic, trigger, sms, template ( case sensitive ) [Optional]
         @options data {String} status: Status of campaign. Possible values – draft, sent, archive, queued, suspended, in_process, temp_active, temp_inactive ( case sensitive ) [Optional]
-        @options data {Integer} page: Maximum number of records per request is 500, if there are more than 500 campaigns then you can use this parameter to get next 500 results [Optional]
-        @options data {Integer} page_limit: This should be a valid number between 1-500 [Optional]
+        @options data {Integer} offset: Index of the first document in the page. Maximum number of records per request is 500, if there are more than 500 campaigns then you can use this parameter to get next 500 results [Optional]
+        @options data {Integer} limit: Number of documents per page. This should be a valid number between 1-500 [Optional]
     */
     public function get_campaigns($data)
     {
-        return $this->get("emailCampaigns",json_encode($data));
+        return $this->get("emailCampaigns" . (!empty($data) ? '?' . http_build_query($data): ''));
     }
 
     /*
@@ -189,12 +189,12 @@ class Sendinblue
         @param {Array} data contains php array with key value pair.
         @options data {Array} listIds: These are the list ids to get their data. The ids found will display records [Mandatory]
         @options data {String} timestamp: This is date-time filter to fetch modified user records >= this time. Valid format Y-m-d H:i:s. Example: "2015-05-22 14:30:00" [Optional]
-        @options data {Integer} page: Maximum number of records per request is 500, if in your list there are more than 500 users then you can use this parameter to get next 500 results [Optional]
-        @options data {Integer} page_limit: This should be a valid number between 1-500 [Optional]
+        @options data {Integer} offset: Maximum number of records per request is 50, if in your list there are more than 50 users then you can use this parameter to get next 50 results [Optional]
+        @options data {Integer} limit: This should be a valid number between 1-50 [Optional]
     */
     public function display_list_users($listid, $data)
     {
-        return $this->get("contacts/lists/".intval($listid)."/contacts",json_encode($data));
+        return $this->get("contacts/lists/".intval($listid)."/contacts" . (!empty($data) ? '?' . http_build_query($data): ''));
     }
 
     /*
