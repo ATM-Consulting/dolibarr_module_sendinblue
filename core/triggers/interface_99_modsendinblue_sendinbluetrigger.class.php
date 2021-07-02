@@ -96,37 +96,45 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
         }
     }
 
-    /**
-     * Function called when a Dolibarrr business event is done.
-     * All functions "runTrigger" are triggered if file
-     * is inside directory core/triggers
-     *
-     * 	@param		string		$action		Event action code
-     * 	@param		Object		$object		Object
-     * 	@param		User		$user		Object user
-     * 	@param		Translate	$langs		Object langs
-     * 	@param		conf		$conf		Object conf
-     * 	@return		int						<0 if KO, 0 if no triggered ran, >0 if OK
-     */
-    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
-    {
-        // Put here code you want to execute when a Dolibarr business events occurs.
-        // Data and type of action are stored into $object and $action
-        // Users
+	/**
+	 * Function called when a Dolibarrr business event is done.
+	 * All functions "runTrigger" are triggered if file is inside directory htdocs/core/triggers or htdocs/module/code/triggers (and declared)
+	 *
+	 * @param string		$action		Event action code
+	 * @param Object		$object     Object
+	 * @param User		    $user       Object user
+	 * @param Translate 	$langs      Object langs
+	 * @param conf		    $conf       Object conf
+	 * @return int         				<0 if KO, 0 if no triggered ran, >0 if OK
+	 */
+	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
+	{
+		if (empty($conf->sendinblue->enabled)) return 0;     // Module not active, we do nothing
 
-		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE')))
-		{
-				define ('INC_FROM_DOLIBARR',true);
-				dol_include_once('/sendinblue/class/dolsendinblue.class.php');
-				$sendinblue= new DolSendinBlue($this->db);
-				$sendinblue->delete_user($object->email);
-
+		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE'))) {
+			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+			define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/sendinblue/class/dolsendinblue.class.php');
+			$sendinblue = new DolSendinBlue($this->db);
+			$sendinblue->delete_user($object->email);
 		}
 
-
-		if($action == 'CONTACT_MODIFY'){
-			if(strcmp ( $object->email , $object->oldcopy->email  ) != 0 ){
+		if ($action == 'CONTACT_MODIFY') {
+			if (strcmp($object->email, $object->oldcopy->email) != 0) {
 				//TODO Faire pop un message d'alerte pour prévenir que l'adresse antérieure est abonnée
+			}
+		}
+
+		if ($action == 'MAILING_DELETE') {
+			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+			dol_include_once('/sendinblue/class/dolsendinblue.class.php');
+			$sendinblue = new DolSendinBlue($this->db);
+			$result = $sendinblue->fetch_by_mailing($object->id);
+			if ($result > 0) $result = $sendinblue->delete($user);
+			if ($result < 0) {
+				$this->error = $sendinblue->error;
+				$this->errors = $sendinblue->errors;
+				return -1;
 			}
 		}
 

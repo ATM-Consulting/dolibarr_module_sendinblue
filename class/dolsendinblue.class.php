@@ -30,35 +30,40 @@ dol_include_once('/sendinblue/class/Sendinblue.class.php');
  */
 class DolSendinBlue extends CommonObject
 {
-	var $db; // !< To store db handler
-	var $error; // !< To return error code (or message)
-	var $errors = array(); // !< To return several error codes (or messages)
-	var $element = 'sendinblue'; // !< Id that identify managed objects
-	var $table_element = 'sendinblue'; // !< Name of table without prefix where object is stored
+	public $db; // !< To store db handler
+	public $error; // !< To return error code (or message)
+	public $errors = array(); // !< To return several error codes (or messages)
+	public $element = 'sendinblue'; // !< Id that identify managed objects
+	public $table_element = 'sendinblue'; // !< Name of table without prefix where object is stored
 	/** @var SendinBlue $sendinblue */
-    var $sendinblue; // API Object
-	var $email_lines = array();
-	var $listdest_lines = array();
-	var $listsegment_lines = array();
-	var $listcampaign_lines = array();
-	var $listlist_lines = array();
-	var $email_activity = array();
-	var $contactemail_activity = array();
-	var $id;
-	var $entity;
-	var $fk_mailing;
+    public $sendinblue; // API Object
+	public $email_lines = array();
+	public $listdest_lines = array();
+	public $listsegment_lines = array();
+	public $listcampaign_lines = array();
+	public $total_campaign_records;
+	public $listlist_lines = array();
+	public $email_activity = array();
+	public $contactemail_activity = array();
+	public $id;
+	public $entity;
+	public $fk_mailing;
 
-	var $sendinblue_id;
-	var $sendinblue_webid;
-	var $sendinblue_listid;
-	var $sendinblue_segmentid;
-	var $sendinblue_sender_name;
-	var $fk_user_author;
-	var $datec = '';
-	var $fk_user_mod;
-	var $tms = '';
-	var $currentmailing;
-	var $lines = array();
+	public $target_added;
+	public $target_updated;
+	public $target_deleted;
+
+	public $sendinblue_id;
+	public $sendinblue_webid;
+	public $sendinblue_listid;
+	public $sendinblue_segmentid;
+	public $sendinblue_sender_name;
+	public $fk_user_author;
+	public $datec = '';
+	public $fk_user_mod;
+	public $tms = '';
+	public $currentmailing;
+	public $lines = array();
 
 	/**
 	 * Constructor
@@ -552,7 +557,8 @@ class DolSendinBlue extends CommonObject
 					return - 1;
 				}
 
-				$sendinblue = new SendinBlue('https://api.sendinblue.com/v3', $conf->global->SENDINBLUE_API_KEY);
+				$timeout = !empty($conf->global->SENDINBLUE_API_TIMEOUT) ? $conf->global->SENDINBLUE_API_TIMEOUT * 1000 : '';
+				$sendinblue = new SendinBlue('https://api.sendinblue.com/v3', $conf->global->SENDINBLUE_API_KEY, $timeout);
 				$this->sendinblue = $sendinblue;
 			}
 
@@ -1145,31 +1151,107 @@ class DolSendinBlue extends CommonObject
 	/**
 	 * Populate an array with campaign
 	 *
-	 * @return int <0 if KO, 1 if OK
+	 * @param 	int		$page			Page to get
+	 * @param 	int		$page_limit		Nb records to get
+	 * @return	int						<0 if KO, 1 if OK
 	 */
-	function getListCampaign() {
+	function getListCampaign($page = 1, $page_limit = 10)
+	{
+		$this->total_campaign_records = 0;
+		$this->listcampaign_lines = array();
 
 		$result = $this->getInstanceSendinBlue();
-		if ($result < 0 ) {
+		if ($result < 0) {
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
+
+		// Clean parameters
+		$page = ($page > 0 ? ($page <= 500 ? $page : 500) : 0);
+		$page_limit = ($page_limit > 0 ? ($page_limit <= 1000 ? $page_limit : 1000) : 1) + 1;
+		$offset = $page * ($page_limit - 1);
 
 		// Call
 		try {
-			if(!($result<0)){
-				$responseSendinBlue = $this->sendinblue->get_campaigns(array("type"=>"classic", "page"=>1,"page_limit"=>10));
+			$options = array("type" => "classic", "offset" => $offset, "limit" => $page_limit);
+			$responseSendinBlue = $this->sendinblue->get_campaigns($options);
+			if (!empty($responseSendinBlue['code'])) {
+				$this->error = $responseSendinBlue['message'];
+				$this->errors[] = $this->error;
+				return -1;
 			}
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
 
-		if(!($result<0)){
-			$this->listcampaign_lines=$responseSendinBlue['campaigns'];
-		}
+		$this->total_campaign_records = $responseSendinBlue['count'];
+		$this->listcampaign_lines = $responseSendinBlue['campaigns'];
+
 		return 1;
+	}
+
+	/**
+	 *  Set object value with send in blue campaign get
+	 *
+	 * @param 	int			$campaign_id	Campaign ID to get
+	 * @return	int|array					<0 if KO, Data campaign if OK
+	 */
+	function getCampaignData($campaign_id)
+	{
+		$result = $this->getInstanceSendinBlue();
+		if ($result < 0) {
+			dol_syslog(__METHOD__ . " " . $this->error, LOG_ERR);
+			return -1;
+		}
+
+		// Call
+		try {
+			$response = $this->sendinblue->get_campaign($campaign_id);
+			if(!empty($response['code'])){
+				$this->error = $response['message'];
+				return -1;
+			}
+		} catch (Exception $e) {
+			$this->error = $e->getMessage();
+			dol_syslog(__METHOD__ . " " . $this->error, LOG_ERR);
+			return -1;
+		}
+
+		return $response;
+	}
+
+	/**
+	 *  Get an array with list associated to a campaign
+	 *
+	 * @param 	int			$campaign_id	Campaign ID
+	 * @return	int|array					<0 if KO, array if OK
+	 */
+	function getCampaignListArray($campaign_id)
+	{
+		// Get campaign sendinblue data
+		$campaign_data = $this->getCampaignData($campaign_id);
+		if (!is_array($campaign_data)) {
+			return -1;
+		}
+
+		$list_array = array();
+		if (!empty($campaign_data['recipients']['lists'])) {
+			foreach ($campaign_data['recipients']['lists'] as $list_id) {
+				// Call
+				try {
+					$response = $this->sendinblue->get_list(array("id" => $list_id));
+				} catch (Exception $e) {
+					$this->error = $e->getMessage();
+					return -1;
+				}
+
+				$list_array[$list_id] = $response['name'];
+			}
+		}
+
+		return $list_array;
 	}
 
 	/**
@@ -1593,20 +1675,22 @@ class DolSendinBlue extends CommonObject
 		}
 	}
 
-	function createList($namelist){
+	function createList($namelist)
+	{
+		global $conf;
+
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
-		$response = $this->sendinblue->create_list(array("name"=>$namelist,"folderId"=>1));
 
-		if (!empty($response['code']))
-        {
-            $this->error = $response['message'];
-            $this->errors[] = $this->error;
-            return -1;
-        }
+		$response = $this->sendinblue->create_list(array("name" => (!empty($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE) ? $conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE : '') . $namelist, "folderId" => 1));
+		if (!empty($response['code'])) {
+			$this->error = $response['message'];
+			$this->errors[] = $this->error;
+			return -1;
+		}
 
 		return $response['id'];
 	}
@@ -1688,25 +1772,47 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function sendSendinBlueCampaign() {
+	function sendSendinBlueCampaign()
+	{
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
 
 		try {
+			if ($this->sendinblue_listid > 0) {
+				// Get campaign sendinblue data
+				$campaign_data = $this->getCampaignData($this->sendinblue_id);
+				if (!is_array($campaign_data)) {
+					return -1;
+				}
+
+				// Add the recipient list in campaign if not present
+				$current_recipients_list = is_array($campaign_data['recipients']['lists']) ? $campaign_data['recipients']['lists'] : array();
+				if (!in_array($this->sendinblue_listid, $current_recipients_list)) {
+					$data = array(
+						"id" => $this->sendinblue_id,
+						"listid" => array_flip(array_flip(array_merge($current_recipients_list, array($this->sendinblue_listid)))),
+					);
+
+					$response = $this->sendinblue->update_campaign($data);
+					if(!empty($response['code'])){
+						$this->error = $response['message'];
+						return -1;
+					}
+				}
+			}
+
 			$response = $this->sendinblue->sendCampaign($this->sendinblue_id);
 			if(!empty($response['code'])){
-
 				$this->error = $response['message'];
-
 				return -1;
 			}
-		} catch ( Exception $e ) {
+		} catch (Exception $e) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::sendSendinBlueCampaign " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
 
 		return 1;
@@ -1752,114 +1858,234 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function importSegmentDestToDolibarr($segment_id) {
-		global $conf;
+	function importSegmentDestToDolibarr($segment_id)
+	{
+		global $user;
+
+		// Get existing targets
+		$sql = "SELECT rowid, fk_mailing, fk_contact, lastname, firstname, email, statut, source_url, source_id, source_type FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE fk_mailing = " . $this->fk_mailing;
+		$resql = $this->db->query($sql);
+		if (!$resql) {
+			$this->error = "Error " . $this->db->lasterror();
+			dol_syslog(__METHOD__ . " - Get existing targets - Error: " . $this->error, LOG_ERR);
+			return -1;
+		}
+		$existing_target_list = array();
+		while ($obj = $this->db->fetch_object($resql)) {
+			$existing_target_list[$obj->email] = array(
+				'rowid' => $obj->rowid,
+				'fk_mailing' => $obj->fk_mailing,
+				'fk_contact' => $obj->fk_contact,
+				'lastname' => $obj->lastname,
+				'firstname' => $obj->firstname,
+				'email' => $obj->email,
+				'statut' => $obj->statut,
+				'source_url' => $obj->source_url,
+				'source_id' => $obj->source_id,
+				'source_type' => $obj->source_type,
+			);
+		}
+
+		// Get SendinBlue subscribers
+		try {
+			$this->sendinblue_segmentid = $segment_id;
+			$this->getInstanceSendinBlue();
+			$list = $this->sendinblue->get_list(array('id' => $segment_id));
+			if(!empty($list['code'])){
+				$this->error = $list['message'];
+				return -1;
+			}
+			$block_size = 50;
+			$subscribers = !empty($list['uniqueSubscribers']) ? ceil($list['uniqueSubscribers'] / $block_size) : 0;
+			$this->email_lines = array();
+			for ($i = 0; $i < $subscribers; $i++) {
+				$result = $this->sendinblue->display_list_users($segment_id, array('offset' => $i * $block_size, 'limit' => $block_size));
+				if(!empty($result['code'])){
+					$this->error = $result['message'];
+					return -1;
+				}
+				foreach ($result['contacts'] as $d) {
+					if ($d['emailBlacklisted']) continue;
+					$this->email_lines[$d['email']] = $d['email'];
+				}
+			}
+		} catch (Exception $e) {
+			$this->error = "Error " . $e->getMessage();
+			dol_syslog(__METHOD__ . " - Get SendinBlue subscribers - Error: " . $this->error, LOG_ERR);
+			return -1;
+		}
+
+		$escaped_email = array();
+		foreach ($this->email_lines as $email) {
+			$escaped_email[] = $this->db->escape($email);
+		}
+
+		$subscribers_list = array();
+		// Get existing objects by email
+		if (!empty($escaped_email)) {
+			// Get thirdparties by email
+			$sql = "SELECT rowid, nom, email FROM " . MAIN_DB_PREFIX . "societe WHERE email IN ('" . implode("','", $escaped_email) . "') AND entity IN (" . getEntity('societe') . ")";
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error " . $this->db->lasterror();
+				dol_syslog(__METHOD__ . " - Get existing targets - Error: " . $this->error, LOG_ERR);
+				return -1;
+			}
+			if ($this->db->num_rows($resql) > 0) {
+				$url_base = dol_buildpath('/societe/card.php', 1);
+				$icon = img_object('', 'company');
+				while ($obj = $this->db->fetch_object($resql)) {
+					$email = strtolower($obj->email);
+					$subscribers_list[$email] = array(
+						'fk_mailing' => $this->fk_mailing,
+						'fk_contact' => 0,
+						'lastname' => $obj->nom,
+						'firstname' => '',
+						'email' => $email,
+						'statut' => 0,
+						'source_url' => '<a href="' . $url_base . '?socid=' . $obj->rowid . '">' . $icon . '</a>',
+						'source_id' => $obj->rowid,
+						'source_type' => 'thirdparty',
+					);
+				}
+			}
+
+			// Get contacts by email
+			$sql = "SELECT rowid, lastname, firstname, email FROM " . MAIN_DB_PREFIX . "socpeople WHERE email IN ('" . implode("','", $escaped_email) . "') AND entity IN (" . getEntity('socpeople') . ")";
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error " . $this->db->lasterror();
+				dol_syslog(__METHOD__ . " - Get existing targets - Error: " . $this->error, LOG_ERR);
+				return -1;
+			}
+			if ($this->db->num_rows($resql) > 0) {
+				$url_base = dol_buildpath('/contact/card.php', 1);
+				$icon = img_object('', 'contact');
+				while ($obj = $this->db->fetch_object($resql)) {
+					$email = strtolower($obj->email);
+					$subscribers_list[$email] = array(
+						'fk_mailing' => $this->fk_mailing,
+						'fk_contact' => $obj->rowid,
+						'lastname' => $obj->lastname,
+						'firstname' => $obj->firstname,
+						'email' => $email,
+						'statut' => 0,
+						'source_url' => '<a href="' . $url_base . '?id=' . $obj->rowid . '">' . $icon . '</a>',
+						'source_id' => $obj->rowid,
+						'source_type' => 'contact',
+					);
+				}
+			}
+		}
+
+		// Get unknown subscribers
+		foreach ($this->email_lines as $email) {
+			$email = strtolower($email);
+			if (!isset($subscribers_list[$email])) {
+				$subscribers_list[$email] = array(
+					'fk_mailing' => $this->fk_mailing,
+					'fk_contact' => 0,
+					'lastname' => '',
+					'firstname' => '',
+					'email' => $email,
+					'statut' => 0,
+					'source_url' => '',
+					'source_id' => 0,
+					'source_type' => 'file',
+				);
+			}
+		}
 
 		$error = 0;
-		$insertcible = 0;
-
 		$this->db->begin();
 
-		$sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'mailing_cibles WHERE fk_mailing=' . $this->fk_mailing;
-		dol_syslog(get_class($this) . "::importSegmentDestToDolibarr sql=" . $sql, LOG_DEBUG);
-		$result = $this->db->query($sql);
-		if (! $result) {
-			$this->error = "Error " . $this->db->lasterror();
-			dol_syslog(get_class($this) . "::importSegmentDestToDolibarr " . $this->error, LOG_ERR);
-			return - 1;
-		}
+		$this->target_added = array();
+		$this->target_updated = array();
+		$this->target_deleted = array();
 
-		$this->sendinblue_segmentid = $segment_id;
-		$this->getInstanceSendinBlue();
-
-		$list = $this->sendinblue->get_list(array('id'=>$segment_id));
-
-		if(!empty($list['totalSubscribers'])){
-			$subscribers = ceil($list['totalSubscribers']/500);
-		}
-		for($i=1;$i<=$subscribers;$i++){
-			$result = $this->sendinblue->display_list_users($segment_id,array('page'=>$i,'page_limit'=>500));
-			foreach($result['contacts'] as $d){
-				$this->email_lines[] = $d['email'];
-			}
-		}
-
-
-		if ($result > 0) {
-			// Try to find for each email if it is already into dolibarr as thirdparty or contact
-			foreach ( $this->email_lines as $email ) {
-				$sql = 'SELECT rowid,nom from ' . MAIN_DB_PREFIX . 'societe WHERE email=\'' . $email . '\'';
-				dol_syslog(get_class($this) . "::importSegmentDestToDolibarr sql=" . $sql, LOG_DEBUG);
-				$result = $this->db->query($sql);
-				if ($result) {
-					if ($this->db->num_rows($result)) {
-						$obj = $this->db->fetch_object($result);
-
-						$url = '<a href="' . DOL_URL_ROOT . '/societe/soc.php?socid=' . $obj->rowid . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/object_company.png" border="0" alt="" title=""></a>';
-
-						$sqlinsert = 'INSERT INTO ' . MAIN_DB_PREFIX . 'mailing_cibles (fk_mailing,fk_contact,lastname,email,statut,source_url,source_id,source_type)';
-						$sqlinsert .= 'VALUES (' . $this->fk_mailing . ',0,\'' . $this->db->escape($obj->nom) . '\',\'' . $email . '\',0,\'' . $url . '\',' . $obj->rowid . ',\'thirdparty\')';
-					}
-					$this->db->free($result);
-				}
-				$sql = 'SELECT rowid,lastname,firstname from ' . MAIN_DB_PREFIX . 'socpeople WHERE email=\'' . $email . '\'';
-				dol_syslog(get_class($this) . "::importSegmentDestToDolibarr sql=" . $sql, LOG_DEBUG);
-				$result = $this->db->query($sql);
-				if ($result) {
-					if ($this->db->num_rows($result)) {
-						$obj = $this->db->fetch_object($result);
-
-						$url = '<a href="' . DOL_URL_ROOT . '/contact/card.php?id=' . $obj->rowid . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/object_contact.png" border="0" alt="" title=""></a>';
-
-						$sqlinsert = 'INSERT INTO ' . MAIN_DB_PREFIX . 'mailing_cibles (fk_mailing,fk_contact,lastname,firstname,email,statut,source_url,source_id,source_type)';
-						$sqlinsert .= 'VALUES (' . $this->fk_mailing . ',' . $obj->rowid . ',\'' . $this->db->escape($obj->lastname) . '\',\'' . $this->db->escape($obj->firstname) . '\',\'' . $email . '\',0,\'' . $url . '\',' . $obj->rowid . ',\'contact\')';
-					}
-					$this->db->free($result);
-				}
-
-				// If not found, no matter into email wihtout thirdparty/contact link
-				if (empty($sqlinsert)) {
-					$sqlinsert = 'INSERT INTO ' . MAIN_DB_PREFIX . 'mailing_cibles (fk_mailing,fk_contact,lastname,firstname,email,statut,source_url,source_id,source_type)';
-					$sqlinsert .= 'VALUES (' . $this->fk_mailing . ',0,\'\',\'\',\'' . $email . '\',0,\'\',NULL,\'file\')';
-				}
-
-				if (! empty($sqlinsert)) {
-					dol_syslog(get_class($this) . "::importSegmentDestToDolibarr sqlinsert=" . $sqlinsert, LOG_DEBUG);
-					$result = $this->db->query($sqlinsert);
-					$insertcible ++;
-					if (! $result) {
-						$this->errors[] = "Error " . $this->db->lasterror();
-						$error ++;
-					}
-				}
-
-				if (! empty($insertcible)) {
-					$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'mailing SET nbemail=' . $insertcible . ' WHERE rowid=' . $this->fk_mailing;
-					dol_syslog(get_class($this) . "::importSegmentDestToDolibarr sql=" . $sql, LOG_DEBUG);
-					$result = $this->db->query($sql);
-					if (! $result) {
-						$this->errors[] = "Error " . $this->db->lasterror();
-						$error ++;
-					}
-				}
-
-				$sqlinsert = '';
-			}
-
-			// Commit or rollback
-			if ($error) {
-				foreach ( $this->errors as $errmsg ) {
-					dol_syslog(get_class($this) . "::importSegmentDestToDolibarr " . $errmsg, LOG_ERR);
-					$this->error .= ($this->error ? ', ' . $errmsg : $errmsg);
-				}
-				$this->db->rollback();
-				return - 1 * $error;
+		// Add/Update targets
+		foreach ($subscribers_list as $email => $target) {
+			if (isset($existing_target_list[$email])) {
+				// Update target
+				$this->target_updated[] = array_merge(array('rowid' => $existing_target_list[$email]['rowid']), $target);
+				$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET" .
+					"  fk_mailing = " . $this->db->escape($target['fk_mailing']) .
+					", fk_contact = " . ($target['fk_contact'] > 0 ? $this->db->escape($target['fk_contact']) : 0) .
+					", lastname = '" . (!empty($target['lastname']) ? $this->db->escape($target['fk_contact']) : '') . "'" .
+					", firstname = '" . (!empty($target['firstname']) ? $this->db->escape($target['firstname']) : '') . "'" .
+					", email = '" . $this->db->escape($target['email']) . "'" .
+					", statut = " . (!empty($target['statut']) ? $this->db->escape($target['statut']) : 0) .
+					", source_url = '" . (!empty($target['source_url']) ? $this->db->escape($target['source_url']) : '') . "'" .
+					", source_id = " . ($target['source_id'] > 0 ? $this->db->escape($target['source_id']) : "NULL") .
+					", source_type = '" . (!empty($target['source_type']) ? $this->db->escape($target['source_type']) : "file") . "'" .
+					" WHERE rowid = " . $existing_target_list[$email]['rowid'];
 			} else {
-				$this->db->commit();
-				return 1;
+				// Add target
+				$this->target_added[] = $target;
+				$sql = "INSERT INTO " . MAIN_DB_PREFIX . "mailing_cibles (fk_mailing, fk_contact, lastname, firstname, email, statut, source_url, source_id, source_type)" .
+					" VALUES (" . $this->db->escape($target['fk_mailing']) .
+					", " . ($target['fk_contact'] > 0 ? $this->db->escape($target['fk_contact']) : 0) .
+					", '" . (!empty($target['lastname']) ? $this->db->escape($target['fk_contact']) : '') . "'" .
+					", '" . (!empty($target['firstname']) ? $this->db->escape($target['firstname']) : '') . "'" .
+					", '" . $this->db->escape($target['email']) . "'" .
+					", " . (!empty($target['statut']) ? $this->db->escape($target['statut']) : 0) .
+					", '" . (!empty($target['source_url']) ? $this->db->escape($target['source_url']) : '') . "'" .
+					", " . ($target['source_id'] > 0 ? $this->db->escape($target['source_id']) : "NULL") .
+					", '" . (!empty($target['source_type']) ? $this->db->escape($target['source_type']) : "file") . "'" .
+					")";
 			}
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error " . $this->db->lasterror();
+				dol_syslog(__METHOD__ . " - Add/update target - Error: " . $this->error, LOG_ERR);
+				$error++;
+				break;
+			}
+		}
+
+		// Delete targets
+		if (!$error) {
+			foreach ($existing_target_list as $email => $target) {
+				if (!isset($subscribers_list[$email])) {
+					// Delete target
+					$this->target_deleted[] = $target;
+					$sql = "DELETE FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE rowid = " . $target['rowid'];
+					$resql = $this->db->query($sql);
+					if (!$resql) {
+						$this->error = "Error " . $this->db->lasterror();
+						dol_syslog(__METHOD__ . " - Delete target - Error: " . $this->error, LOG_ERR);
+						$error++;
+						break;
+					}
+				}
+			}
+		}
+
+		// Update target count on emailing
+		if (!$error) {
+			$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET nbemail = " . count($subscribers_list) . " WHERE rowid = " . $this->fk_mailing;
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error " . $this->db->lasterror();
+				dol_syslog(__METHOD__ . " - Update target count - Error: " . $this->error, LOG_ERR);
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			// Call trigger
+			$result = $this->call_trigger('SENDINBLUE_IMPORT_SUBSCRIBERS', $user);
+			if ($result < 0) $error++;
+			// End call triggers
+		}
+
+		// Commit or rollback
+		if ($error) {
+			$this->db->rollback();
+			return -1 * $error;
 		} else {
-			return - 1;
+			$this->db->commit();
+			return 1;
 		}
 	}
 
@@ -1920,6 +2146,203 @@ class DolSendinBlue extends CommonObject
 			return 1;
 		}
 	}*/
+
+	/**
+	 * Create the emailing on Dolibarr from the capaign on SendinBlue
+	 *
+	 * @param	user		$user							User who make this action
+	 * @param 	int			$campaign_id					SendinBlue campaign ID to get
+	 * @param 	int			$list_id						SendinBlue list ID specified (if not create new from emailing)
+	 * @param 	int			$list_name						SendinBlue list name specified (if create new from emailing)
+	 * @param 	array		$mailing_properties				Default properties values for emailing
+	 * @return	int											<0 if KO, >0 if OK
+	 */
+	function createDolibarrEmailingFromSendinBlueCampaign($user, $campaign_id, $list_id = 0, $list_name = '', $mailing_properties = array())
+	{
+		global $conf, $langs;
+		$langs->loadLangs(array('mails', 'sendinblue@sendinblue'));
+
+		$error = 0;
+		$this->error = '';
+		$this->errors = array();
+
+		// Clear parameters
+		$campaign_id = $campaign_id > 0 ? $campaign_id : 0;
+		$list_id = $list_id > 0 ? $list_id : 0;
+
+		// Check parameters
+		if (empty($campaign_id)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("SendinBlueCampaignID"));
+			$error++;
+		}
+		if ($error) {
+			dol_syslog(__METHOD__ . " - check params - " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		}
+
+		// Get campaign sendinblue data
+		$campaign_data = $this->getCampaignData($campaign_id);
+		if (!is_array($campaign_data)) {
+			return -1;
+		}
+
+		$emailing_title = !empty($list_name) ? $list_name : trim($campaign_data["name"]);
+
+		// Create list on Sendinblue if not specified
+		$new_list = false;
+		if (empty($list_id)) {
+			$new_list = true;
+			$list_id = $this->createList($emailing_title);
+			if ($list_id < 0) {
+				return -1;
+			}
+
+			// Update list on campaign
+			$current_recipients_list = is_array($campaign_data['recipients']['lists']) ? $campaign_data['recipients']['lists'] : array();
+			$data = array(
+				"id" => $campaign_id,
+				"listid" => array_flip(array_flip(array_merge($current_recipients_list, array($list_id)))),
+			);
+			try {
+				$response = $this->sendinblue->update_campaign($data);
+				if(!empty($response['code'])){
+					$this->error = $response['message'];
+					return -1;
+				}
+			} catch (Exception $e) {
+				$this->error = $e->getMessage();
+				dol_syslog(__METHOD__ . " - link new list to campaign - " . $this->error, LOG_ERR);
+				return -1;
+			}
+		}
+
+		// Create emailing with campaign data
+		require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
+		$mailing = new Mailing($this->db);
+		$mailing->email_from = trim($campaign_data["sender"]["email"]);
+		$mailing->email_replyto = trim($campaign_data["replyTo"]);
+		$mailing->email_errorsto = trim(!empty($conf->global->MAILING_EMAIL_ERRORSTO) ? $conf->global->MAILING_EMAIL_ERRORSTO : $conf->global->MAIN_MAIL_ERRORS_TO);
+		$mailing->titre = $emailing_title;
+		$mailing->sujet = trim($campaign_data["subject"]);
+		$mailing->body = trim($campaign_data["htmlContent"]);
+		$mailing->bgcolor = "";
+		$mailing->bgimage = "";
+		if (is_array($mailing_properties) && count($mailing_properties)) {
+			foreach ($mailing_properties as $k => $v) {
+				$mailing->$k = $v;
+			}
+		}
+
+		if (empty($mailing->titre)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailTitle"));
+			$error++;
+		}
+		if (empty($mailing->sujet)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailTopic"));
+			$error++;
+		}
+		if (empty($mailing->body)) {
+			$this->errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentities("MailMessage"));
+			$error++;
+		}
+		if ($error) {
+			dol_syslog(__METHOD__ . " - check mailing params - " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		}
+
+		$this->db->begin();
+
+		$mailing_id = $mailing->create($user);
+		if ($mailing_id < 0) {
+			$this->error = $mailing->error;
+			$this->errors = $mailing->errors;
+			$error++;
+		}
+
+		// Create link emailing with sendinblue
+		$sendinblue = new DolSendinblue($this->db);
+		if (!$error) {
+			$sendinblue->fk_mailing = $mailing_id;
+			$sendinblue->sendinblue_id = $campaign_id;
+			$sendinblue->sendinblue_webid = array('data' => array(0 => $campaign_data));
+			$sendinblue->sendinblue_listid = $list_id > 0 ? $list_id : null;
+			$sendinblue->sendinblue_segmentid = null;
+			$sendinblue->sendinblue_sender_name = trim($campaign_data["sender"]["name"]);
+
+			$id = $sendinblue->create($user);
+			if ($id < 0) {
+				$this->error = $sendinblue->error;
+				$this->errors = $sendinblue->errors;
+				$error++;
+			}
+		}
+
+		// Get contact list
+		if (!$error && !$new_list) {
+			$result = $sendinblue->importSegmentDestToDolibarr($list_id);
+			if ($result < 0) {
+				$this->error = $sendinblue->error;
+				$this->errors = $sendinblue->errors;
+				dol_syslog(__METHOD__ . " - get contact list of SendinBlue campaign ID $campaign_id, list ID $list_id - " . $sendinblue->errorsToString(), LOG_ERR);
+				$error++;
+			}
+		}
+
+		$status = $campaign_data["status"];
+		if (!$error && ($status == 'save' || $status== 'Draft' || $status == 'paused' ||
+				$status == "suspended" || $status == "archive" || $status == "darchive" || $status == "replicate" || $status == "replicateTemplate")) {
+			// Do nothing
+		}
+		// Set emailing status to validated
+		if (!$error && ($status == 'schedule' || $status == 'Scheduled' ||
+				$status == "queued")
+		) {
+			$result = $mailing->valid($user);
+			if ($result < 0) {
+				$this->error = $mailing->error;
+				$this->errors = $mailing->errors;
+				$error++;
+			}
+		}
+		// Set emailing status to sent partially
+		if (!$error && ($status == 'sending')) {
+			$result = $mailing->setStatut(2);
+			if ($result < 0) {
+				$this->error = $mailing->error;
+				$this->errors = $mailing->errors;
+				$error++;
+			}
+		}
+		// Set emailing status to sent
+		if (!$error && ($status == 'sent' ||$status == 'Sent' || $status == 'Sent and Archived')) {
+			$result = $mailing->setStatut(3);
+			if ($result < 0) {
+				$this->error = $mailing->error;
+				$this->errors = $mailing->errors;
+				$error++;
+			}
+		}
+
+		// Update campaign/contacts status
+		if (!$error && ($mailing->statut == 3)) {
+			// todo uncomment when the code is compatible with API v3
+//			$result = $sendinblue->updateSendinBlueCampaignStatus($user);
+//			if ($result < 0) {
+//				$this->error = $sendinblue->error;
+//				$this->errors = $sendinblue->errors;
+//				dol_syslog(__METHOD__ . " - Update status SendinBlue campaign ID $campaign_id - " . $sendinblue->errorsToString(), LOG_ERR);
+//				$error++;
+//			}
+		}
+
+		if ($error) {
+			$this->db->rollback();
+			return -1;
+		}
+
+		$this->db->commit();
+		return $id;
+	}
 
 	/**
 	 * Create the capaign on SendinBlue
@@ -2038,13 +2461,14 @@ class DolSendinBlue extends CommonObject
 	 * @param user $user
 	 * @return int <0 if KO, >0 if OK
 	 */
-	public function updateSendinBlueCampaignStatus($user) {
+	public function updateSendinBlueCampaignStatus($user)
+	{
 		global $conf;
 
 		$result = $this->getInstanceSendinBlue();
 		if ($result < 0) {
 			dol_syslog(get_class($this) . "::updateSendinBlueCampaignStatus " . $this->error, LOG_ERR);
-			return - 1;
+			return -1;
 		}
 
 		$error = 0;
@@ -2059,7 +2483,7 @@ class DolSendinBlue extends CommonObject
 		} catch ( Exception $e ) {
 			$this->error = $e->getMessage();
 			dol_syslog(get_class($this) . "::updateSendinBlueCampaignStatus " . $this->error, LOG_ERR);
-			$error ++;
+			$error++;
 		}
 
 		// Set Dolibarr campaign with this information from sendinblue
@@ -2069,15 +2493,15 @@ class DolSendinBlue extends CommonObject
 		$result = $mailing->fetch($this->fk_mailing);
 		if ($result < 0) {
 			$this->errors[] = "Error class Mailing Dolibarr " . $result . ' ' . $mailing->error;
-			$error ++;
+			$error++;
 		}
 
-		if (! empty($body_html)) {
+		if (!empty($body_html)) {
 			$mailing->body = $response['htmlContent'];
 			$result = $mailing->update($user);
 			if ($result < 0) {
 				$this->errors[] = "Error class Mailing Dolibarr " . $result . ' ' . $mailing->error;
-				$error ++;
+				$error++;
 			}
 		}
 
@@ -2090,114 +2514,92 @@ class DolSendinBlue extends CommonObject
 		$result = $this->getCampaignActivity($response);
 
 		if ($result < 0) {
-			$error ++;
+			$error++;
 		}
 
 		dol_syslog(get_class($this) . "::getCampaignActivity end " . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 		if ($this->email_activity[0]['email'] == 'error') {
-			$error ++;
+			$error++;
 		}
-		if (empty($error)) {
-			if (is_array($this->email_activity) && count($this->email_activity) > 0) {
 
-				foreach ( $this->email_activity as $email_activity ) {
+		if (!$error) {
+			if (is_array($this->email_activity) && count($this->email_activity) > 0) {
+				foreach ($this->email_activity as $email_activity) {
 					// Sent
 					$result = $this->updateTargetMailingStatus($user, 1, $email_activity['email'], 0, $dt_send_unix);
 					if ($result < 0) {
-						$error ++;
+						$error++;
 					}
 
 					// Each activities
-					if (isset($email_activity['activity'])) {
-
-							// dol_syslog(get_class($this)."::getCampaignActivity activities=".var_export($activities,true), LOG_DEBUG);
-							if ($email_activity['activity'] == '' ) {
-								$result = $this->updateTargetMailingStatus($user, 1, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-							}
-
-							if ($email_activity['activity'] == 'open' ) {
-								$result = $this->updateTargetMailingStatus($user, 2, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-
-							}
-							if ($email_activity['activity'] == 'unsubscribe' ) {
-								$result = $this->updateTargetMailingStatus($user, 3, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-							}
-
-							if ($email_activity['activity'] == 'click' ) {
-								$result = $this->updateTargetMailingStatus($user, 4, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-							}
-							if ($email_activity['activity'] == 'hard_bounce' ) {
-								$result = $this->updateTargetMailingStatus($user, 5, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-							}
-							if ($email_activity['activity'] == 'soft_bounce' ) {
-								$result = $this->updateTargetMailingStatus($user, 6, $email_activity['email'], 0, $dt_send_unix);
-								if ($result < 0) {
-									$error ++;
-								}
-							}
-					}
-				}
-			}
-		}
-
-
-			// Save email activites into Dolibarr
-			// Find each email for this mailing
-			$result = $this->getEmailMailingDolibarr('simple');
-			if ($result < 0) {
-				$error ++;
-			}
-			if (empty($error) && is_array($this->email_lines) && count($this->email_lines) > 0) {
-
-				// For each mail find the total activites
-				foreach ( $this->email_lines as $email ) {
-					$result = $this->getEmailcontactActivites($email);
-
-					if ($result < 0) {
-						$error ++;
-					} else {
-						// if activites is found then send it to save it
-						if (is_array($this->contactemail_activity) && count($this->contactemail_activity) > 0) {
-							require_once 'sendinblueactivites.class.php';
-							$contact_activites = new SendinBlueActivites($this->db);
-							$contact_activites->fk_mailing = $this->fk_mailing;
-							$contact_activites->sendinblue_id = $this->sendinblue_id;
-							$result = $contact_activites->saveEmailContactActivites($user, $this->contactemail_activity, $email);
-							if ($result < 0) {
-								$this->errors[] = $contact_activites->error;
-								$error ++;
-							}
+					if (!$error && isset($email_activity['activity'])) {
+						// dol_syslog(get_class($this)."::getCampaignActivity activities=".var_export($activities,true), LOG_DEBUG);
+						$result = 0;
+						if ($email_activity['activity'] == '') {
+							$result = $this->updateTargetMailingStatus($user, 1, $email_activity['email'], 0, $dt_send_unix);
+						} elseif ($email_activity['activity'] == 'open') {
+							$result = $this->updateTargetMailingStatus($user, 2, $email_activity['email'], 0, $dt_send_unix);
+						} elseif ($email_activity['activity'] == 'unsubscribe') {
+							$result = $this->updateTargetMailingStatus($user, 3, $email_activity['email'], 0, $dt_send_unix);
+						} elseif ($email_activity['activity'] == 'click') {
+							$result = $this->updateTargetMailingStatus($user, 4, $email_activity['email'], 0, $dt_send_unix);
+						} elseif ($email_activity['activity'] == 'hard_bounce') {
+							$result = $this->updateTargetMailingStatus($user, 5, $email_activity['email'], 0, $dt_send_unix);
+						} elseif ($email_activity['activity'] == 'soft_bounce') {
+							$result = $this->updateTargetMailingStatus($user, 6, $email_activity['email'], 0, $dt_send_unix);
+						}
+						if ($result < 0) {
+							$error++;
 						}
 					}
 				}
 			}
+		}
+
+		// Save email activites into Dolibarr
+		// Find each email for this mailing
+		if (!$error) {
+			$result = $this->getEmailMailingDolibarr('simple');
+			if ($result < 0) {
+				$error++;
+			}
+		}
+
+		if (!$error && is_array($this->email_lines) && count($this->email_lines) > 0) {
+			// For each mail find the total activites
+			foreach ($this->email_lines as $email) {
+				$result = $this->getEmailcontactActivites($email);
+				if ($result < 0) {
+					$error++;
+				} else {
+					// if activites is found then send it to save it
+					if (is_array($this->contactemail_activity) && count($this->contactemail_activity) > 0) {
+						require_once 'sendinblueactivites.class.php';
+						$contact_activites = new SendinBlueActivites($this->db);
+						$contact_activites->fk_mailing = $this->fk_mailing;
+						$contact_activites->sendinblue_id = $this->sendinblue_id;
+						$result = $contact_activites->saveEmailContactActivites($user, $this->contactemail_activity, $email);
+						if ($result < 0) {
+							$this->errors[] = $contact_activites->error;
+							$error++;
+						}
+					}
+				}
+			}
+		}
 
 		// Commit or rollback
 		if ($error) {
-			foreach ( $this->errors as $errmsg ) {
+			foreach ($this->errors as $errmsg) {
 				dol_syslog(get_class($this) . "::updateSendinBlueCampaignStatus " . $errmsg, LOG_ERR);
 				$this->error .= ($this->error ? ', ' . $errmsg : $errmsg);
 			}
-			return - 1;
+			return -1;
 		} else {
 			return 1;
 		}
 	}
+
 	/**
 	 * Show if the email you chose is unsubscribed to the list you chose too
 	 *

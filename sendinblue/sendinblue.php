@@ -619,7 +619,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	if (!empty($sendinblue->sendinblue_id) && !$error_sendinblue_control) {
 		if (($object->statut == 3 ) && $object->nbemail > 0 && $user->rights->mailing->valider) {
 			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {
-				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendMailing").'</a>';
+				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendinBlueUpdateStatus").'</a>';
 			} else {
 				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updatesendinbluecampaignstatus&amp;id='.$object->id.'">'.$langs->trans("SendinBlueUpdateStatus").'</a>';
 			}

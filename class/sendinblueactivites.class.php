@@ -702,9 +702,8 @@ function getEmailcontactActivitesOpen($sortorder = 'ASC', $sortfield = 't.rowid'
 
 			foreach ( $targetactivites as $activites ) {
 				// Find length of current activite to know of we have more inforamtion and then update it
-
-				// if (empty($this->fk_mailing))
-				$this->fk_mailing = $activites->fk_mailing;
+				if (!($this->fk_mailing > 0))
+					$this->fk_mailing = $activites->fk_mailing;
 
 				$this->email = $email;
 
