@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 - NEW : Ajout sur la liste des campagnes la possibilité de créer un emailing à partir d'une campagne *02/07/2021* - 2.2.0 - OpenDsi  
   + Ajout d'options dans le module
 - NEW : Ajout d'une action Triggers supprimant l'objet DolSendinBlue lié à l'emailing à la suppression de celui-ci *02/07/2021* - 2.1.0 - OpenDsi  
-- FIX : Corrections diverses de compatibilité API V3 *02/07/2021* - 2.0.1 - OpenDsi  
+- FIX : Corrections diverses de compatibilité API V3 *02/07/2021* - 2.0.3 - OpenDsi  
 
 ## 2.0 *2021-05-17*
 
