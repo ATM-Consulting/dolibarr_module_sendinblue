@@ -1,7 +1,7 @@
 <?php
 
-if (!defined("NOCSRFCHECK")) define("NOSCRFCHECK");
-if (!defined("NOTOKENRENEWAL")) define("NOTOKENRENEWAL");
+if (!defined("NOCSRFCHECK")) define("NOSCRFCHECK", 1);
+if (!defined("NOTOKENRENEWAL")) define("NOTOKENRENEWAL", 1);
 $sapi_type = php_sapi_name();
 // from ajax call (apache2handler) from php command line (cli)
 if (substr($sapi_type, 0, 3) == 'cli')
