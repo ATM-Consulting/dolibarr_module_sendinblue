@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## 2.2 *07/07/2021*
 
+- FIX : Fatal *15/09/2021* - 2.2.2
 - FIX : Pagination manquante pour le get list *15/09/2021* - 2.2.1
 - NEW : Ajout sur la liste des campagnes la possibilité de créer un emailing à partir d'une campagne *02/07/2021* - 2.2.0 - OpenDsi  
   + Ajout d'options dans le module
