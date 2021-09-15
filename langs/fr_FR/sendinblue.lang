@@ -228,3 +228,7 @@ ExportList=Exporter la liste
 MailingModuleDescContactCompanies=Contacts tiers (prospects, clients, fournisseur...)
 MailingModuleDescDolibarrContractsLinesExpired=Tiers avec des lignes de contrat expirées
 NoRecords = Aucun résultat
+
+uniqueSubscribers = Abonnés unique
+SendinBlueBlacklistedSubcribers = Blacklistés
+SendinBlueTotalSubcribers = Total abonnés

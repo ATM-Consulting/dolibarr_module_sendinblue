@@ -158,9 +158,43 @@ class Sendinblue
         @options data {Integer} page: Maximum number of records per request is 50, if there are more than 50 processes then you can use this parameter to get next 50 results [Mandatory]
         @options data {Integer} page_limit: This should be a valid number between 1-50 [Mandatory]
     */
-    public function get_lists($data)
+    public function get_lists($data, $limit = -1, $offset=0, $sort='desc')
     {
-        return $this->get("contacts/lists",json_encode($data));
+		if($limit>=50){
+			// au dessus de 50 send in bleu reponds vide
+			$limit = -1;
+		}
+
+		if($limit < 0){
+			// Mode no limit
+
+			$output = array(
+				'lists' => array()
+			);
+
+			while ($data = $this->get("contacts/lists?limit=50&offset=".$offset.'&sort='.$sort,json_encode($data))){
+
+				if(empty($data['lists'])){
+					break;
+				}
+
+				$output = array(
+					'lists' => array_merge($output['lists'], $data['lists'])
+				);
+
+				$offset++;
+
+
+				if($offset>10){
+					break;
+				}
+			}
+
+			return $output;
+		}
+		else{
+			return $this->get("contacts/lists?limit=".$limit.'&offset='.$offset.'&sort='.$sort,json_encode($data));
+		}
     }
 
     /*

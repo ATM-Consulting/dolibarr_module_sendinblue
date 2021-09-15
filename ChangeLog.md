@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## 2.2 *07/07/2021*
 
+- FIX : Pagination manquante pour le get list *15/09/2021* - 2.2.1
 - NEW : Ajout sur la liste des campagnes la possibilité de créer un emailing à partir d'une campagne *02/07/2021* - 2.2.0 - OpenDsi  
   + Ajout d'options dans le module
 - NEW : Ajout d'une action Triggers supprimant l'objet DolSendinBlue lié à l'emailing à la suppression de celui-ci *02/07/2021* - 2.1.0 - OpenDsi  

@@ -209,20 +209,26 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '<table class="border" width="100%">';
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans('SendinBlueListName').'</td>';
-	print '<td>'.$langs->trans('SendinBlueSubcribers').'</td>';
-	print '<td>'.$langs->trans('DateCreation').'</td>';
+	print '<td>'.$langs->trans('SendinBlueUniqueSubcribers').'</td>';
+	print '<td>'.$langs->trans('SendinBlueBlacklistedSubcribers').'</td>';
+	print '<td>'.$langs->trans('SendinBlueTotalSubcribers').'</td>';
+//	print '<td>'.$langs->trans('DateCreation').'</td>';
 	print '</tr>';
 
 	$sendinbluesegment= new DolSendinBlue($db);
 	if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
 		foreach($sendinblue->listdest_lines['data'] as $dest_line) {
-
+// 'uniqueSubscribers' => int 133
+//  'totalBlacklisted' => int 0
+//  'totalSubscribers' => int 0
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
 			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'">'.$dest_line['name'].'</a></td>';
 			if(empty($dest_line['totalSubscribers'])) $dest_line['totalSubscribers']=0;
+			print '<td>'.$dest_line['uniqueSubscribers'].'</td>';
+			print '<td>'.$dest_line['totalBlacklisted'].'</td>';
 			print '<td>'.$dest_line['totalSubscribers'].'</td>';
-			print '<td>'.$dest_line['entered'].'</td>';
+//			print '<td>'.$dest_line['entered'].'</td>';
 			print '</tr>';
 
 			/*$result=$sendinbluesegment->getListSegmentDestinaries($dest_line['id']);
@@ -246,7 +252,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 	}
 	else {
 		print "<tr " . $bc[$var] . ">";
-		print '<td colspan="3">'.$langs->trans('SendinBlueListNoEmailFound').'</td>';
+		print '<td colspan="2">'.$langs->trans('SendinBlueListNoEmailFound').'</td>';
 		print '</tr>';
 	}
 
