@@ -182,10 +182,10 @@ class Sendinblue
 					'lists' => array_merge($output['lists'], $data['lists'])
 				);
 
-				$offset++;
+				$offset+=50;
 
 
-				if($offset>10){
+				if($offset>500){
 					break;
 				}
 			}

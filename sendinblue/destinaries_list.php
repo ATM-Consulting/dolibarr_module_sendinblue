@@ -209,7 +209,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 	print '<table class="border" width="100%">';
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans('SendinBlueListName').'</td>';
-	print '<td>'.$langs->trans('SendinBlueUniqueSubcribers').'</td>';
+	print '<td>'.$langs->trans('SendinBlueSubcribers').'</td>';
 	print '<td>'.$langs->trans('SendinBlueBlacklistedSubcribers').'</td>';
 	print '<td>'.$langs->trans('SendinBlueTotalSubcribers').'</td>';
 //	print '<td>'.$langs->trans('DateCreation').'</td>';
