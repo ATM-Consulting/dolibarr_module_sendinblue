@@ -11,11 +11,31 @@ require __DIR__ . '/config.php';
 
 $tokenKey = GETPOST('token', 'alphanohtml');
 
-if(empty($conf->global->CRON_KEY) || $conf->global->CRON_KEY != $tokenKey){
+if(empty($conf->global->CRON_KEY)
+	|| $conf->global->CRON_KEY != $tokenKey
+	|| empty($conf->global->SENINBLUE_USER_ID)){
 	http_response_code(401);
 	print 'Unauthorized';
 	exit;
 }
+
+require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/contact.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
+require_once DOL_DOCUMENT_ROOT . '/comm/mailing/class/mailing.class.php';
+
+require_once __DIR__ . '/class/dolsendinblue.class.php';
+require_once __DIR__ . '/class/sendinblueactivites.class.php';
+require_once __DIR__ . '/class/html.formsendinblue.class.php';
+
+$langs->load("companies");
+$langs->load("users");
+$langs->load("other");
+$langs->load("commercial");
+$langs->load("sendinblue@sendinblue");
+
 
 // SEE DOC
 // https://developers.sendinblue.com/docs/how-to-use-webhooks

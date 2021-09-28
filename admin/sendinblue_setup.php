@@ -106,13 +106,14 @@ print_fiche_titre($langs->trans($page_name), $linkback);
 
 // Configuration header
 // $head = sendinblueAdminPrepareHead();
-dol_fiche_head(
+print dol_get_fiche_head(
     $head,
     'settings',
     $langs->trans("Module104036Name"),
-    0,
+    -1,
     "sendinblue@sendinblue"
 );
+print dol_get_fiche_end(-1);
 
 // Setup page goes here
 $form = new Form($db);
@@ -124,7 +125,7 @@ print '<form method="post" action="' . $_SERVER['PHP_SELF'] . '" enctype="multip
 print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
 print '<input type="hidden" name="action" value="setvar">';
 
-print '<table class="noborder" width="100%">';
+print '<table class="table noborder" width="100%">';
 
 print '<tr class="liste_titre">';
 print '<td width="40%">' . $langs->trans("Name") . '</td>';
@@ -174,6 +175,37 @@ print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWEDHelp"), 1, 'help');
 print '</td>';
 print '</tr>';
+
+
+print '<tr class="liste_titre">';
+print '<td width="40%">' . $langs->trans("WebHooks") . '</td>';
+print '<td>' . $langs->trans("Valeur") . '</td>';
+print '<td></td>';
+print "</tr>\n";
+
+
+
+
+print '<tr class="impair"><td>' . $langs->trans("SendInBlueWebHooksUrl").'</td>';
+print '<td >';
+print '<input style="min-width:100%;" onClick="this.select();" value="'.dol_buildpath('sendinblue/webhook.php', 2).'?token='.$conf->global->CRON_KEY.'" readonly="readonly"  />';
+if(empty($conf->global->CRON_KEY)){
+	print '<div class="error" >'.$langs->trans('SENINBLUE_missingTokenGenerated').'</div>';
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+
+print '<tr class="impair">';
+print '<td>' . $langs->trans("SENINBLUE_USER_ID").'<br>';
+print '</td>';
+print '<td >';
+print $form->select_dolusers($conf->global->SENINBLUE_USER_ID, 'SENINBLUE_USER_ID', true);
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
 
 print '<tr class="liste_titre"><td colspan="3" align="center"><input type="submit" class="button" value="' . $langs->trans("Save") . '"></td></tr>';
 
