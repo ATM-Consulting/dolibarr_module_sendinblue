@@ -257,8 +257,37 @@ class Sendinblue
     */
     public function create_update_user($data)
     {
-        return $this->post("contacts",json_encode($data));
+		$result = $this->post("contacts",json_encode($data));
+
+		if(!empty($result['code']) && $result['code'] == 'duplicate_parameter'){
+
+
+			$updateData = array();
+			$result = false;
+			// Parce qu'il faut adapter à la V3 avec les anciens appels
+			if(!empty($data['listIds'])) {
+				$listIds = $data['listIds'];
+				foreach ($listIds as $listid) {
+					$updateData['emails'] = array($data['email']);
+					$result = $this->addExistingContactsToLists($listid, $updateData);
+				}
+			}
+		}
+
+		return $result;
     }
+
+
+	/**
+	 * @param $data [emails, ids] limité a 150 items par appels, utiliser l'import s'il faut en faire plus
+	 * @return array|false|mixed|object
+	 */
+	public function addExistingContactsToLists($listid, $data)
+	{
+		// Bon ya pas de gestion d'erreur correct ici pourtant l'api de sendinblue renvoi 2 tableaux success et failure contenant les adresses emails
+
+		return $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+	}
 
     /*
         Get Access a specific user Information.
