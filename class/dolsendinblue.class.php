@@ -381,7 +381,7 @@ class DolSendinBlue extends CommonObject
 		dol_syslog(get_class($this) . "::fetch_by_sendinblueid sql=" . $sql, LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql) {
-			if ($this->db->num_rows($resql)) {
+			if ($this->db->num_rows($resql) > 0) {
 				$obj = $this->db->fetch_object($resql);
 
 				$this->id = $obj->rowid;
@@ -397,10 +397,13 @@ class DolSendinBlue extends CommonObject
 				$this->datec = $this->db->jdate($obj->datec);
 				$this->fk_user_mod = $obj->fk_user_mod;
 				$this->tms = $this->db->jdate($obj->tms);
-			}
-			$this->db->free($resql);
 
-			return 1;
+
+				$this->db->free($resql);
+				return 1;
+			}
+
+			return 0;
 		} else {
 			$this->error = "Error " . $this->db->lasterror();
 			dol_syslog(get_class($this) . "::fetch_by_sendinblueid " . $this->error, LOG_ERR);
@@ -2880,7 +2883,7 @@ class DolSendinBlue extends CommonObject
 			$this->getInstanceSendinBlue();
 			$reponse = $this->sendinblue->get_user($email);
 
-			// TODO : change hard_bounces does not exist anymore...
+			// TODO : change hard_bounces does not exist anymore... --> use webhooks
 			if(!empty($reponse['statistics']['hardBounces'])){
 				foreach($reponse['statistics']['hardBounces'] as $camp){
 					$fk_mailing = $this->getMaillingFromCampainId($camp['campaignId']);
@@ -2894,7 +2897,7 @@ class DolSendinBlue extends CommonObject
 				}
 			}
 
-			// TODO : change soft_bounces does not exist anymore
+			// TODO : change soft_bounces does not exist anymore --> use webhooks
 			if(!empty($reponse['statistics']['softBounces'])){
 				foreach($reponse['statistics']['softBounces'] as $camp){
 					$fk_mailing = $this->getMaillingFromCampainId($camp['campaignId']);
@@ -2907,7 +2910,7 @@ class DolSendinBlue extends CommonObject
 					}
 				}
 			}
-			// TODO change spam does not exist anymore
+			// TODO change spam does not exist anymore --> use webhooks
 			if(!empty($reponse['statistics']['spam'])){
 				foreach($reponse['statistics']['spam'] as $camp){
 					$fk_mailing = $this->getMaillingFromCampainId($camp['campaignId']);

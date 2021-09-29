@@ -41,15 +41,13 @@ $langs->load("sendinblue@sendinblue");
 // https://developers.sendinblue.com/docs/how-to-use-webhooks
 $data = json_decode(file_get_contents('php://input'));
 
-
+$webHookUser = new User($db);
+$webHookUser->fetch($conf->global->SENINBLUE_USER_ID);
 
 /**
  * MARKETING WEBHOOK
  */
 if(!empty($data->event) && in_array($data->event, array(
-	"list_addition",
-	"contact_updated",
-	"contact_deleted",
 	"unsubscribed",
 	"delivered",
 	"soft_bounced",
@@ -57,8 +55,53 @@ if(!empty($data->event) && in_array($data->event, array(
 	"click",
 	"opened",
 	"spam",
-)))
-{
+))) {
+
+	$sendInBlue = new DolSendinBlue($db);
+	$res = $sendInBlue->fetch_by_sendinblueid($data->camp_id);
+	if($res < 1){
+		exit;
+	}
+
+	/**
+	 * Marked as Clicked, Opened
+	 */
+	/*
+	  {
+			"id": xxxxxx,
+		  "camp_id": xx,
+		  "email": "example@domain.com",
+		  "campaign name": "My First Campaign",
+		  "date_sent": "2020-10-09 00:00:00",
+		  "date_event": "2020-10-09 00:00:00",
+		  "event": "click", // "opened"
+		  "tag": "",
+		  "ts_sent": 1604933619,
+		  "ts_event": 1604933737,
+		  "ts": 1604937337,
+		  "URL": "https://myCampaignUrl.net"
+		}
+	*/
+	if($data->event == 'click' || $data->event == 'opened'){
+		$sendinblueactivites = new SendinBlueActivites($db);
+		$sendinblueactivites->fk_mailing = $sendInBlue->fk_mailing;
+		$sendinblueactivites->entity = $sendInBlue->entity;
+		$sendinblueactivites->sendinblue_id = $data->camp_id;
+		$sendinblueactivites->email = $data->email;
+		$sendinblueactivites->fk_user_author = intval($conf->global->SENINBLUE_USER_ID);
+		$sendinblueactivites->datec = intval( $data->ts_event);
+
+		if($data->event == 'click'){
+			$sendinblueactivites->activites = 'Click';
+		}
+		else{
+			$sendinblueactivites->activites = $data->event;
+		}
+
+		$res = $sendinblueactivites->create($webHookUser);
+		exit;
+	}
+
 
 	/**
 	 * Marked as Spam
@@ -80,45 +123,6 @@ if(!empty($data->event) && in_array($data->event, array(
 		}
 	*/
 
-
-	/**
-	 * Marked as Opened
-	 */
-	/*
-	  {
-		"id": xxxxxx,
-		"camp_id": xx,
-		"email": "example@domain.com",
-		"campaign name": "My First Campaign",
-		"date_sent": "2020-10-09 00:00:00",
-		"date_event": "2020-10-09 00:00:00",
-		"event": "opened",
-		"tag": "",
-		"ts_sent": 1604933619,
-		"ts_event": 1604933737,
-		"ts": 1604937337
-		}
-	*/
-
-	/**
-	 * Marked as Clicked
-	 */
-	/*
-	  {
-			"id": xxxxxx,
-		  "camp_id": xx,
-		  "email": "example@domain.com",
-		  "campaign name": "My First Campaign",
-		  "date_sent": "2020-10-09 00:00:00",
-		  "date_event": "2020-10-09 00:00:00",
-		  "event": "click",
-		  "tag": "",
-		  "ts_sent": 1604933619,
-		  "ts_event": 1604933737,
-		  "ts": 1604937337,
-		  "URL": "https://myCampaignUrl.net"
-		}
-	*/
 
 
 	/**
@@ -213,8 +217,23 @@ if(!empty($data->event) && in_array($data->event, array(
 
 
 
+}
+
+
+
+/**
+ * CONTACT ACTION WEBHOOK
+ */
+if(!empty($data->event) && in_array($data->event, array(
+	"list_addition",
+	"contact_updated",
+	"contact_deleted"
+)))
+{
+
+
 	/**
-	 * Marked as Unsubscribed
+	 * Contact deleted
 	 */
 	/*
 	  {

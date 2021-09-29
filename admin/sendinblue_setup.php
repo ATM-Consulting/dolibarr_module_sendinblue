@@ -54,7 +54,14 @@ $refreshButtonPressed = isset($_SERVER['HTTP_CACHE_CONTROL']) && ($_SERVER['HTTP
 
 if(!empty($conf->global->SEND_BY_SENDINBLUE)){
 	// retrait permanent de cette conf, elle créée plus de problème qu'elle n'en résous
-	$TConfToDelete = array('SEND_BY_SENDINBLUE','SENDINBLUE_MAIL_SMTP_SERVER', 'SENDINBLUE_SMTP_PORT', 'SENDINBLUE_MAIL_SMTPS_ID', 'SENDINBLUE_MAIL_SMTPS_PW', 'SENDINBLUE_MAIL_EMAIL_FROM');
+	$TConfToDelete = array(
+		'SEND_BY_SENDINBLUE',
+		'SENDINBLUE_MAIL_SMTP_SERVER',
+		'SENDINBLUE_SMTP_PORT',
+		'SENDINBLUE_MAIL_SMTPS_ID',
+		'SENDINBLUE_MAIL_SMTPS_PW',
+		'SENDINBLUE_MAIL_EMAIL_FROM'
+	);
 	foreach ($TConfToDelete as $conToDel){
 		dolibarr_del_const($db, $conToDel, $conf->entity);
 	}
@@ -65,14 +72,29 @@ if(!empty($conf->global->SEND_BY_SENDINBLUE)){
  */
 if ($action == 'setvar') {
 
-	$res = dolibarr_set_const($db, 'SENDINBLUE_API_KEY', GETPOST('SENDINBLUE_API_KEY', 'none'), 'chaine', 0, '', $conf->entity);
-	if (! $res > 0) {
-		$error ++;
+	// Alpha conf
+	$TConf = array(
+		'SENDINBLUE_API_KEY'
+	);
+
+	foreach ($TConf as $key){
+		$res = dolibarr_set_const($db, $key, GETPOST($key, 'none'), 'chaine', 0, '', $conf->entity);
+		if (! $res > 0) {
+			$error ++;
+		}
 	}
 
-	$res = dolibarr_set_const($db, 'SENDINBLUE_API_TIMEOUT', GETPOST('SENDINBLUE_API_TIMEOUT', 'int'), 'chaine', 0, '', $conf->entity);
-	if (! $res > 0) {
-		$error ++;
+	// Int conf
+	$TConf = array(
+		'SENDINBLUE_API_TIMEOUT',
+		'SENINBLUE_USER_ID'
+	);
+
+	foreach ($TConf as $key){
+		$res = dolibarr_set_const($db, $key, GETPOST($key, 'int'), 'chaine', 0, '', $conf->entity);
+		if (! $res > 0) {
+			$error ++;
+		}
 	}
 
 	$res = dolibarr_set_const($db, 'SENDINBLUE_PREFIXNEWLISTONSENDINBLUE', GETPOST('SENDINBLUE_PREFIXNEWLISTONSENDINBLUE', 'san_alpha'), 'chaine', 0, '', $conf->entity);
