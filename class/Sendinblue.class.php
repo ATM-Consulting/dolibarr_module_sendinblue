@@ -255,13 +255,11 @@ class Sendinblue
         @options data {Array} listIds: The list id(s) to be linked from user [Optional]
         @options data {Array} smsBlacklisted: This is used to blacklist/ Unblacklist a user’s SMS number. Possible values – 0 & 1. blacklisted_sms = 1 means user’s SMS number has been blacklisted [Optional]
     */
-    public function create_update_user($data)
+    public function create_update_user($data, $tryUpdate = false)
     {
 		$result = $this->post("contacts",json_encode($data));
 
-		if(!empty($result['code']) && $result['code'] == 'duplicate_parameter'){
-
-
+		if($tryUpdate && !empty($result['code']) && $result['code'] == 'duplicate_parameter'){
 			$updateData = array();
 			$result = false;
 			// Parce qu'il faut adapter à la V3 avec les anciens appels
@@ -277,6 +275,31 @@ class Sendinblue
 		return $result;
     }
 
+	/**
+	 * TODO : Typiquement le genre de methode à mettre en sortie de do_request avec une vraie gestion des erreurs mais imposerait de revoir entièrement le code module .
+	 * @param $response
+	 * @param bool $errorSetEventMessage to display erro rmessage
+	 * @return bool
+	 */
+	public function analyseResponseResult($response, $errorSetEventMessage = false){
+		$this->error = '';
+		if(!empty($response['code'])){
+			// Apparement il y a une erreur
+			if(!empty($response['message'])){
+				$this->error = $response['message'];
+			}else{
+				$this->error = $response['code'];
+			}
+			if($errorSetEventMessage){
+				setEventMessage($this->error, 'errors');
+			}
+			return false;
+		}
+		else{
+			return true;
+		}
+
+	}
 
 	/**
 	 * @param $data [emails, ids] limité a 150 items par appels, utiliser l'import s'il faut en faire plus
@@ -285,8 +308,34 @@ class Sendinblue
 	public function addExistingContactsToLists($listid, $data)
 	{
 		// Bon ya pas de gestion d'erreur correct ici pourtant l'api de sendinblue renvoi 2 tableaux success et failure contenant les adresses emails
+		$listid = intval($listid);
+		$maxSend = 150;
 
-		return $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+		if(is_array($data['emails']) && count($data['emails']) > $maxSend)
+		{
+			$items = $data['emails'];
+			$nb = count($items);
+			$added = 0;
+			while ($added < $nb){
+				$data['emails'] = array_slice($items, $added, min($maxSend, $nb - $added));
+				$added+=count($data['emails']);
+				$result = $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+			}
+		}
+		elseif(is_array($data['ids']) && count($data['ids']) > $maxSend){
+			$items = $data['ids'];
+			$nb = count($items);
+			$added = 0;
+			while ($added < $nb){
+				$data['ids'] = array_slice($items, $added, min($maxSend, $nb - $added));
+				$added+=count($data['ids']);
+				$result = $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+			}
+
+		}
+		else{
+			return $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+		}
 	}
 
     /*

@@ -1404,10 +1404,48 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . '::addEmailToList count($batch_email_to_add)=' . count($batch_email_to_add), LOG_DEBUG);
 
 			dol_syslog(get_class($this) . '::addEmailToList start batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
+//
+//			foreach($batch_email_to_add as $email){
+//				// Call
+//				$data = array(
+//					"email" => $email['email_address'],
+//					"attributes" => array(
+//						"FIRST_NAME" => $email['merge_vars']->FNAME,
+//						"LAST_NAME" => $email['merge_vars']->LNAME,
+//					),
+//					"listIds" => array(intval($listid))
+//				);
+//
+//				if (!empty($email['merge_extrafields']))
+//				{
+//					foreach ($email['merge_extrafields'] as $code => $val)
+//					{
+//						// strtoupper car sendinblue force les majuscules et remplace les espaces par des _
+//						$data['attributes'][strtoupper($code)] = $val;
+//					}
+//				}
+//
+//				try {
+//					$response = $this->sendinblue->create_update_user($data);
+//					if($this->sendinblue->analyseResponseResult($response)){
+//						$this->errors[] = $this->sendinblue->error;
+//						$error ++;
+//					}
+//				} catch ( Exception $e ) {
+//					$this->errors[] = $e->getMessage();
+//					$batch_email_to_add_error=$batch_email_to_add;
+//					$error ++;
+//				}
+//
+//			}
+
+			$contactToAddInList = array();
+			$contactData = array();
 
 			foreach($batch_email_to_add as $email){
-				// Call
+				$contactToAddInList[] = $email['email_address'];
 
+				// Call
 				$data = array(
 					"email" => $email['email_address'],
 					"attributes" => array(
@@ -1426,15 +1464,31 @@ class DolSendinBlue extends CommonObject
 					}
 				}
 
-				try {
-					$response = $this->sendinblue->create_update_user($data);
-				} catch ( Exception $e ) {
-					$this->errors[] = $e->getMessage();
-					$batch_email_to_add_error=$batch_email_to_add;
+				// If update fail we will create contact with this info
+				$contactData[$email['email_address']] = $data;
+			}
+
+
+			try {
+
+				$response = $this->sendinblue->addExistingContactsToLists($listid, array('emails' => $contactToAddInList));
+				if($this->sendinblue->analyseResponseResult($response)){
+					$this->errors[] = $this->sendinblue->error;
 					$error ++;
 				}
-
+				elseif(!empty($response['failure']) && is_array($response['failure'])){
+					foreach ($response['failure'] as $email ){
+						if(isset($contactData[$email])){
+							$response = $this->sendinblue->create_update_user($contactData[$email]);
+						}
+					}
+				}
+			} catch ( Exception $e ) {
+				$this->errors[] = $e->getMessage();
+				$batch_email_to_add_error=$batch_email_to_add;
+				$error ++;
 			}
+
 
 			dol_syslog(get_class($this) . '::addEmailToList end batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 		}
