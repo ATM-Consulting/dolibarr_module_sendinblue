@@ -3,7 +3,8 @@ All notable changes to this project will be documented in this file.
 
 ## UNRELEASED
 
-
+- FIX : Add contact to existing list *29/09/2021* - 2.3.1
+- NEW : Prepare doc for hooks *29/09/2021* - 2.3.0
 
 ## 2.2 *07/07/2021*
 
