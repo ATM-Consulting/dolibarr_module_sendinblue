@@ -210,7 +210,7 @@ print "</tr>\n";
 
 print '<tr class="impair"><td>' . $langs->trans("SendInBlueWebHooksUrl").'</td>';
 print '<td >';
-print '<input style="min-width:100%;" onClick="this.select();" value="'.dol_buildpath('sendinblue/webhook.php', 2).'?token='.$conf->global->CRON_KEY.'" readonly="readonly"  />';
+print '<input style="min-width:100%;" onClick="this.select();" value="'.dol_buildpath('sendinblue/webhook.php', 2).'?token='.urlencode($conf->global->CRON_KEY).'" readonly="readonly"  />';
 if(empty($conf->global->CRON_KEY)){
 	print '<div class="error" >'.$langs->trans('SENINBLUE_missingTokenGenerated').'</div>';
 }
