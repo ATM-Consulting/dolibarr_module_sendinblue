@@ -143,9 +143,19 @@ class Sendinblue
     }
 
 	/**
-	 * Send an email campaign immediately, based on campaignId
+	 * Update an email campaign, based on campaignId
+	 * @param {Array} data contains php array with key value pair.
 	 * @return null | array
     */
+	public function updateCampaign($campaignId, $data)
+	{
+		return $this->put("emailCampaigns/".$campaignId, json_encode($data));
+	}
+
+	/**
+	 * Send an email campaign immediately, based on campaignId
+	 * @return null | array
+	 */
 	public function sendCampaign($campaignId)
 	{
 		return $this->post("emailCampaigns/".$campaignId."/sendNow");
@@ -255,25 +265,27 @@ class Sendinblue
         @options data {Array} listIds: The list id(s) to be linked from user [Optional]
         @options data {Array} smsBlacklisted: This is used to blacklist/ Unblacklist a user’s SMS number. Possible values – 0 & 1. blacklisted_sms = 1 means user’s SMS number has been blacklisted [Optional]
     */
-    public function create_update_user($data, $tryUpdate = false)
-    {
-		$result = $this->post("contacts",json_encode($data));
-
-		if($tryUpdate && !empty($result['code']) && $result['code'] == 'duplicate_parameter'){
-			$updateData = array();
-			$result = false;
-			// Parce qu'il faut adapter à la V3 avec les anciens appels
-			if(!empty($data['listIds'])) {
-				$listIds = $data['listIds'];
-				foreach ($listIds as $listid) {
-					$updateData['emails'] = array($data['email']);
-					$result = $this->addExistingContactsToLists($listid, $updateData);
-				}
-			}
-		}
-
-		return $result;
-    }
+//    public function create_update_user($data, $tryUpdate = false)
+//    {
+//		$result = $this->post("contacts",json_encode($data));
+//
+//		if($tryUpdate && !empty($result['code']) && $result['code'] == 'duplicate_parameter'){
+//			$updateData = array();
+//			// Parce qu'il faut adapter à la V3 avec les anciens appels
+//			if(!empty($data['listIds'])) {
+//				$listIds = $data['listIds'];
+//				foreach ($listIds as $listid) {
+//					$updateData['emails'] = array($data['email']);
+//					$result = $this->addExistingContactsToLists($listid, $updateData);
+//					if ($result < 0) {
+//						return -1;
+//					}
+//				}
+//			}
+//		}
+//
+//		return 1;
+//    }
 
 	/**
 	 * TODO : Typiquement le genre de methode à mettre en sortie de do_request avec une vraie gestion des erreurs mais imposerait de revoir entièrement le code module .
@@ -281,60 +293,188 @@ class Sendinblue
 	 * @param bool $errorSetEventMessage to display erro rmessage
 	 * @return bool
 	 */
-	public function analyseResponseResult($response, $errorSetEventMessage = false){
-		$this->error = '';
-		if(!empty($response['code'])){
-			// Apparement il y a une erreur
-			if(!empty($response['message'])){
-				$this->error = $response['message'];
-			}else{
-				$this->error = $response['code'];
+	public function analyseResponseResult($response, $errorSetEventMessage = false)
+	{
+		if (!empty($response['code'])) {
+			$error = $response['code'];
+			if (!empty($response['message'])) {
+				$error .= ' - ' . $response['message'];
 			}
-			if($errorSetEventMessage){
-				setEventMessage($this->error, 'errors');
+			if ($errorSetEventMessage) {
+				setEventMessage($error, 'errors');
 			}
+			$this->errors[] = $error;
 			return false;
-		}
-		else{
+		} else {
 			return true;
 		}
-
 	}
 
 	/**
 	 * @param $data [emails, ids] limité a 150 items par appels, utiliser l'import s'il faut en faire plus
-	 * @return array|false|mixed|object
+	 * @return int 				<0 if KO, >0 if OK
 	 */
-	public function addExistingContactsToLists($listid, $data)
+	public function addExistingContactsToLists($db, $fk_mailing, $listid, $data, $contactData)
 	{
 		// Bon ya pas de gestion d'erreur correct ici pourtant l'api de sendinblue renvoi 2 tableaux success et failure contenant les adresses emails
 		$listid = intval($listid);
 		$maxSend = 150;
 
-		if(is_array($data['emails']) && count($data['emails']) > $maxSend)
-		{
-			$items = $data['emails'];
-			$nb = count($items);
-			$added = 0;
-			while ($added < $nb){
-				$data['emails'] = array_slice($items, $added, min($maxSend, $nb - $added));
-				$added+=count($data['emails']);
-				$result = $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
-			}
+		$error = 0;
+		$this->error = '';
+		$this->errors = array();
+
+		if (is_array($data['emails'])) {
+			$data_to_send = $data['emails'];
+			$data_type = 'emails';
+		} elseif (is_array($data['ids'])) {
+			$data_to_send = $data['ids'];
+			$data_type = 'ids';
+		} else {
+			$this->errors[] = 'Wrong data send (only emails or ids) to list (ID: ' . $listid . ', data: ' . json_encode($data) . ')';
+			$error++;
 		}
-		elseif(is_array($data['ids']) && count($data['ids']) > $maxSend){
-			$items = $data['ids'];
-			$nb = count($items);
+
+		if (!$error) {
+			$success_email = array();
+			$failure_email = array();
+
 			$added = 0;
-			while ($added < $nb){
-				$data['ids'] = array_slice($items, $added, min($maxSend, $nb - $added));
-				$added+=count($data['ids']);
-				$result = $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+			$nb = count($data_to_send);
+			while ($added < $nb) {
+				$items = array_slice($data_to_send, $added, min($maxSend, $nb - $added));
+				$added += count($items);
+				$response = $this->post("contacts/lists/" . $listid . "/contacts/add", json_encode(array($data_type => $items)));
+				if (!$this->analyseResponseResult($response) && $response['message'] != "Contact already in list and/or does not exist") {
+					$failure_email = array_merge($failure_email, $items);
+					$this->errors[] = ' send contacts to list (ID: ' . $listid . ') error - try 1 - data: ' . json_encode(array($data_type => $items));
+					$error++;
+				} else {
+					if (!empty($response['contacts']['success'])) {
+						$success_email = array_merge($success_email, $response['contacts']['success']);
+					}
+
+					if ((!empty($response['contacts']['failure']) && is_array($response['contacts']['failure'])) || $response['message'] == "Contact already in list and/or does not exist") { // code: invalid_parameter (same code for different message ...)
+						$contactToCreate = !empty($response['contacts']['failure']) ? $response['contacts']['failure'] : $items;
+						foreach ($contactToCreate as $email) {
+							if (isset($contactData[$email])) {
+								$response2 = $this->post("contacts", json_encode($contactData[$email]));
+								if (!$this->analyseResponseResult($response2) && (empty($response['code']) || $response2['code'] != 'duplicate_parameter')) { // Message: Contact already exist
+									$this->errors[] = ' create contact error - data: ' . json_encode($contactData[$email]);
+									$error++;
+								}
+							}
+						}
+
+						if (!$error) {
+							// Resend
+							$response3 = $this->post("contacts/lists/" . $listid . "/contacts/add", json_encode(array($data_type => $contactToCreate)));
+							if (!$this->analyseResponseResult($response3)) {
+								$failure_email = array_merge($failure_email, $contactToCreate);
+								$this->errors[] = ' send contacts to list (ID: ' . $listid . ') error - try 2 - data: ' . json_encode(array($data_type => $contactToCreate));
+								$error++;
+							} else {
+								if (!empty($response3['contacts']['success'])) {
+									$success_email = array_merge($success_email, $response3['contacts']['success']);
+								}
+								if (!empty($response3['contacts']['failure']) && is_array($response3['contacts']['failure'])) {
+									$failure_email = array_merge($failure_email, $response3['contacts']['failure']);
+									$this->errors[] = ' send contacts to list (ID: ' . $listid . ') failed for ' . $data_type . ': ' . implode(', ', $contactToCreate);
+								}
+							}
+						} else {
+							$failure_email = array_merge($failure_email, $response['failure']);
+						}
+					}
+				}
 			}
 
+			if ($fk_mailing > 0) {
+				if (!empty($success_email)) {
+					$success_email = array_flip(array_flip($success_email));
+					$escaped_email = array();
+					foreach ($success_email as $email) {
+						$escaped_email[] = $db->escape($email);
+					}
+
+					$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET sendinblue_status = 1" .
+						" WHERE fk_mailing = " . $fk_mailing . " AND email IN ('" . implode("','", $escaped_email) . "')";
+					$resql = $db->query($sql);
+					if (!$resql) {
+						$this->error = "Error " . $db->lasterror();
+						dol_syslog(__METHOD__ . " - Update target status 1 - Error: " . $this->error, LOG_ERR);
+					}
+				}
+				if (!empty($failure_email)) {
+					$failure_email = array_flip(array_flip($failure_email));
+					$escaped_email = array();
+					foreach ($failure_email as $email) {
+						$escaped_email[] = $db->escape($email);
+					}
+
+					$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET sendinblue_status = 0" .
+						" WHERE fk_mailing = " . $fk_mailing . " AND email IN ('" . implode("','", $escaped_email) . "')";
+					$resql = $db->query($sql);
+					if (!$resql) {
+						$this->error = "Error " . $db->lasterror();
+						dol_syslog(__METHOD__ . " - Update target status 0 - Error: " . $this->error, LOG_ERR);
+					}
+				}
+			}
 		}
-		else{
-			return $this->post("contacts/lists/".$listid."/contacts/add",json_encode($data));
+
+		if ($error) {
+			dol_syslog(__METHOD__ . " - Error: " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+
+	/**
+	 * @param $data [emails, ids] limité a 150 items par appels, utiliser l'import s'il faut en faire plus
+	 * @return int 				<0 if KO, >0 if OK
+	 */
+	public function delExistingContactsToLists($listid, $data)
+	{
+		// Bon ya pas de gestion d'erreur correct ici pourtant l'api de sendinblue renvoi 2 tableaux success et failure contenant les adresses emails
+		$listid = intval($listid);
+		$maxSend = 150;
+
+		$error = 0;
+		$this->error = '';
+		$this->errors = array();
+
+		if (is_array($data['emails'])) {
+			$data_to_send = $data['emails'];
+			$data_type = 'emails';
+		} elseif (is_array($data['ids'])) {
+			$data_to_send = $data['ids'];
+			$data_type = 'ids';
+		} else {
+			$this->errors[] = 'Wrong data send (only emails or ids) to list (ID: ' . $listid . ', data: ' . json_encode($data) . ')';
+			$error++;
+		}
+
+		if (!$error) {
+			$removed = 0;
+			$nb = count($data_to_send);
+			while ($removed < $nb) {
+				$items = array_slice($data_to_send, $removed, min($maxSend, $nb - $removed));
+				$removed += count($items);
+				$response = $this->post("contacts/lists/" . $listid . "/contacts/remove", json_encode(array($data_type => $items)));
+				if (!$this->analyseResponseResult($response)) {
+					$this->errors[] = ' delete contacts to list (ID: ' . $listid . ') error - data: ' . json_encode(array($data_type => $items));
+					$error++;
+				}
+			}
+		}
+
+		if ($error) {
+			dol_syslog(__METHOD__ . " - Error: " . $this->errorsToString(), LOG_ERR);
+			return -1;
+		} else {
+			return 1;
 		}
 	}
 
@@ -356,4 +496,14 @@ class Sendinblue
     {
         return $this->delete("contacts/".$email,"");
     }
+
+	/**
+	 * Method to output saved errors
+	 *
+	 * @return	string		String with errors
+	 */
+	public function errorsToString()
+	{
+		return $this->error.(is_array($this->errors)?(($this->error!=''?', ':'').join(', ', $this->errors)):'');
+	}
 }

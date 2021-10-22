@@ -613,16 +613,22 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getListDestinaries " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-			$nb_lists = $response['count'];
-			if ($nb_lists > 100) {
-				$response = $this->sendinblue->get('contacts/lists');
-			}
-
-			$this->listdest_lines = array();
-			if (! empty($response['lists'])) {
+			if (!empty($filters['id'])) {
 				$this->listdest_lines = array(
-					'data'=> $response['lists']
+					'data' => array($response)
 				);
+			} else {
+				$nb_lists = $response['count'];
+				if ($nb_lists > 100) {
+					$response = $this->sendinblue->get('contacts/lists');
+				}
+
+				$this->listdest_lines = array();
+				if (!empty($response['lists'])) {
+					$this->listdest_lines = array(
+						'data' => $response['lists']
+					);
+				}
 			}
 
 			return 1;
@@ -709,6 +715,10 @@ class DolSendinBlue extends CommonObject
 		// Call
 		try {
 			$response = $this->sendinblue->get_user($email);
+			if(!empty($response['code'])){
+				$this->error = 'SendinBlue error: ' . $response['message'];
+				return -1;
+			}
 
 		} catch ( Exception $e ) {
 			if (get_class($e) != 'SendinBlue_List_NotSubscribed') {
@@ -721,7 +731,7 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getListForEmail error " . $this->error, LOG_ERR);
 			return - 1;
 		} else {
-			$this->listlist_lines = $response['data']['listid'];
+			$this->listlist_lines = $response['listIds'];
 			return $response;
 		}
 	}
@@ -1287,9 +1297,10 @@ class DolSendinBlue extends CommonObject
 	 *
 	 * @param int $listid to add
 	 * @param array $array_email add
+	 * @param bool $copy 	Copy exact of dolibarr send to sendinblue
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function addEmailToList($listid = 0, $array_email = array()) {
+	function addEmailToList($listid = 0, $array_email = array(), $copy = false) {
 		global $conf, $db;
 
 		require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
@@ -1468,36 +1479,53 @@ class DolSendinBlue extends CommonObject
 				}
 
 				// If update fail we will create contact with this info
-				$contactData[$email['email_address']] = $data;
+				$contactData[strtolower($email['email_address'])] = $data;
 			}
 
+			// Retrieve email in sendinblue
+			if ($this->fk_mailing > 0 && !$copy) {
+				$result = $this->getEmailMailingDolibarr('simple', true);
+			} else {
+				$result = $this->getEmailMailingSendinblue($listid);
+			}
+			if ($result < 0) {
+				$error++;
+			} else {
+				$contactToDelInList = array_values(array_diff(array_map('strtolower', $this->email_lines), array_map('strtolower', $contactToAddInList)));
+				$contactToAddInList = array_values(array_diff(array_map('strtolower', $contactToAddInList), array_map('strtolower', $this->email_lines)));
 
-			try {
-
-				$response = $this->sendinblue->addExistingContactsToLists($listid, array('emails' => $contactToAddInList));
-				if($this->sendinblue->analyseResponseResult($response)){
-					$this->errors[] = $this->sendinblue->error;
+				try {
+					$result = $this->sendinblue->addExistingContactsToLists($this->db, $this->fk_mailing, $listid, array('emails' => $contactToAddInList), $contactData);
+					if ($result < 0) {
+						$this->errors = array_merge($this->errors, $this->sendinblue->errors);
+						$error ++;
+					}
+				} catch ( Exception $e ) {
+					$this->errors[] = $e->getMessage();
+					$batch_email_to_add_error=$batch_email_to_add;
 					$error ++;
 				}
-				elseif(!empty($response['failure']) && is_array($response['failure'])){
-					foreach ($response['failure'] as $email ){
-						if(isset($contactData[$email])){
-							$response = $this->sendinblue->create_update_user($contactData[$email]);
+
+				if ($copy) {
+					try {
+						$result = $this->sendinblue->delExistingContactsToLists($listid, array('emails' => $contactToDelInList));
+						if ($result < 0) {
+							$this->errors = array_merge($this->errors, $this->sendinblue->errors);
+							$error ++;
 						}
+					} catch ( Exception $e ) {
+						$this->errors[] = $e->getMessage();
+						$batch_email_to_add_error=$batch_email_to_add;
+						$error ++;
 					}
 				}
-			} catch ( Exception $e ) {
-				$this->errors[] = $e->getMessage();
-				$batch_email_to_add_error=$batch_email_to_add;
-				$error ++;
 			}
-
 
 			dol_syslog(get_class($this) . '::addEmailToList end batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
 		}
 		if ($error) {
 			foreach ( $this->errors as $errmsg ) {
-				dol_syslog(get_class($this) . "::addEmailToList Error" . $errmsg, LOG_ERR);
+				dol_syslog(get_class($this) . "::addEmailToList Error: " . $errmsg, LOG_ERR);
 				dol_syslog(get_class($this) . "::addEmailToList batch_email_to_add=" . var_export($batch_email_to_add_error,true), LOG_ERR);
 				$this->error .= ($this->error ? ', ' . $errmsg : $errmsg);
 			}
@@ -1849,12 +1877,13 @@ class DolSendinBlue extends CommonObject
 				$current_recipients_list = is_array($campaign_data['recipients']['lists']) ? $campaign_data['recipients']['lists'] : array();
 				if (!in_array($this->sendinblue_listid, $current_recipients_list)) {
 					$data = array(
-						"id" => $this->sendinblue_id,
-						"listid" => array_flip(array_flip(array_merge($current_recipients_list, array($this->sendinblue_listid)))),
+						'recipients' => array(
+							'listIds' => array_flip(array_flip(array_merge($current_recipients_list, array($this->sendinblue_listid))))
+						),
 					);
 
-					$response = $this->sendinblue->update_campaign($data);
-					if(!empty($response['code'])){
+					$response = $this->sendinblue->updateCampaign($this->sendinblue_id, $data);
+					if (!empty($response['code'])) {
 						$this->error = $response['message'];
 						return -1;
 					}
@@ -1878,16 +1907,18 @@ class DolSendinBlue extends CommonObject
 	/**
 	 * Get dolibarr destinaries email
 	 *
-	 * @param string $returntype populate email_lines with only email, 'toadd' for 'email&type&id'
-	 * @return int <0 if KO, >0 if OK
+	 * @param	string 	$returntype 	populate email_lines with only email, 'toadd' for 'email&type&id'
+	 * @param	bool	$linked			Get only liked to sendinblue (null: all)
+	 * @return	int						<0 if KO, >0 if OK
 	 */
-	function getEmailMailingDolibarr($returntype = 'simple') {
-		global $conf;
+	function getEmailMailingDolibarr($returntype = 'simple', $linked = null)
+	{
 		$this->email_lines = array();
 
 		$sql = "SELECT mc.email,mc.source_type,mc.source_id";
 		$sql .= " FROM " . MAIN_DB_PREFIX . "mailing_cibles as mc";
 		$sql .= " WHERE mc.fk_mailing=" . $this->fk_mailing;
+		if (isset($linked)) $sql .= " AND mc.sendinblue_status = " . ($linked ? 1 : 0);
 
 		dol_syslog(get_class($this) . "::getEmailMailingDolibarr sql=" . $sql);
 		$result = $this->db->query($sql);
@@ -1911,13 +1942,85 @@ class DolSendinBlue extends CommonObject
 	}
 
 	/**
+	 * Get sendinblue subscribers email
+	 *
+	 * @param	int		$segment_id			List sendinblue ID
+	 * @param	bool	$no_blacklisted		Don't get blacklisted subscribers
+	 * @return	int							<0 if KO, >0 if OK
+	 */
+	function getEmailMailingSendinblue($segment_id, $no_blacklisted = false)
+	{
+		$this->email_lines = array();
+		$block_size = 200; // max 500
+
+		// Get subscribers
+		try {
+			$result = $this->getInstanceSendinBlue();
+			if ($result < 0) {
+				return -1;
+			}
+
+			$offset = 0;
+			do {
+				// Get contacts of the list
+				$filter = array('offset' => $offset, 'limit' => $block_size);
+				$response = $this->sendinblue->display_list_users($segment_id, $filter);
+				if (!$this->sendinblue->analyseResponseResult($response)) {
+					$this->error = $this->sendinblue->error;
+					$this->errors = $this->sendinblue->errors;
+					dol_syslog(__METHOD__ . " - Get SendinBlue subscribers - Error: " . $this->errorsToString(), LOG_ERR);
+					return -1;
+				}
+
+				// Add email into the list
+				if (!empty($response['contacts'])) {
+					foreach ($response['contacts'] as $d) {
+						// dont get blacklisted email
+						if ($d['emailBlacklisted'] && $no_blacklisted) continue;
+
+						$email = strtolower($d['email']);
+						$this->email_lines[$email] = $email;
+					}
+				}
+
+				$offset += $block_size;
+			} while($offset <= $response['count']);
+		} catch (Exception $e) {
+			$this->error = "Error " . $e->getMessage();
+			dol_syslog(__METHOD__ . " - Get SendinBlue subscribers - Error: " . $this->error, LOG_ERR);
+			return -1;
+		}
+
+		return 1;
+	}
+
+	/**
+	 * Get sendinblue subscribers email
+	 *
+	 * @return	int						<0 if KO, >0 if OK
+	 */
+	function getEmailMailingNotSynchronised()
+	{
+		$this->email_lines = array();
+
+		$result = $this->getEmailMailingDolibarr('simple', false);
+		if ($result < 0) {
+			return -1;
+		} else {
+			$this->email_lines = array_map('strtolower', $this->email_lines);
+		}
+
+		return 1;
+	}
+
+	/**
 	 * Import into dolibarr email
 	 *
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function importSegmentDestToDolibarr($segment_id)
+	function importSegmentDestToDolibarr($segment_id, $copy = false)
 	{
-		global $user;
+		global $conf, $user;
 
 		// Get existing targets
 		$sql = "SELECT rowid, fk_mailing, fk_contact, lastname, firstname, email, statut, source_url, source_id, source_type FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE fk_mailing = " . $this->fk_mailing;
@@ -1929,7 +2032,7 @@ class DolSendinBlue extends CommonObject
 		}
 		$existing_target_list = array();
 		while ($obj = $this->db->fetch_object($resql)) {
-			$existing_target_list[$obj->email] = array(
+			$existing_target_list[strtolower($obj->email)] = array(
 				'rowid' => $obj->rowid,
 				'fk_mailing' => $obj->fk_mailing,
 				'fk_contact' => $obj->fk_contact,
@@ -1944,31 +2047,8 @@ class DolSendinBlue extends CommonObject
 		}
 
 		// Get SendinBlue subscribers
-		try {
-			$this->sendinblue_segmentid = $segment_id;
-			$this->getInstanceSendinBlue();
-			$list = $this->sendinblue->get_list(array('id' => $segment_id));
-			if(!empty($list['code'])){
-				$this->error = $list['message'];
-				return -1;
-			}
-			$block_size = 50;
-			$subscribers = !empty($list['uniqueSubscribers']) ? ceil($list['uniqueSubscribers'] / $block_size) : 0;
-			$this->email_lines = array();
-			for ($i = 0; $i < $subscribers; $i++) {
-				$result = $this->sendinblue->display_list_users($segment_id, array('offset' => $i * $block_size, 'limit' => $block_size));
-				if(!empty($result['code'])){
-					$this->error = $result['message'];
-					return -1;
-				}
-				foreach ($result['contacts'] as $d) {
-					if ($d['emailBlacklisted']) continue;
-					$this->email_lines[$d['email']] = $d['email'];
-				}
-			}
-		} catch (Exception $e) {
-			$this->error = "Error " . $e->getMessage();
-			dol_syslog(__METHOD__ . " - Get SendinBlue subscribers - Error: " . $this->error, LOG_ERR);
+		$result = $this->getEmailMailingSendinblue($segment_id);
+		if ($result < 0) {
 			return -1;
 		}
 
@@ -2062,11 +2142,12 @@ class DolSendinBlue extends CommonObject
 
 		// Add/Update targets
 		foreach ($subscribers_list as $email => $target) {
+			$email = strtolower($email);
 			if (isset($existing_target_list[$email])) {
 				// Update target
 				$this->target_updated[] = array_merge(array('rowid' => $existing_target_list[$email]['rowid']), $target);
-				$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET" .
-					"  fk_mailing = " . $this->db->escape($target['fk_mailing']) .
+				$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET sendinblue_status = 1" .
+					", fk_mailing = " . $this->db->escape($target['fk_mailing']) .
 					", fk_contact = " . ($target['fk_contact'] > 0 ? $this->db->escape($target['fk_contact']) : 0) .
 					", lastname = '" . (!empty($target['lastname']) ? $this->db->escape($target['fk_contact']) : '') . "'" .
 					", firstname = '" . (!empty($target['firstname']) ? $this->db->escape($target['firstname']) : '') . "'" .
@@ -2079,7 +2160,7 @@ class DolSendinBlue extends CommonObject
 			} else {
 				// Add target
 				$this->target_added[] = $target;
-				$sql = "INSERT INTO " . MAIN_DB_PREFIX . "mailing_cibles (fk_mailing, fk_contact, lastname, firstname, email, statut, source_url, source_id, source_type)" .
+				$sql = "INSERT INTO " . MAIN_DB_PREFIX . "mailing_cibles (fk_mailing, fk_contact, lastname, firstname, email, statut, source_url, source_id, source_type, sendinblue_status)" .
 					" VALUES (" . $this->db->escape($target['fk_mailing']) .
 					", " . ($target['fk_contact'] > 0 ? $this->db->escape($target['fk_contact']) : 0) .
 					", '" . (!empty($target['lastname']) ? $this->db->escape($target['fk_contact']) : '') . "'" .
@@ -2089,6 +2170,7 @@ class DolSendinBlue extends CommonObject
 					", '" . (!empty($target['source_url']) ? $this->db->escape($target['source_url']) : '') . "'" .
 					", " . ($target['source_id'] > 0 ? $this->db->escape($target['source_id']) : "NULL") .
 					", '" . (!empty($target['source_type']) ? $this->db->escape($target['source_type']) : "file") . "'" .
+					", 1" .
 					")";
 			}
 			$resql = $this->db->query($sql);
@@ -2103,16 +2185,31 @@ class DolSendinBlue extends CommonObject
 		// Delete targets
 		if (!$error) {
 			foreach ($existing_target_list as $email => $target) {
-				if (!isset($subscribers_list[$email])) {
-					// Delete target
-					$this->target_deleted[] = $target;
-					$sql = "DELETE FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE rowid = " . $target['rowid'];
-					$resql = $this->db->query($sql);
-					if (!$resql) {
-						$this->error = "Error " . $this->db->lasterror();
-						dol_syslog(__METHOD__ . " - Delete target - Error: " . $this->error, LOG_ERR);
-						$error++;
-						break;
+				$email_key = strtolower($email);
+				if (!isset($subscribers_list[$email_key])) {
+					if (!empty($copy)) {
+						// Delete target
+						$this->target_deleted[] = $target;
+						$sql = "DELETE FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE rowid = " . $target['rowid'];
+						$resql = $this->db->query($sql);
+						if (!$resql) {
+							$this->error = "Error " . $this->db->lasterror();
+							dol_syslog(__METHOD__ . " - Delete target - Error: " . $this->error, LOG_ERR);
+							$error++;
+							break;
+						}
+					} else {
+						// Delete linked status
+						$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET" .
+							"  sendinblue_status = 0" .
+							" WHERE rowid = " . $existing_target_list[$email]['rowid'];
+						$resql = $this->db->query($sql);
+						if (!$resql) {
+							$this->error = "Error " . $this->db->lasterror();
+							dol_syslog(__METHOD__ . " - Delete Sendinblue status - Error: " . $this->error, LOG_ERR);
+							$error++;
+							break;
+						}
 					}
 				}
 			}
@@ -2120,7 +2217,18 @@ class DolSendinBlue extends CommonObject
 
 		// Update target count on emailing
 		if (!$error) {
-			$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET nbemail = " . count($subscribers_list) . " WHERE rowid = " . $this->fk_mailing;
+			$nb = 0;
+			$sql = "SELECT COUNT(*) AS nb FROM " . MAIN_DB_PREFIX . "mailing_cibles WHERE fk_mailing = " . $this->fk_mailing;
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				$this->error = "Error " . $this->db->lasterror();
+				dol_syslog(__METHOD__ . " - Get target count - Error: " . $this->error, LOG_ERR);
+				$error++;
+			} elseif ($obj = $this->db->fetch_object($resql)) {
+				$nb = $obj->nb;
+			}
+
+			$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing SET nbemail = " . $nb . " WHERE rowid = " . $this->fk_mailing;
 			$resql = $this->db->query($sql);
 			if (!$resql) {
 				$this->error = "Error " . $this->db->lasterror();
@@ -2149,12 +2257,11 @@ class DolSendinBlue extends CommonObject
 	/**
 	 * Export to list and segments sendinblue only segment from dolibarr email
 	 *
-	 * @param int $segmentid segment id
-	 * @param string $newsegmentname segment name
-	 * @param int $resetseg segment
+	 * @param int $listid 	segment id
+	 * @param bool $copy 	Copy exact of dolibarr send to sendinblue
 	 * @return int <0 if KO, >0 if OK
 	 */
-	function exportDesttoSendinBlue($listid) {
+	function exportDesttoSendinBlue($listid, $copy = false) {
 		global $conf;
 
 		$result = $this->getEmailMailingDolibarr('toadd');
@@ -2162,7 +2269,7 @@ class DolSendinBlue extends CommonObject
 			return - 1;
 		}
 		if (count($this->email_lines)) {
-			$result_add_to_list = $this->addEmailToList($this->sendinblue_listid, $this->email_lines);
+			$result_add_to_list = $this->addEmailToList($this->sendinblue_listid, $this->email_lines, $copy);
 		}
 
 		if ($result_add_to_list < 0) {
@@ -2257,11 +2364,12 @@ class DolSendinBlue extends CommonObject
 			// Update list on campaign
 			$current_recipients_list = is_array($campaign_data['recipients']['lists']) ? $campaign_data['recipients']['lists'] : array();
 			$data = array(
-				"id" => $campaign_id,
-				"listid" => array_flip(array_flip(array_merge($current_recipients_list, array($list_id)))),
+				'recipients' => array(
+					'listIds' => array_flip(array_flip(array_merge($current_recipients_list, array($list_id)))),
+				),
 			);
 			try {
-				$response = $this->sendinblue->update_campaign($data);
+				$response = $this->sendinblue->updateCampaign($campaign_id, $data);
 				if(!empty($response['code'])){
 					$this->error = $response['message'];
 					return -1;
