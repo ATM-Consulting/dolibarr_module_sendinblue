@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## UNRELEASED
 
+## 2.4 *26/10/2021*
+
+- FIX : API route - 2.4.1 *26/10/2021*
+- NEW : Button to sync additional contacts  - 2.4 *26/10/2021*
 
 ## 2.3 *01/10/2021*
 
