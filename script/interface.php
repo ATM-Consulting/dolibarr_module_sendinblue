@@ -101,9 +101,31 @@ switch ($set) {
 		exit;
 
 		break;
+	case 'export_copy':
+		$script = dol_buildpath('/sendinblue/script/interface.php', 0);
+		$params = 'async_action=export_copy listid='.$listid.' fk_mailing='.$fk_mailing.' fk_user='.$user->id;
+
+		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
+		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
+
+		__out($pid);
+		exit;
+
+		break;
 	case 'import':
 		$script = dol_buildpath('/sendinblue/script/interface.php', 0);
 		$params = 'async_action=import listid='.$listid.' fk_mailing='.$fk_mailing.' fk_user='.$user->id;
+
+		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
+		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
+
+		__out($pid);
+		exit;
+
+		break;
+	case 'import_copy':
+		$script = dol_buildpath('/sendinblue/script/interface.php', 0);
+		$params = 'async_action=import_copy listid='.$listid.' fk_mailing='.$fk_mailing.' fk_user='.$user->id;
 
 		$pid = exec('php '.$script.' '.$params.' > /dev/null 2>&1 & echo $!;');
 		$_SESSION['SENDINBLUE_PID_ACTIVE'][$fk_mailing][$listid][$pid] = $pid;
@@ -119,8 +141,16 @@ switch ($async_action) {
 		$result=$sendinblue->exportDesttoSendinBlue($listid);
 		exit;
 		break;
+	case 'export_copy':
+		$result=$sendinblue->exportDesttoSendinBlue($listid, true);
+		exit;
+		break;
 	case 'import':
 		$result=$sendinblue->importSegmentDestToDolibarr($listid);
+		exit;
+		break;
+	case 'import_copy':
+		$result=$sendinblue->importSegmentDestToDolibarr($listid, true);
 		exit;
 		break;
 }

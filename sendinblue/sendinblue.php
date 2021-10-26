@@ -253,82 +253,31 @@ if (empty($sendinblue->sendinblue_sender_name)) {
 	$error_sendinblue_control++;
 }
 
-$warning_destnotsync=false;
-//Check dolibarr dest versus list segment define
-if(!empty($conf->global->SENDINBLUE_API_KEY)){
-	if (!empty($sendinblue->id))
-	{
-		if ($object->statut==0 || $object->statut==1) {
-			$email_seg_array=array();
-			//retrive email for segment and Or List
-			if (!empty($sendinblue->sendinblue_segmentid)) {
-				$result=$sendinblue->getEmailList();
-				if ($result<0) {
-					setEventMessage($sendinblue->error,'errors');
+if (empty($action)) {
+	$email_in_dol_not_in_sendinblue = array();
+	$warning_destnotsync = false;
+	// Check email not synchronized
+	if (!empty($conf->global->SENDINBLUE_API_KEY)) {
+		if (!empty($sendinblue->id)) {
+			if ($object->statut == 0 || $object->statut == 1) {
+				// Retrieve email not synchronized
+				$result = $sendinblue->getEmailMailingNotSynchronised();
+				if ($result < 0) {
+					setEventMessages($sendinblue->error, $sendinblue->errors, 'errors');
 				} else {
-					foreach($sendinblue->email_lines as $l){
-						$email_seg_array[]=$l['email'];
+					$email_in_dol_not_in_sendinblue = $sendinblue->email_lines;
+					if (!empty($email_in_dol_not_in_sendinblue)) {
+						$warning_destnotsync = true;
 					}
 				}
 			}
-			else {
-				if (!empty($sendinblue->sendinblue_listid)) {
-					$result=$sendinblue->getEmailList();
-					if ($result<0) {
-						setEventMessage($sendinblue->error,'errors');
-					} else {
-						foreach($sendinblue->email_lines as $l){
-						$email_seg_array[]=$l['email'];
-					}
-					}
-				}
-			}
-
-			//Retreive mail from mailling destinaries
-			$sendinblue->fk_mailing=$id;
-			$result=$sendinblue->getEmailMailingDolibarr();
-			if ($result<0) {
-				setEventMessage($sendinblue->error,'errors');
-			} else {
-				$email_dol_array=$sendinblue->email_lines;
-			}
-
-			$email_in_dol_not_in_sendinblue=array();
-			//First compare count easy and quick
-			if (count($email_dol_array)!=count($email_seg_array)) {
-				$warning_destnotsync=true;
-				foreach ($email_dol_array as $emailadress) {
-					if (array_search($emailadress, $email_seg_array)===false) {
-						$email_in_dol_not_in_sendinblue[]=$emailadress;
-					}
-				}
-
-			}else {
-				foreach($email_seg_array as $emailadress){
-					$email_sb_array[]=$emailadress;
-				}
-
-				//if count is same compare email by email
-				foreach($email_dol_array as $emailadress) {
-					if (!in_array($emailadress,$email_sb_array)) {
-
-						$warning_destnotsync=true;
-						break;
-					}
-				}
-				if(!empty($email_sb_array)){
-					foreach($email_sb_array as $emailadress) {
-						if (!in_array($emailadress,$email_dol_array)) {
-							$warning_destnotsync=true;
-							break;
-						}
-					}
-				}
-			}
+		} else {
+			$warning_destnotsync = true;
 		}
-	} else {
-		$warning_destnotsync=true;
 	}
+} else {
+	$email_in_dol_not_in_sendinblue = array('Refresh page for show email not synchronized');
+	$warning_destnotsync = true;
 }
 
 
@@ -472,7 +421,7 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 			if (is_array($sendinblue->listdest_lines) && count($sendinblue->listdest_lines)>0) {
 
 
-				print $sendinblue->listdest_lines['data']['name'];
+				print $sendinblue->listdest_lines['data'][0]['name'];
 
 			}
 		}
@@ -554,10 +503,14 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 
 		print '<tr class="pair">';
 		print '<td style="text-align:right"><input id="bt_send_import" type="button" class="button" onclick="sendInBlueCallImport()" value="'.$langs->trans('SendinBlueImportForm').'" />';
-		print $form->textwithpicto('',$langs->trans('SendinBlueImportFormHelp'));
+		print $form->textwithpicto('',$langs->trans( 'SendinBlueImportFormHelp'));
+		print '<input id="bt_send_import_copy" type="button" class="button" onclick="sendInBlueCallImportCopy()" value="'.$langs->trans('SendinBlueImportCopyForm').'" />';
+		print $form->textwithpicto('',$langs->trans( 'SendinBlueImportCopyFormHelp'));
 		print '</td><td></td><td>';
 		print '<input id="bt_send_export" type="button" class="button" onclick="sendInBlueCallExport()" value="'.$langs->trans('SendinBlueExportTo').'" />';
 		print $form->textwithpicto('',$langs->trans('SendinBlueExportToHelp'));
+		print '<input id="bt_send_export_copy" type="button" class="button" onclick="sendInBlueCallExportCopy()" value="'.$langs->trans('SendinBlueExportCopyTo').'" />';
+		print $form->textwithpicto('',$langs->trans('SendinBlueExportCopyToHelp'));
 		print '</td></tr>';
 		print '</table>';
 
@@ -701,7 +654,9 @@ if($object->statut == 3){
 
 	triggerIntervalChecker = function() {
 		$('#bt_send_export').prop('disabled',true);
+		$('#bt_send_export_copy').prop('disabled',true);
 		$('#bt_send_import').prop('disabled',true);
+		$('#bt_send_import_copy').prop('disabled',true);
 		$('#sendinblue_loading').css('display', 'block');
 
 		sendInBlueTimer = setInterval(function() {
@@ -733,9 +688,15 @@ if($object->statut == 3){
 	sendInBlueCallExport = function() {
 		sendInBlueCallAjax('export', '');
 	};
+	sendInBlueCallExportCopy = function() {
+		sendInBlueCallAjax('export_copy', '');
+	};
 
 	sendInBlueCallImport = function() {
 		sendInBlueCallAjax('import', '');
+	};
+	sendInBlueCallImportCopy = function() {
+		sendInBlueCallAjax('import_copy', '');
 	};
 
 	sendInBlueCallAjax = function(set, get) {
