@@ -11,6 +11,8 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
+ */
 function sendinblueAdminPrepareHead() {
 	global $langs, $conf;
 
@@ -19,11 +21,15 @@ function sendinblueAdminPrepareHead() {
 	$h = 0;
 	$head = array();
 
-	$head[$h][0] = dol_buildpath("/sendinblue/admin/admin_sendinblue.php", 1);
+	$head[$h][0] = dol_buildpath("/sendinblue/admin/sendinblue_setup.php", 1);
 	$head[$h][1] = $langs->trans("SettingsSendinBlue");
 	$head[$h][2] = 'settings';
 	$h++;
-	$head[$h][0] = dol_buildpath("/sendinblue/admin/about.php", 1);
+	$head[$h][0] = dol_buildpath("/sendinblue/admin/sendinblue_help.php", 1);
+	$head[$h][1] = $langs->trans("Help");
+	$head[$h][2] = 'help';
+	$h++;
+	$head[$h][0] = dol_buildpath("/sendinblue/admin/sendinblue_about.php", 1);
 	$head[$h][1] = $langs->trans("About");
 	$head[$h][2] = 'about';
 	$h++;

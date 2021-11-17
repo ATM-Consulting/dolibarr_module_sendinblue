@@ -14,6 +14,14 @@ SendinBlueSetupPage = Page de réglage de SendinBlue
 SendinBlueErrorCurlNotLoaded=Erreur : l'extension CURL n'est pas chargée dans la configuration PHP
 
 #
+# Page Aide
+#
+webhookIntro=Nous allons voir ici, comment utiliser les webhooks de sendInBlue :<br/>
+webhookPart1=Après avoir renseigné votre "clé API SendinBlue (v3)" dans l'écran de configuration du module, vous devez vous rendre sur votre compte SendinBlue pour créer de nouveaux webhooks.<br/>Pour cela, rendez-vous dans les paramètres de votre compte puis "Webhooks"
+webhookPart2=Vous arrivez sur la liste des webhooks présents. Cliquez sur "ajouter un nouveau webhook"
+webhookPart3=Il ne vous reste plus qu'à renseigner l'url à appeler (présente dans l'écran de configuration du module).<br/> Sélectionnez les évènements déclencheurs et cliquez sur "Ajouter"
+webhookOutro=selon les événements sélectionnés, sendinBlue enverra les informations correspondante à Dolibarr.
+#
 # Page À propos
 #
 About = À propos
