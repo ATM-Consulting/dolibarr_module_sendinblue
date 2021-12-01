@@ -291,9 +291,10 @@ class Sendinblue
 	 * TODO : Typiquement le genre de methode à mettre en sortie de do_request avec une vraie gestion des erreurs mais imposerait de revoir entièrement le code module .
 	 * @param $response
 	 * @param bool $errorSetEventMessage to display erro rmessage
+	 * @param string $error_prefix
 	 * @return bool
 	 */
-	public function analyseResponseResult($response, $errorSetEventMessage = false)
+	public function analyseResponseResult($response, $errorSetEventMessage = false, $error_prefix = "")
 	{
 		if (!empty($response['code'])) {
 			$error = $response['code'];
@@ -303,7 +304,7 @@ class Sendinblue
 			if ($errorSetEventMessage) {
 				setEventMessage($error, 'errors');
 			}
-			$this->errors[] = $error;
+			$this->errors[] = !empty($error_prefix)?($error_prefix.' : '.$error):$error;
 			return false;
 		} else {
 			return true;
@@ -347,19 +348,35 @@ class Sendinblue
 				$response = $this->post("contacts/lists/" . $listid . "/contacts/add", json_encode(array($data_type => $items)));
 				if (!$this->analyseResponseResult($response) && $response['message'] != "Contact already in list and/or does not exist") {
 					$failure_email = array_merge($failure_email, $items);
+					$failure_email = array_unique($failure_email);
 					$this->errors[] = ' send contacts to list (ID: ' . $listid . ') error - try 1 - data: ' . json_encode(array($data_type => $items));
 					$error++;
 				} else {
 					if (!empty($response['contacts']['success'])) {
 						$success_email = array_merge($success_email, $response['contacts']['success']);
+						$this->errors[] = 'success_email : ' . var_export($response['contacts']['success'], true);
 					}
 
 					if ((!empty($response['contacts']['failure']) && is_array($response['contacts']['failure'])) || $response['message'] == "Contact already in list and/or does not exist") { // code: invalid_parameter (same code for different message ...)
+
+						$this->errors[] = 'Fail_email : ' . var_export($response['contacts']['failure'], true);
 						$contactToCreate = !empty($response['contacts']['failure']) ? $response['contacts']['failure'] : $items;
 						foreach ($contactToCreate as $email) {
 							if (isset($contactData[$email])) {
 								$response2 = $this->post("contacts", json_encode($contactData[$email]));
-								if (!$this->analyseResponseResult($response2) && (empty($response['code']) || $response2['code'] != 'duplicate_parameter')) { // Message: Contact already exist
+								if (!empty($response['code']) && $response2['code'] == 'duplicate_parameter') {
+									// Le contact existe déja il faut donc mettre à jour l'info sur Dolibarr
+									// cela peut venir d'une erreur lors de la première synchro
+									self::removeItemFromArray($failure_email, $email);
+									$success_email[] = $email;
+									$success_email = array_unique($success_email);
+								}
+								elseif (
+									!$this->analyseResponseResult($response2, false, "contacts/lists/" . $listid . "/contacts/add")
+									&& (
+										empty($response['code']) || $response2['code'] != 'duplicate_parameter' // Message: Contact already exist
+									)
+								) {
 									$this->errors[] = ' create contact error - data: ' . json_encode($contactData[$email]);
 									$error++;
 								}
@@ -369,7 +386,7 @@ class Sendinblue
 						if (!$error) {
 							// Resend
 							$response3 = $this->post("contacts/lists/" . $listid . "/contacts/add", json_encode(array($data_type => $contactToCreate)));
-							if (!$this->analyseResponseResult($response3)) {
+							if (!$this->analyseResponseResult($response3, false, " restart contacts/lists/" . $listid . "/contacts/add")) {
 								$failure_email = array_merge($failure_email, $contactToCreate);
 								$this->errors[] = ' send contacts to list (ID: ' . $listid . ') error - try 2 - data: ' . json_encode(array($data_type => $contactToCreate));
 								$error++;
@@ -390,21 +407,6 @@ class Sendinblue
 			}
 
 			if ($fk_mailing > 0) {
-				if (!empty($success_email)) {
-					$success_email = array_flip(array_flip($success_email));
-					$escaped_email = array();
-					foreach ($success_email as $email) {
-						$escaped_email[] = $db->escape($email);
-					}
-
-					$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET sendinblue_status = 1" .
-						" WHERE fk_mailing = " . $fk_mailing . " AND email IN ('" . implode("','", $escaped_email) . "')";
-					$resql = $db->query($sql);
-					if (!$resql) {
-						$this->error = "Error " . $db->lasterror();
-						dol_syslog(__METHOD__ . " - Update target status 1 - Error: " . $this->error, LOG_ERR);
-					}
-				}
 				if (!empty($failure_email)) {
 					$failure_email = array_flip(array_flip($failure_email));
 					$escaped_email = array();
@@ -416,10 +418,27 @@ class Sendinblue
 						" WHERE fk_mailing = " . $fk_mailing . " AND email IN ('" . implode("','", $escaped_email) . "')";
 					$resql = $db->query($sql);
 					if (!$resql) {
-						$this->error = "Error " . $db->lasterror();
+						$this->error = "Error update failure email " . $db->lasterror();
 						dol_syslog(__METHOD__ . " - Update target status 0 - Error: " . $this->error, LOG_ERR);
 					}
 				}
+
+				if (!empty($success_email)) {
+					$success_email = array_flip(array_flip($success_email));
+					$escaped_email = array();
+					foreach ($success_email as $email) {
+						$escaped_email[] = $db->escape($email);
+					}
+
+					$sql = "UPDATE " . MAIN_DB_PREFIX . "mailing_cibles SET sendinblue_status = 1" .
+						" WHERE fk_mailing = " . $fk_mailing . " AND email IN ('" . implode("','", $escaped_email) . "')";
+					$resql = $db->query($sql);
+					if (!$resql) {
+						$this->error = "Error update success email " . $db->lasterror();
+						dol_syslog(__METHOD__ . " - Update target status 1 - Error: " . $this->error, LOG_ERR);
+					}
+				}
+
 			}
 		}
 
@@ -505,5 +524,15 @@ class Sendinblue
 	public function errorsToString()
 	{
 		return $this->error.(is_array($this->errors)?(($this->error!=''?', ':'').join(', ', $this->errors)):'');
+	}
+
+	/**
+	 * @param array $items
+	 * @param string|int $valueToDel
+	 */
+	static public function removeItemFromArray(&$items, $valueToDel){
+		foreach (array_keys($items, $valueToDel, true) as $key) {
+			unset($items[$key]);
+		}
 	}
 }
