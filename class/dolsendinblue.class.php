@@ -1418,40 +1418,6 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . '::addEmailToList count($batch_email_to_add)=' . count($batch_email_to_add), LOG_DEBUG);
 
 			dol_syslog(get_class($this) . '::addEmailToList start batchSubscribe ' . dol_print_date(dol_now(), 'standard'), LOG_DEBUG);
-//
-//			foreach($batch_email_to_add as $email){
-//				// Call
-//				$data = array(
-//					"email" => $email['email_address'],
-//					"attributes" => array(
-//						"FIRST_NAME" => $email['merge_vars']->FNAME,
-//						"LAST_NAME" => $email['merge_vars']->LNAME,
-//					),
-//					"listIds" => array(intval($listid))
-//				);
-//
-//				if (!empty($email['merge_extrafields']))
-//				{
-//					foreach ($email['merge_extrafields'] as $code => $val)
-//					{
-//						// strtoupper car sendinblue force les majuscules et remplace les espaces par des _
-//						$data['attributes'][strtoupper($code)] = $val;
-//					}
-//				}
-//
-//				try {
-//					$response = $this->sendinblue->create_update_user($data);
-//					if($this->sendinblue->analyseResponseResult($response)){
-//						$this->errors[] = $this->sendinblue->error;
-//						$error ++;
-//					}
-//				} catch ( Exception $e ) {
-//					$this->errors[] = $e->getMessage();
-//					$batch_email_to_add_error=$batch_email_to_add;
-//					$error ++;
-//				}
-//
-//			}
 
 			$contactToAddInList = array();
 			$contactData = array();
@@ -1497,12 +1463,15 @@ class DolSendinBlue extends CommonObject
 				try {
 					$result = $this->sendinblue->addExistingContactsToLists($this->db, $this->fk_mailing, $listid, array('emails' => $contactToAddInList), $contactData);
 					if ($result < 0) {
+						$batch_email_to_add_error=$contactToAddInList;
+						$this->errors[] = '----- START ERRORS FROM addExistingContactsToLists -----';
 						$this->errors = array_merge($this->errors, $this->sendinblue->errors);
+						$this->errors[] = '----- END ERRORS FROM addExistingContactsToLists -----';
 						$error ++;
 					}
 				} catch ( Exception $e ) {
 					$this->errors[] = $e->getMessage();
-					$batch_email_to_add_error=$batch_email_to_add;
+					$batch_email_to_add_error=$contactToAddInList;
 					$error ++;
 				}
 
@@ -1511,11 +1480,12 @@ class DolSendinBlue extends CommonObject
 						$result = $this->sendinblue->delExistingContactsToLists($listid, array('emails' => $contactToDelInList));
 						if ($result < 0) {
 							$this->errors = array_merge($this->errors, $this->sendinblue->errors);
+							$batch_email_to_add_error=$contactToAddInList;
 							$error ++;
 						}
 					} catch ( Exception $e ) {
 						$this->errors[] = $e->getMessage();
-						$batch_email_to_add_error=$batch_email_to_add;
+						$batch_email_to_add_error=$contactToAddInList;
 						$error ++;
 					}
 				}
