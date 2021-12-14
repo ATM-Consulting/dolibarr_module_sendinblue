@@ -1,0 +1,243 @@
+Modul104036Name = SendinBlue
+Modul104036Desc = SendinBlue-Anschluss
+
+ATMAbout = Dieses Modul wurde entwickelt von <a href="http://www.atm-consulting.fr" target="_blank"> ATM Consulting </a> <br> Sie finden die Dokumentation auf unserer <a href = "http://wiki.atm-consulting.fr/index.php/Accueil" target = "_ blank"> Wiki </a> <br> <br> Kontaktieren Sie uns bei technischen Fragen oder Feedback unter <a href = "mailto: support@atm-consulting.fr"> support@atm-consulting.fr </a> <br> <br> Kontaktieren Sie uns bei kommerziellen Fragen unter <a href = "mailto: contact @ atm -consulting .fr "> contact@atm-consulting.fr </a> oder +33 9 77 19 50 70 <br> <br> Unsere anderen Module finden Sie auf <a href =" http: //www.dolistore.com / search .php? orderby = position & orderway = desc & search_query = atm & Submit_search = Suche nach "target =" _ blank "> Dolistore </a>
+
+
+
+#
+# Verwaltungsseite
+#
+SendinBlueSetup = Konfiguration des SendinBlue-Moduls
+SendinBlueSettings = Einstellungen
+SendinBlueSetupPage = SendinBlue-Einstellungsseite
+SendinBlueErrorCurlNotLoaded = Fehler: CURL-Erweiterung wird nicht in PHP-Konfiguration geladen
+
+#
+# Über die Seite
+#
+Über = Über
+SendinBlueAbout = Über SendinBlue
+SendinBlueAboutPage = Seite über SendinBlue
+
+#
+# Rechts
+#
+PermissionSendinBlueRead = Attribute von SendinBlue-Kampagnen lesen
+PermissionSendinBlueRight = Attribute von SendinBlue-Kampagnen schreiben
+
+#
+# Speisekarte
+#
+SendinBlueSending = SendinBlue
+SendinBlueTarget = Empfänger
+SendinBlueListCampaign = Liste der Dolibarr-Kampagnen
+SendinBlueClickReport = Klickbericht
+SendinBlueOpenedReport = Bericht öffnen
+Gesendet = Gesendet
+Gesendet und archiviert = Gesendet und archiviert
+#
+# Administrator
+#
+SettingsSendinBlue = Konfiguration des SendinBlue-Moduls
+SendinBlueExplain = SendinBlue ist ein kostenloser E-Mail-Versanddienst <br> <u> <b> Internet erforderlich </b> </u> <br> Weitere Informationen finden Sie auf der <a href = "Website http://www.sendinblue .com/ "target =" _ blank "> SendinBlue </a>. <br> Um Ihre Anmeldedaten anzuzeigen: <a href =" https://account.sendinblue.com/advanced/api " target = "_ blank "> Mein SendinBlue-Konto </a>
+
+SendinBlueActiveSending = Alle E-Mails werden von SendinBlue versendet
+SendinblueByDol = Alle Ihre E-Mails werden weiterhin über das in der Dolibarr-Konfiguration definierte SMTP gesendet.
+SendinBlueActiveSendingForMailingOnlyHelp = Die Dolibarr-E-Mail-Konfiguration ist nicht betroffen, das Modul wird nur verwendet, um Ihre SendinBlue-Listen und -Segmente zu füttern / zu synchronisieren
+SendinBlueSuccessSave = Konfiguration gespeichert
+SendinBlueDolibarrSettings = Die aktuelle Konfiguration (<a href="%s"> E-Mail-Konfiguration </a>) wird gespeichert, wenn diese Option aktiviert wird. <br> Um zur ursprünglichen Konfiguration zurückzukehren, müssen Sie das Modul nur dadurch deaktivieren Taste.
+SendinBlueDolibarrCheckSettings = Gehen Sie hier: <a href="%s"> E-Mail-Konfiguration </a> um Ihre Konfiguration zu testen
+SendinBlueAPIKeyNotSet = API-Schlüssel erforderlich
+MandrillSecretKeyNotSet = Mandrill API-Schlüssel erforderlich
+SendinBlueSecretKeyNotSet = Geheimer Schlüssel erforderlich
+SendinBlueSenderNameValid = Gültige E-Mail-Adresse
+SendinBlueSenderNameNotValid = Ungültige E-Mail-Adresse
+SendinBlueActiveActivityLocalStorage = Aktiviert die Speicherung des Verlaufs der Kontaktaktivität in der Dolibarr-Datenbank. Seien Sie vorsichtig, dies kann die Größe Ihrer Datenbank erhöhen und die Aktualisierung des Empfängerstatus verlangsamen.
+SENDINBLUE_NB_MAX_LIST = Maximale Anzahl der durchsuchten Listen
+SENDINBLUE_NB_MAX_LISTHelp = Nummer, mit der die Ladegeschwindigkeit des sendinblue-Tabs für einen Kontakt verbessert werden kann, aber VORSICHT, dies kann zu Informationsverlust führen. Lassen Sie das Feld leer, wenn der sendinblue-Tab eines Kontakts schnell genug geladen wird.
+SENDINBLUE_API_KEY = SendinBlue-API-Schlüssel (v3)
+SENDINBLUE_API_KEYHelp = Wenn Sie auf Ihre sendinblue-Informationen zugreifen möchten, füllen Sie bitte dieses Feld aus
+SendBySendinblue = E-Mails werden von SendinBlue versendet
+SendinblueAPIKeyNotSet = SendinBlue API-Schlüssel nicht konfiguriert
+InvalidAPIKey = Ungültiger API-Schlüssel
+InvalidAPIKeyForSTMP = Dieser Schlüssel kann nicht verwendet werden, um Dolibarr-Mails über das SendInBlue-SMTP zu senden
+SENDINBLUE_API_TIMEOUT = API-Antwortzeit
+SENDINBLUE_API_TIMEOUTHelp = Maximale Antwortzeit der SendinBlue API (in Sekunden, Standard: 30s)
+SENDINBLUE_PREFIXNEWLISTONSENDINBLUE = Neue SendinBlue-Listen voranstellen
+SENDINBLUE_PREFIXNEWLISTONSENDINBLUEHelp = Präfix für neue Mailinglisten, die auf SendinBlue von Dolibarr erstellt wurden
+
+SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED = Firmenzusatzfelder für Synchronisation
+SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED = Zusätzliche Kontaktfelder für die Synchronisation
+SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWEDHelp = Wählen Sie hier die zusätzlichen Attribute aus, die Sie synchronisieren möchten <br /> Damit dies korrekt funktioniert, müssen Sie diese / dieselben Attribute auf der Sendinblue-Seite im Abschnitt "Parameter> Kontakte und CRM-Attribute> Attributfelder" mit dem Code von . erstellen das Dolibarr-Attribut als Name des Attributs auf Sendinblue
+SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWEDHelp = Wählen Sie hier die zusätzlichen Attribute aus, die Sie synchronisieren möchten <br /> Damit dies korrekt funktioniert, müssen Sie diese / dieselben Attribute auf der Sendinblue-Seite im Abschnitt "Parameter> Kontakte und CRM-Attribute> Attributfelder" mit dem Code von . erstellen das Dolibarr-Attribut als Name des Attributs auf Sendinblue
+SENINBLUE_USER_ID = Benutzer, der während sendinblue Webhook-Anrufen verwendet wird
+SENINBLUE_WebhookUrl = URL von Webhooks
+SENINBLUE_missingTokenGenerated = Der Sicherheitsschlüssel für die URL zum Starten von geplanten Jobs wurde nicht generiert, er muss mit dem Modul für geplante Aufgaben generiert werden
+SendInBlueWebHooksUrl = URL der Webhooks, die an Sendinblue bereitgestellt werden sollen
+
+
+#
+# Empfängerliste
+#
+SendinBlueCreateList = Erstellen Sie eine Empfängerliste
+SendinBlueDestList = Liste der SendinBlue-Empfänger
+SendinBlueListName = Listenname
+SendinBlueSubcribers = Anzahl der Abonnenten
+SendinBlueNoEmailFound = Referrer und ihre Kontakte haben keine E-Mail (oder ungültig)
+SendinBlueDestListAction = E-Mail der Empfänger
+SendinBlueNewListName = Erstellen Sie die Liste auf SendinBlue (neu laden Sie diese Seite zum Aktualisieren)
+SendinBlueOr = Or
+SendinBlueUpdateExistingList = Wählen Sie eine Liste aus, zu der Empfänger hinzugefügt werden sollen
+SendinBlueListNoEmailFound = Keine Liste gefunden
+SendinBlueSelected = Auswählen
+SendinBlueUpdateExistingSegments = Wählen Sie ein Segment aus, um diese E-Mails hinzuzufügen
+SendinBlueNewSegmentName = Neues Segment erstellen
+SendinBlueSelectSegmentOrNewOnes = Sie haben ein Segment ausgewählt und einen neuen Namen eingegeben. Sie müssen zwischen den beiden Optionen wählen.
+SendinBlueResetSegment = Leeres Segment vor dem Hinzufügen von E-Mail(s)
+SendinBlueSegment = Segment
+CreateCampaignOnThisSegment = Eine Kampagne in diesem Segment erstellen
+SendinBlueUpdateStatus = Aktualisieren Sie den Status von Dolibarr-Empfängern von SendinBlue
+SendinBlueConfirmUpdateCampaignText = Dieser Vorgang kann sehr lang sein und zu einer Fehlermeldung führen, wenn die maximale Ausführungszeit überschritten wurde <br/> Bitten Sie Ihren Dolibarr-Administrator, diesen Task im Batch-Modus über die Befehlszeile auszuführen <br > <textarea cols = " 60" Zeilen = "2" Wrap = "soft"> php% s </textarea>;
+SendinBlueConfirmUpdateCampaign = Bestätigen Sie die Aktualisierung des Status der Dolibarr-Empfänger von SendinBlue für die Kampagnen
+
+SendInBlueReturnError = Sendinblue hat den folgenden Fehler zurückgegeben:% s
+
+#
+# Index
+#
+SendinBlueCampaign = Kampagne
+SendinBlueExplainIndex = Um eine SendinBlue-Kampagne zu erstellen, müssen Sie eine Empfängerliste / ein Segment definieren. <br/> Um eine Liste zu erstellen, gehen Sie zu <a href = "http://www.sendinblue.com/" target = "_ blank "> SendinBlue </a>. <br/> Sie finden einen Helfer auf der Registerkarte <b>% s </b> von <b>% s </b> oder nachdem Sie eine Dolibarr-E-Mail erstellt und Empfänger auf der Registerkarte SendinBlue angesteuert haben.
+DolibarrCampaignLink = Dolibarr-Kampagne verlinkt
+SendinBlueUpdateAllCampaign = Aktualisieren Sie den Status der Dolibarr-Empfänger von SendinBlue für alle Kampagnen
+SendinBlueConfirmUpdateAllCampaignText = Dieser Vorgang kann sehr lang sein und zu einer Fehlermeldung führen, wenn die maximale Ausführungszeit überschritten wurde <br/> Bitten Sie Ihren Dolibarr-Administrator, diese Aufgabe im Batch-Modus über die Befehlszeile zu starten <br > <textarea cols = " 60" Zeilen = "2" Wrap = "soft"> php% s </textarea>;
+SendinBlueConfirmUpdateAllCampaign = Bestätigen Sie die Aktualisierung des Status der Dolibarr-Empfänger von SendinBlue für alle Kampagnen
+SendinBlueCreateEmailingFromCampaign = Erstellen Sie das mit der Kampagne verknüpfte E-Mailing
+SendinBlueConfirmCreateEmailingFromCampaign = Möchten Sie wirklich ein E-Mailing erstellen, das mit der Kampagne "% s" verknüpft ist?
+SendinBlueCampaignID = Kampagnen-ID (SendinBlue)
+SendinBlueAssociateCampaignList = Associate-Mailingliste
+SendinBlueChoiceExistingCampaignList = Wählen Sie eine vorhandene Liste
+SendinBlueCreateNewCampaignList = Eine neue Liste erstellen
+
+#
+# Status
+#
+SendinBluesave = Registriert
+SendinBluepaused = Pause
+SendinBlueschedule = Geplant
+SendinBluesent = Gesendet
+SendinBlueHardBounce = Hard Bounce
+SendinBlueSoftBounce = Soft-Bounce
+SendinBlueOpen = Open
+SendinBlueClick = Klick
+SendinBlueUnsucscribe = Abgemeldet
+
+#
+# Kontaktstatus
+#
+SendinBlueSubscribersState = Kontaktstatus
+SendinBlueStatusunsubscribed = Abgemeldet
+SendinBlueStatuscleaned = Gelöscht (oder nicht registriert)
+SendinBlueStatuspending = Pending
+SendinBlueStatussubscribed = Abonniert
+
+#
+# Abonnement
+#
+SendinBlueUnsubscribe = Link zum Abbestellen
+SendinBluesending = Sendevorgang läuft
+
+#
+# SendinBluescreen
+#
+MailJetUnsubLinkMandatory = Der Abmeldelink ist für den SendinBlue-E-Mail-Versand erforderlich
+SendinBlueNoFileAttached = Angehängte Dateien sind in SendinBlue-Kampagnen-E-Mails nicht erlaubt
+MailJetCannotSendControlNotOK = Sie können diese E-Mail nicht mit SendinBlue senden, da die obige(n) Bedingung(en) nicht erfüllt sind.
+SendinBlueToSendByMailJetGoToSendinBlue = Um diese E-Mail von einer SendinBlue-Kampagne zu versenden, gehen Sie zum SendinBlue-Tab. Andernfalls werden sie als transaktionale SendinBlue / Mandrill-E-Mails ausgegeben.
+SendinBlueNotValidated = Ihre Kampagne ist noch nicht validiert
+SendinBlueSelectSegmentOrList = Es ist kein Empfänger definiert. Sie können die Registerkarte Empfänger oder die SendinBlue-Listen / -Segmente mit den folgenden Optionen verwenden.
+SendinBlueImportForm = Import von SendinBlue
+SendinBlueImportFormHelp = Importieren Sie E-Mails aus der ausgewählten SendinBlue-Liste / dem ausgewählten Segment an Dolibarr-Empfänger
+SendinBlueImportCopyForm = Import von SendinBlue (beglaubigte Kopie)
+SendinBlueImportCopyFormHelp = Importieren Sie die sendinblue-Kontakte, löschen und ersetzen Sie die Dolibarr-Empfänger durch die E-Mails aus der ausgewählten SendinBlue-Liste / dem ausgewählten Segment
+SendinBlueExportTo = Nach SendinBlue exportieren
+SendinBlueExportToHelp = Aktuelle Dolibarr-Empfänger in die ausgewählte SendinBlue-Liste / -Segment exportieren
+SendinBlueExportCopyTo = Export nach SendinBlue (zertifizierte Kopie)
+SendinBlueExportCopyToHelp = Dolibarr-Empfänger exportieren, sendinblue-Kontakte löschen und durch ausgewählte Dolibarr-Empfänger ersetzen
+SendinBlueEmailNotSync = Die Empfänger der SendinBlue-Liste / des Segments unterscheiden sich von den in Dolibarr definierten. Verwenden Sie das Bedienfeld oben, um sie zu synchronisieren.
+SendinBlueCannotSendControlNotOK = Die Bedingungen zum Erstellen einer Kampagne sind nicht erfüllt.
+SendinBlueCreateCampaign = Erstellen Sie die SendinBlue-Kampagne
+SendinBlueSenderName = Name des Absenders
+SendinBlueSenderNameMandatory = Absendername ist erforderlich
+SendinBlueStatus = Status der SendinBlue-Kampagne
+SendinBlueSendMailing = SendinBlue-Kampagne
+SendinBlueNotActive = Das Modul ist aktiv, aber die Konfiguration ist nicht abgeschlossen
+SendinBlueEmailNotSyncInDolNotSendinBlue = Empfängeradresse(n) Dolibarr fehlt in der SendinBlue-Liste / im Segment
+SendinBlueUpdateOnly = Speichern Sie den Listen- / Segmentlink zwischen der Dolibarr-Kampagne und der SendinBlue-Kampagne nur
+SendinBlueUpdateSegmentOnly = Nur das ausgewählte Segment aktualisieren (werden nur die Kontakte hinzugefügt, die bereits in der SendinBlue-Liste vorhanden sind)
+SendinBlueStats = SendinBlue-Statistiken.
+SendinBlueSenderMustBeAnEmail = Der Absender muss eine E-Mail enthalten
+titleGraphCampaignActions = Kontaktaktivität in der Kampagne
+SendinBlue_SyncLoading = Synchronisierung läuft
+
+#
+# Kontaktaktivitäten
+#
+SendinBlueActivites = SendinBlue-Aktivität
+NbOfEMailingsSend = Massen-E-Mailings gesendet
+SendinBlueContactIsList = Der Kontakt gehört zur Liste
+titleGraphContactActions = Zusammenfassung der Kontaktaktivität
+
+#
+# Kontaktstatus
+#
+SendinBlueSubscribersState = Kontaktstatus
+Abgemeldet = Abgemeldet
+gereinigt = entfernt
+ausstehend = ausstehend
+abonniert = abonniert
+NoEmail = Keine E-Mail
+unique_views = Nur einmal gesehen
+Angesehen = Mindestens einmal gesehen
+abmelden = Abgemeldet
+mirror_click = Angeklickter Spiegel-Link
+angeklickt = angeklickt
+Beschwerden = Beschwerden
+geöffnet = geöffnet
+Klicks = Angeklickt
+abmelden = abmelden
+
+#
+# Export
+#
+ExportDataset_MailinsDestStatus = SendinBlue / Dolibarr - Empfängerstatus exportieren
+
+
+#
+# Kontaktkategorieblatt
+#
+sendinblue_nb_email_removed = Anzahl der aus der Liste gelöschten E-Mail(s):% d
+sendinblue_nb_email_added = Anzahl der E-Mail(s), die aus der Liste hinzugefügt wurden:% d
+sendinblue_select_list = Zugehörige sendinblue-Liste
+sendinblue_select_segment = Zugehöriges sendinblue-Segment
+sendinblue_sync = SendinBlue-Synchronisierung
+sendinblue_error_syn = Fehler bei der Synchronisation:% s
+SendinBlue_error_can_not_update_fields = Fehler beim Aktualisieren der sendinblue-Felder
+sendinblue_warning_info_about_sync = Warnung: eine Synchronisierung kann lange dauern
+sendinblue_confirm_sync = Synchronisation bestätigen?
+UpdateSendinBlueObject = Kontaktänderung
+ConfirmUpdateSendinBlueObject = Die E-Mail-Adresse wird auf SendinBlue nicht geändert. Möchten Sie die E-Mail-Adresse des Kontakts wirklich ändern?
+
+
+#
+# target.php
+#
+ExportList = Liste exportieren
+MailingModuleDescContactCompanies = Kontakte Dritter (Interessenten, Kunden, Lieferanten ...)
+MailingModuleDescDolibarrContractsLinesExpired = Dritte mit abgelaufenen Vertragslinien
+NoRecords = Keine Ergebnisse
+
+uniqueSubscribers = Einzigartige Abonnenten
+SendinBlueBlacklistedSubscribers = Blacklisted
+SendinBlueTotalSubcribers = Gesamtzahl der Abonnenten
+
