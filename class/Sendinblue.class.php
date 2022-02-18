@@ -251,7 +251,7 @@ class Sendinblue
     {
         $id = $data['id'];
         unset($data['id']);
-        return $this->delete("contacts/list/".intval($id),json_encode($data));
+        return $this->post("contacts/lists/".intval($id).'/contacts/remove',json_encode($data));
     }
 
 
