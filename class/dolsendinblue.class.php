@@ -1541,7 +1541,7 @@ class DolSendinBlue extends CommonObject
 
 
 		try {
-			$response = $this->sendinblue->delete_users_list(array('id'=>$listid,'users'=>$array_email));
+			$response = $this->sendinblue->delete_users_list(array('id'=>$listid,'emails'=>$array_email));
 			$success_count ++;
 		} catch ( Exception $e ) {
 			$error ++;
@@ -1549,11 +1549,9 @@ class DolSendinBlue extends CommonObject
 			dol_syslog(get_class($this) . "::getListCampaign " . $this->error, LOG_ERR);
 		}
 
-		if ($response['error_count'] > 0) {
+		if (isset($response['code']) > 0) {
 			$error ++;
-			foreach ( $response['errors'] as $err ) {
-				$this->errors[] = $err['error'];
-			}
+			$this->errors[] = $response['message'];
 		}
 		if ($error) {
 			foreach ( $this->errors as $errmsg ) {
