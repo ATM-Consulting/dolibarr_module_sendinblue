@@ -402,7 +402,7 @@ class Sendinblue
 									$this->errors[] = ' send contacts to list (ID: ' . $listid . ') failed for ' . $data_type . ': ' . implode(', ', $contactToCreate);
 								}
 							}
-						} elseif(is_array($response['failure']) && is_array($response['failure'])){
+						} elseif(is_array($response['failure']) && is_array($response2['failure'])){
 							$failure_email = array_merge($failure_email, $response['failure']);
 						}
 					}
