@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 
 ## 2.4 *26/10/2021*
+- FIX : V16 TOKEN - *08/06/2022* - 2.4.7  
 - FIX : Change errors management - 2.4.6 *15/04/2022*
 - FIX : Route for removing contact from list - 2.4.5 *17/02/2022*
 - FIX : Contacts already sent not tagged as sent - 2.4.4 *15/02/2022*
