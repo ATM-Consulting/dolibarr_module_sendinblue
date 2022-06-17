@@ -63,7 +63,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 $hookmanager=new HookManager($db);
 $hookmanager->initHooks(array('sendinbluedestlist'));
 
-
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 /*
  * ACTIONS
 *
@@ -128,7 +128,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 
 		print '<form name="formsoc" method="post" action="'.$_SERVER["PHP_SELF"].'" enctype="multipart/form-data">';
 		print '<input type="hidden" value="associateconfirm" name="action">';
-		print '<input type="hidden" value="'.$_SESSION['newtoken'].'" name="token">';
+		print '<input type="hidden" value="'.$newToken.'" name="token">';
 		print '<input type="hidden" value="'.$productid.'" name="productid">';
 		print '<input type="hidden" value="'.$type.'" name="type">';
 
@@ -223,7 +223,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 //  'totalSubscribers' => int 0
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
-			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'">'.$dest_line['name'].'</a></td>';
+			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'&token='.$newToken.">'.$dest_line['name'].</a></td>';
 			if(empty($dest_line['totalSubscribers'])) $dest_line['totalSubscribers']=0;
 			print '<td>'.$dest_line['uniqueSubscribers'].'</td>';
 			print '<td>'.$dest_line['totalBlacklisted'].'</td>';
