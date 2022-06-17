@@ -449,14 +449,17 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	// Other attributes
 	$parameters=array();
 	$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);
+
 	if (empty($reshook) && ! empty($extrafields->attribute_label)) {
-		foreach($extrafields->attribute_label as $key=>$label) {
-			$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$object->array_options["options_".$key]);
-			print '<tr class="impair"><td';
-			if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-			print '>'.$label.'</td><td colspan="3">';
-			print $extrafields->showInputField($key,$value);
-			print "</td></tr>\n";
+		if(!empty($extrafields->attributes[$object->table_element]['label'])) {
+			foreach ($extrafields->attributes[$object->table_element]['label'] as $key => $label) {
+				$value = (isset($_POST["options_" . $key]) ? $_POST["options_" . $key] : $object->array_options["options_" . $key]);
+				print '<tr class="impair"><td';
+				if (!empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
+				print '>' . $label . '</td><td colspan="3">';
+				print $extrafields->showInputField($key, $value);
+				print "</td></tr>\n";
+			}
 		}
 	}
 
