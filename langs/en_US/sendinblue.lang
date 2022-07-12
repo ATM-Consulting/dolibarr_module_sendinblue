@@ -20,3 +20,9 @@ About = About
 SendinBlueAbout = About SendinBlue
 SendinBlueAboutPage = SendinBlue About Page
 
+
+#
+# Rights / Permissons
+#
+PermissionSendinBlueRead = Reading the attributes of SendinBlue campaigns
+PermissionSendinBlueRight = Writing attributes for SendinBlue campaigns
