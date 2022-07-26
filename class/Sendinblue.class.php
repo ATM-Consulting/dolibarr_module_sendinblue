@@ -6,6 +6,7 @@
 
 class Sendinblue
 {
+	static $SENDINBLUE_API_LINES_LIMIT = 50; 
     public $api_key;
     public $base_url;
     public $timeout;
