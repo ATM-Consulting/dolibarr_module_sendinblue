@@ -252,7 +252,7 @@ class Sendinblue
     {
         $id = $data['id'];
         unset($data['id']);
-        return $this->delete("contacts/list/".intval($id),json_encode($data));
+        return $this->post("contacts/lists/".intval($id).'/contacts/remove',json_encode($data));
     }
 
 
@@ -360,12 +360,12 @@ class Sendinblue
 
 					if ((!empty($response['contacts']['failure']) && is_array($response['contacts']['failure'])) || $response['message'] == "Contact already in list and/or does not exist") { // code: invalid_parameter (same code for different message ...)
 
-						$this->errors[] = 'Fail_email : ' . var_export($response['contacts']['failure'], true);
 						$contactToCreate = !empty($response['contacts']['failure']) ? $response['contacts']['failure'] : $items;
 						foreach ($contactToCreate as $email) {
 							if (isset($contactData[$email])) {
+								// Creation du contact par API
 								$response2 = $this->post("contacts", json_encode($contactData[$email]));
-								if (!empty($response['code']) && $response2['code'] == 'duplicate_parameter') {
+								if (!empty($response2['code']) && $response2['code'] == 'duplicate_parameter') {
 									// Le contact existe déja il faut donc mettre à jour l'info sur Dolibarr
 									// cela peut venir d'une erreur lors de la première synchro
 									self::removeItemFromArray($failure_email, $email);
@@ -381,10 +381,13 @@ class Sendinblue
 									$this->errors[] = ' create contact error - data: ' . json_encode($contactData[$email]);
 									$error++;
 								}
+								elseif(!empty($response2['id'])){
+									// le contact est bien créé, il ne faut pas forcer la création
+									self::removeItemFromArray($contactToCreate, $email);
+								}
 							}
 						}
-
-						if (!$error) {
+						if (!$error && !empty($contactToCreate)) {
 							// Resend
 							$response3 = $this->post("contacts/lists/" . $listid . "/contacts/add", json_encode(array($data_type => $contactToCreate)));
 							if (!$this->analyseResponseResult($response3, false, " restart contacts/lists/" . $listid . "/contacts/add")) {
@@ -400,7 +403,7 @@ class Sendinblue
 									$this->errors[] = ' send contacts to list (ID: ' . $listid . ') failed for ' . $data_type . ': ' . implode(', ', $contactToCreate);
 								}
 							}
-						} else {
+						} elseif(is_array($response['failure']) && is_array($response2['failure'])){
 							$failure_email = array_merge($failure_email, $response['failure']);
 						}
 					}
