@@ -223,7 +223,7 @@ if (!empty($conf->global->SENDINBLUE_API_KEY)) {
 //  'totalSubscribers' => int 0
 			$var=!$var;
 			print "<tr " . $bc[$var] . ">";
-			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'&token='.$newToken.'">'.$dest_line['name'].</a></td>';
+			print '<td><a target="_blanck" href="https://my.sendinblue.com/users/list/id/'.$dest_line['id'].'&token='.$newToken.'">'.$dest_line['name'].'</a></td>';
 			if(empty($dest_line['totalSubscribers'])) $dest_line['totalSubscribers']=0;
 			print '<td>'.$dest_line['uniqueSubscribers'].'</td>';
 			print '<td>'.$dest_line['totalBlacklisted'].'</td>';
