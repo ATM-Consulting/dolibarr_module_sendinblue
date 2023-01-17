@@ -42,13 +42,12 @@ $langs->load('products');
 $action=GETPOST('action','alpha');
 $confirm = GETPOST('confirm', 'none');
 
-$limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
+$limit = (GETPOST('limit', 'int') && GETPOST('limit', 'int') <= Sendinblue::$SENDINBLUE_API_LINES_LIMIT) ? GETPOST('limit', 'int') : Sendinblue::$SENDINBLUE_API_LINES_LIMIT; // SendInBlue does not send any result if limit > 50
 $page = GETPOST("page", 'int');
 if (empty($page) || $page == -1 || !empty($search_btn) || !empty($search_remove_btn) || (empty($toselect) && $massaction === '0')) { $page = 0; }     // If $page is not defined, or '' or -1
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 $page = ($page >= 0 ? ($page <= 499 ? $page : 499) : 0);
-$page_limit = ($page_limit > 0 ? ($page_limit < 1000 ? $page_limit : 1000) : 1);
 
 $param='';
 if ($limit > 0 && $limit != $conf->liste_limit) $param.='&limit='.urlencode($limit);
@@ -241,7 +240,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		if (++$idx >= $limit) break;
 	}
 }else {
-	print "<tr " . $bc[$var] . ">";
+	print "<tr>";
 	print '<td colspan="3">'.$langs->trans('NoRecords').'</td>';
 	print '</tr>';
 }
