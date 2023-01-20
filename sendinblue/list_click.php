@@ -66,7 +66,7 @@ $sortfield = GETPOST('sortfield', 'alpha');
 $page = GETPOST('page', 'int');
 $page = intval($page);
 $contact_id=(int)GETPOST('contactid', 'int');
-
+$limit = GETPOST('limit', 'int');
 
 if (empty($search_year)) {
 	$search_year=dol_print_date(dol_now(),'%Y');
@@ -168,7 +168,7 @@ if ($result < 0) {
 	setEventMessage($sendinblueactivities->error, 'errors');
 }
 
-print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $option, $sortfield, $sortorder, '', $result, $nbtotalofrecords);
+print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $options, $sortfield, $sortorder, '', $result, $nbtotalofrecords);
 
 print '<form method="post" action="' . $_SERVER ['PHP_SELF'] . '" name="search_form">' . "\n";
 
@@ -205,7 +205,7 @@ print '<td>'.$form->selectcontacts(0,'contactid','contactid',1).'</td>';
 print '</tr>';
 $sendinbluestatic = new DolSendinBlue($db);
 $contact_array=array();
-if (is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
+if (!empty($sendinblueactivities->contactemail_clickactivity) && is_array($sendinblueactivities->contactemail_clickactivity) && count($sendinblueactivities->contactemail_clickactivity) > 0) {
 	foreach ( $sendinblueactivities->contactemail_clickactivity as $activites ) {
 
 		if (!array_key_exists($activites->contactid, $contact_array) && !empty($activites->contactid)) {

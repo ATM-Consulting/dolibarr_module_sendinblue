@@ -1,7 +1,7 @@
 # Dolibarr module sendinblue
 
 
-**Attention :**  
+**Attention :**
 Les caractères unicode nécessitant 4 octets en utf-8 (tel que les emojis) nécessitent une base de donnée en barracuda et des tables en mb4
 
 **Warning :**  

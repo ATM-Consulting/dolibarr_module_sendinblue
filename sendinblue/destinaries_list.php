@@ -114,7 +114,7 @@ $result=$sendinblue->getListDestinaries();
 */
 
 llxHeader('',$langs->trans("SendinBlueDestList"));
-
+$var=0;
 $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$product,$action);
 
 $formsendinblue = new FormSendinBlue($db);

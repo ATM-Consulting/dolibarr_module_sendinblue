@@ -618,9 +618,11 @@ class DolSendinBlue extends CommonObject
 					'data' => array($response)
 				);
 			} else {
-				$nb_lists = $response['count'];
-				if ($nb_lists > 100) {
-					$response = $this->sendinblue->get('contacts/lists');
+				if(!empty($response['count'])) {
+					$nb_lists = $response['count'];
+					if($nb_lists > 100) {
+						$response = $this->sendinblue->get('contacts/lists');
+					}
 				}
 
 				$this->listdest_lines = array();
@@ -1336,9 +1338,10 @@ class DolSendinBlue extends CommonObject
 
 		dol_syslog(get_class($this) . '::addEmailToList count($$array_email)=' . count($array_email), LOG_DEBUG);
 
-        $TExtSociete = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED);
-        $TExtContact = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED);
-
+        $TExtSociete = '';
+		$TExtContact = '';
+		if(!empty($conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED)) $TExtSociete = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED);
+		if(!empty($conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED)) $TExtContact = explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED);
 		foreach ( $array_email as $email ) {
 
 			// email is formated like email&type&id where type=contact for contact or thirdparty and id is the id of contact or thridparty
