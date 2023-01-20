@@ -1,28 +1,29 @@
 Module104036Name = SendinBlue
 Module104036Desc = Connecteur SendinBlue
 
-ATMAbout = Ce module a été développé par <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>Vous pouvez retrouver la documentation sur notre <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>Pour toute question technique ou retour, contactez-nous sur <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>Pour toute question commerciale, contactez-nous sur <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> ou au +33 9 77 19 50 70<br><br>Retrouvez nos autres modules sur <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
+ATMAbout = Ce module a été développé par <a href="https://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>Vous pouvez retrouver la documentation sur notre <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>Pour toute question technique ou retour, contactez-nous sur <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>Pour toute question commerciale, contactez-nous sur <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> ou au +33 9 77 19 50 70<br><br>Retrouvez nos autres modules sur <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
 
 
 
 #
-# Page d'administration
+# Page d'administration / Setup
 #
 SendinBlueSetup = Configuration du module SendinBlue 
 SendinBlueSettings = Réglages
 SendinBlueSetupPage = Page de réglage de SendinBlue
-SendinBlueErrorCurlNotLoaded=Erreur : l'extension CURL n'est pas chargée dans la configuration PHP
+SendinBlueErrorCurlNotLoaded = Erreur : l'extension CURL n'est pas chargée dans la configuration PHP
 
 #
 # Page Aide
 #
-webhookIntro=Nous allons voir ici, comment utiliser les webhooks de sendInBlue :<br/>
-webhookPart1=Après avoir renseigné votre "clé API SendinBlue (v3)" dans l'écran de configuration du module, vous devez vous rendre sur votre compte SendinBlue pour créer de nouveaux webhooks.<br/>Pour cela, rendez-vous dans les paramètres de votre compte puis "Webhooks"
-webhookPart2=Vous arrivez sur la liste des webhooks présents. Cliquez sur "ajouter un nouveau webhook"
-webhookPart3=Il ne vous reste plus qu'à renseigner l'url à appeler (présente dans l'écran de configuration du module).<br/> Sélectionnez les évènements déclencheurs et cliquez sur "Ajouter"
-webhookOutro=selon les événements sélectionnés, sendinBlue enverra les informations correspondante à Dolibarr.
+webhookIntro = Nous allons voir ici, comment utiliser les webhooks de sendInBlue :<br/>
+webhookPart1 = Après avoir renseigné votre "clé API SendinBlue (v3)" dans l'écran de configuration du module, vous devez vous rendre sur votre compte SendinBlue pour créer de nouveaux webhooks.<br/>Pour cela, rendez-vous dans les paramètres de votre compte puis "Webhooks"
+webhookPart2 = Vous arrivez sur la liste des webhooks présents. Cliquez sur "ajouter un nouveau webhook"
+webhookPart3 = Il ne vous reste plus qu'à renseigner l'url à appeler (présente dans l'écran de configuration du module).<br/> Sélectionnez les évènements déclencheurs et cliquez sur "Ajouter"
+webhookOutro = selon les événements sélectionnés, sendinBlue enverra les informations correspondante à Dolibarr.
+
 #
-# Page À propos
+# Page À propos / About
 #
 About = À propos
 SendinBlueAbout = À propos de SendinBlue
@@ -37,13 +38,14 @@ PermissionSendinBlueRight = Écriture des attributs des campagnes SendinBlue
 #
 # Menu
 #
-SendinBlueSending=SendinBlue
-SendinBlueTarget=Destinataires
+SendinBlueSending = SendinBlue
+SendinBlueTarget = Destinataires
 SendinBlueListCampaign = Liste des campagnes Dolibarr
-SendinBlueClickReport=Rapport des clics
+SendinBlueClickReport = Rapport des clics
 SendinBlueOpenedReport = Rapport des ouvertures
 Sent = Envoyé
 Sent and Archived = Envoyé et Archivé
+
 #
 # Admin
 #

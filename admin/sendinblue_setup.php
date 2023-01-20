@@ -167,7 +167,7 @@ print '</tr>';
 // SENDINBLUE_API_TIMEOUT
 print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_API_TIMEOUT") . '</td>';
 print '<td align="left">';
-print '<input type="number" name="SENDINBLUE_API_TIMEOUT" value="' . $conf->global->SENDINBLUE_API_TIMEOUT . '" size="20" ></td>';
+print '<input type="number" name="SENDINBLUE_API_TIMEOUT" value="' . (!empty($conf->global->SENDINBLUE_API_TIMEOUT) ? $conf->global->SENDINBLUE_API_TIMEOUT : '') . '" size="20" ></td>';
 print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_API_TIMEOUTHelp"), 1, 'help');
 print '</td>';
@@ -176,7 +176,7 @@ print '</tr>';
 // SENDINBLUE_PREFIXNEWLISTONSENDINBLUE
 print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_PREFIXNEWLISTONSENDINBLUE") . '</td>';
 print '<td align="left">';
-print '<input type="text" name="SENDINBLUE_PREFIXNEWLISTONSENDINBLUE" value="' . dol_escape_js($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE, 2) . '" size="20" ></td>';
+print '<input type="text" name="SENDINBLUE_PREFIXNEWLISTONSENDINBLUE" value="' . (!empty($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE) ? dol_escape_js($conf->global->SENDINBLUE_PREFIXNEWLISTONSENDINBLUE, 2) : '') . '" size="20" ></td>';
 print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_PREFIXNEWLISTONSENDINBLUEHelp"), 1, 'help');
 print '</td>';
@@ -184,7 +184,7 @@ print '</tr>';
 
 print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED") . '</td>';
 print '<td align="left">';
-print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', $extralabels_societe, explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED));
+print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED', $extralabels_societe, !empty($conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED) ? explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWED) : '');
 print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_EXTRAFIELDS_SOCIETE_ALLOWEDHelp"), 1, 'help');
 print '</td>';
@@ -192,7 +192,7 @@ print '</tr>';
 
 print '<tr class="impair"><td>' . $langs->trans("SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED") . '</td>';
 print '<td align="left">';
-print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED', $extralabels_contact, explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED));
+print Form::multiselectarray('SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED', $extralabels_contact, !empty($conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED) ? explode(',', $conf->global->SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWED) : '');
 print '<td align="left">';
 print $form->textwithpicto('', $langs->trans("SENDINBLUE_EXTRAFIELDS_CONTACT_ALLOWEDHelp"), 1, 'help');
 print '</td>';
@@ -218,12 +218,12 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-
+<
 print '<tr class="impair">';
 print '<td>' . $langs->trans("SENINBLUE_USER_ID").'<br>';
 print '</td>';
 print '<td >';
-print $form->select_dolusers($conf->global->SENINBLUE_USER_ID, 'SENINBLUE_USER_ID', true);
+print $form->select_dolusers(!empty($conf->global->SENINBLUE_USER_ID) ? $conf->global->SENINBLUE_USER_ID : '', 'SENINBLUE_USER_ID', true);
 print '</td>';
 print '<td></td>';
 print '</tr>';

@@ -6,6 +6,7 @@
 
 class Sendinblue
 {
+	static $SENDINBLUE_API_LINES_LIMIT = 50; 
     public $api_key;
     public $base_url;
     public $timeout;
@@ -357,7 +358,7 @@ class Sendinblue
 						$this->errors[] = 'success_email : ' . var_export($response['contacts']['success'], true);
 					}
 
-					if ((!empty($response['contacts']['failure']) && is_array($response['contacts']['failure'])) || $response['message'] == "Contact already in list and/or does not exist") { // code: invalid_parameter (same code for different message ...)
+					if ((!empty($response['contacts']['failure']) && is_array($response['contacts']['failure'])) || (!empty($response['message']) && ($response['message'] == "Contact already in list and/or does not exist"))) { // code: invalid_parameter (same code for different message ...)
 
 						$contactToCreate = !empty($response['contacts']['failure']) ? $response['contacts']['failure'] : $items;
 						foreach ($contactToCreate as $email) {

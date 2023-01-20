@@ -52,12 +52,12 @@ $backtopage = GETPOST('backtopage','alpha');
 $id			= GETPOST('id','int');
 $socid		= GETPOST('socid','int');
 $listid		= GETPOST('listid','alpha');
-if ($user->societe_id) $socid=$user->societe_id;
+if (!empty($user->societe_id)) $socid=$user->societe_id;
 
 $object = new Contact($db);
 $extrafields = new ExtraFields($db);
 $sendinblue= new DolSendinBlue($db);
-
+$var = 0;
 // fetch optionals attributes and labels
 $extralabels=$extrafields->fetch_name_optionals_label($object->table_element);
 
@@ -77,7 +77,7 @@ $res=$object->fetch_optionals($object->id,$extralabels);
 
 
 // Security check
-$result = restrictedArea($user, 'contact', $id, 'socpeople&societe', '', '', 'rowid', $objcanvas); // If we create a contact with no company (shared contacts), no check on write permission
+$result = restrictedArea($user, 'contact', $id, 'socpeople&societe', '', '', 'rowid'); // If we create a contact with no company (shared contacts), no check on write permission
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('sendinbluecontactcard'));
@@ -86,7 +86,7 @@ $hookmanager->initHooks(array('sendinbluecontactcard'));
  *	Actions
 */
 
-$parameters=array('id'=>$id, 'objcanvas'=>$objcanvas);
+$parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 $error=$hookmanager->error; $errors=array_merge($errors, (array) $hookmanager->errors);
 
