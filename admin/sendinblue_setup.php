@@ -218,7 +218,6 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-<
 print '<tr class="impair">';
 print '<td>' . $langs->trans("SENINBLUE_USER_ID").'<br>';
 print '</td>';
