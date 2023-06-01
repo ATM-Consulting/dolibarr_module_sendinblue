@@ -343,7 +343,8 @@ if ($object->fetch($id) >= 0)
 				$qualified=1;
 				foreach ($obj->require_module as $key)
 				{
-					if (! empty($conf->$key->enabled) || (! $user->admin && $obj->require_admin))
+
+					if (empty($conf->$key->enabled) || (! $user->admin && $obj->require_admin))
 					{
 						$qualified=0;
 						//print "Les prerequis d'activation du module mailing ne sont pas respectes. Il ne sera pas actif";
@@ -628,7 +629,7 @@ if ($object->fetch($id) >= 0)
 					print '<td align="center">&nbsp;</td>';
 					print '<td align="right" class="nowrap">'.$langs->trans("MailingStatusNotSent");
 					if ($user->rights->mailing->creer && $allowaddtarget) {
-						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'">'.img_delete($langs->trans("RemoveRecipient"));
+						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'&token='.$_SESSION['newtoken'].'">'.img_delete($langs->trans("RemoveRecipient"));
 					}
 					print '</td>';
 				}
