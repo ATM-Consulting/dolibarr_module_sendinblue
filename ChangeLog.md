@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 
 ## 2.4 *26/10/2021*
+- FIX : Impossibilité de supprimé des contacts ajoutés en tant que destinataires + correction bugs - *01/06/2023* - 2.4.10
 - FIX : V17 Compat - *17/01/2023* - 2.4.9
 - FIX : V16 TOKEN - *08/06/2022* - 2.4.8
 - FIX : Gestion de l'affichage des extrafields sur une fiche sendinblue- 2.4.7 *16/06/2022*
