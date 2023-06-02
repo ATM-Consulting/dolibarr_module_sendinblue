@@ -629,7 +629,8 @@ if ($object->fetch($id) >= 0)
 					print '<td align="center">&nbsp;</td>';
 					print '<td align="right" class="nowrap">'.$langs->trans("MailingStatusNotSent");
 					if ($user->rights->mailing->creer && $allowaddtarget) {
-						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'&token='.$_SESSION['newtoken'].'">'.img_delete($langs->trans("RemoveRecipient"));
+						$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
+						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'&token='.$newToken.'">'.img_delete($langs->trans("RemoveRecipient"));
 					}
 					print '</td>';
 				}
