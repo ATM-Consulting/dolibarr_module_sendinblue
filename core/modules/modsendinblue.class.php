@@ -325,7 +325,7 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/list_click.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 107,
-				'enabled' => '$user->rights->sendinblue->read',
+				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
 				'perms' => '$user->rights->sendinblue->read',
 				'target' => '',
 				'user' => 2
@@ -339,7 +339,7 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/list_open.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 108,
-				'enabled' => '$user->rights->sendinblue->read',
+				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
 				'perms' => '$user->rights->sendinblue->read',
 				'target' => '',
 				'user' => 2
