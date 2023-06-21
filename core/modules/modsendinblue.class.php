@@ -60,7 +60,7 @@ class modsendinblue extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "SendinBlue Connector";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '2.4.10';
+		$this->version = '2.4.11';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -325,7 +325,7 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/list_click.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 107,
-				'enabled' => '$user->rights->sendinblue->read',
+				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
 				'perms' => '$user->rights->sendinblue->read',
 				'target' => '',
 				'user' => 2
@@ -339,7 +339,7 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/list_open.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 108,
-				'enabled' => '$user->rights->sendinblue->read',
+				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
 				'perms' => '$user->rights->sendinblue->read',
 				'target' => '',
 				'user' => 2
