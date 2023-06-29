@@ -228,7 +228,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 		if (!empty($sendinblue_dolibarr->fk_mailing)) {
 			$mailing = new Mailing($db);
 			$mailing->fetch($sendinblue_dolibarr->fk_mailing);
-			print '<a target="_blanck" href="' . dol_buildpath('/comm/mailing/card.php', 1) . '?id=' . $mailing->id . $param . $param2 . '">' . (empty($mailing->titre) ? $langs->trans('RecordDeleted') : $mailing->titre) . '</a>';
+			print '<a target="_blanck" href="' . dol_buildpath('/comm/mailing/card.php', 1) . '?id=' . $mailing->id . $param . $param2 . '">' . (empty($mailing->title) ? $langs->trans('RecordDeleted') : $mailing->title) . '</a>';
 		} else {
 			print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?action=createemailing&sendinblueid=' . $line['id'] .
 				'&campaignname=' . urlencode(!empty($line['settings']['title']) ? $line['settings']['title'] : $line['campaign_name']) . $param . $param2 . '">' .
