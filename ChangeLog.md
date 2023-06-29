@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 
 ## 2.4 *26/10/2021*
+- FIX : Ajout du bouton "Passer le mailing au statut envoyé complètement - *29/06/2023* - 2.4.12
 - FIX : Make menu experimentals because they don't work - *20/06/2023* - 2.4.11
 - FIX : Impossibilité de supprimer des contacts ajoutés en tant que destinataires + correction bugs - *01/06/2023* - 2.4.10
 - FIX : V17 Compat - *17/01/2023* - 2.4.9
