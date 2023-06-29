@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 
 ## 2.4 *26/10/2021*
+- FIX : Ajout du bouton "Passer le mailing au statut envoyé complètement - *29/06/2023* - 2.4.14
 - FIX : Prise en compte du mauvais champ pour l'affichage du titre des mailings - *29/06/2023* - 2.4.13
 - FIX : Status of mailing targets were not working - *29/06/2023* - 2.4.12
 - FIX : Make menu experimentals because they don't work - *20/06/2023* - 2.4.11
