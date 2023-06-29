@@ -190,6 +190,7 @@ SendinBlueStats=SendinBlue Stats.
 SendinBlueSenderMustBeAnEmail=L'émetteur doit contenir un e-mail
 titleGraphCampaignActions=Activité des contacts sur la campagne
 SendinBlue_SyncLoading=Synchronisation en cours
+SetStatusToSent=Passer le mailing au statut envoyé complètement
 
 #
 # Contact Activites

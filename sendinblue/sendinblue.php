@@ -120,6 +120,18 @@ if ($action == 'settitre' || $action == 'setemail_from') {
 	$action="";
 }
 
+if($action == 'setStatusToSent') {
+
+    $sql = 'UPDATE '.MAIN_DB_PREFIX.'mailing SET statut = 3 WHERE rowid = '.intval($object->id);
+    $resql = $db->query($sql);
+    if(!$resql) {
+		setEventMessage($langs->trans('setStatustoSentError'),'errors');
+		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+	} else {
+		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+	}
+}
+
 if ($action=='associateconfirm') {
 
 	$import=GETPOST('import','alpha');
@@ -547,6 +559,11 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	}
 
 	print "\n\n<div class=\"tabsAction\">\n";
+	if (!in_array($object->statut, array(0,3)) && $user->rights->mailing->creer) {
+		if ((float) DOL_VERSION < 3.7) print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=setStatusToSent&amp;id='.$object->id.'">'.$langs->trans("SetStatusToSent").'</a>';
+		else print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=setStatusToSent&amp;id='.$object->id.'&token='.newToken().'">'.$langs->trans("SetStatusToSent").'</a>';
+	}
+
 	if (($object->statut == 0) && $user->rights->mailing->creer) {
 		if ((float) DOL_VERSION < 3.7) print '<a class="butAction" href="'.dol_buildpath('/comm/mailing/fiche.php',1).'?action=edit&amp;id='.$object->id.'">'.$langs->trans("EditMailing").'</a>';
 		else print '<a class="butAction" href="'.dol_buildpath('/comm/mailing/card.php',1).'?action=edit&amp;id='.$object->id.'">'.$langs->trans("EditMailing").'</a>';
