@@ -122,7 +122,7 @@ if ($action == 'settitre' || $action == 'setemail_from') {
 
 if($action == 'setStatusToSent') {
 
-    $sql = 'UPDATE '.MAIN_DB_PREFIX.'mailing SET statut = 3 WHERE rowid = '.$object->id;
+    $sql = 'UPDATE '.MAIN_DB_PREFIX.'mailing SET statut = 3 WHERE rowid = '.intval($object->id);
     $resql = $db->query($sql);
     if(!$resql) {
 		setEventMessage($langs->trans('setStatustoSentError'),'errors');
