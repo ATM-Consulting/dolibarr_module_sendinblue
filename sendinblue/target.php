@@ -49,7 +49,7 @@ require_once '../class/html.formmailing.class.php';
 $langs->load("mails");
 
 // Security check
-if (! $user->rights->mailing->lire || (!empty($user->societe_id) && $user->societe_id > 0)) accessforbidden();
+if (! $user->hasRight('mailing', 'lire') || (!empty($user->societe_id) && $user->societe_id > 0)) accessforbidden();
 
 
 $mesg = '';
@@ -287,7 +287,7 @@ if ($object->fetch($id) >= 0)
 	$allowaddtarget=($object->statut == 0);
 
 	// Show email selectors
-	if ($allowaddtarget && $user->rights->mailing->creer)
+	if ($allowaddtarget && $user->hasRight('mailing', 'creer'))
 	{
 		print_fiche_titre($langs->trans("ToAddRecipientsChooseHere"),($user->admin?info_admin($langs->trans("YouCanAddYourOwnPredefindedListHere"),1):''),'');
 
@@ -628,7 +628,7 @@ if ($object->fetch($id) >= 0)
 				{
 					print '<td align="center">&nbsp;</td>';
 					print '<td align="right" class="nowrap">'.$langs->trans("MailingStatusNotSent");
-					if ($user->rights->mailing->creer && $allowaddtarget) {
+					if ($user->hasRight('mailing', 'creer') && $allowaddtarget) {
 						$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 						print '<a href="'.$_SERVER['PHP_SELF'].'?action=delete&rowid='.$obj->rowid.$param.'&token='.$newToken.'">'.img_delete($langs->trans("RemoveRecipient"));
 					}

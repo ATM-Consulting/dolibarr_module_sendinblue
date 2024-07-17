@@ -67,13 +67,13 @@ $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
 if (empty($reshook)) {
-	if ($action == 'updateallcampagin_confirm' && $confirm = 'yes' && $user->rights->mailing->creer) {
+	if ($action == 'updateallcampagin_confirm' && $confirm = 'yes' && $user->hasRight('mailing', 'creer')) {
 		$sendinblue = new DolSendinblue($db);
 		$result = $sendinblue->updateSendinBlueAllCampaignStatus($user);
 		if ($result < 0) {
 			setEventMessage($sendinblue->error, 'errors');
 		}
-	} elseif ($action == 'createemailing_confirm' && $confirm = 'yes' && !empty($user->rights->mailing->creer)) {
+	} elseif ($action == 'createemailing_confirm' && $confirm = 'yes' && !empty($user->hasRight('mailing', 'creer'))) {
 		$sendinblue_id = GETPOST('sendinblueid', 'int');
 		$list_choice = GETPOST('listchoice', 'int');
 		$list_id = GETPOST('listid', 'int');
@@ -252,7 +252,7 @@ if (is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign
 print '<table>';
 
 print "\n\n<div class=\"tabsAction\">\n";
-if ($user->rights->mailing->creer && is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign_lines)>0) {
+if ($user->hasRight('mailing', 'creer') && is_array($sendinblue->listcampaign_lines) && count($sendinblue->listcampaign_lines)>0) {
 	print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?action=updateallcampagin' . $param . $param2 . '">' . $langs->trans("SendinBlueUpdateAllCampaign") . '</a>';
 }
 print '<br><br></div>';

@@ -201,7 +201,7 @@ print '<td>'.$langs->trans("Fax").'</td><td>'.dol_print_phone($object->fax,$obje
 
 // Email
 print '<tr><td>'.$langs->trans("EMail").'</td><td>'.dol_print_email($object->email,$object->id,$object->socid,'AC_EMAIL').'</td>';
-if (! empty($conf->mailing->enabled))
+if (isModEnabled('mailing'))
 {
 	$langs->load("mails");
 	print '<td nowrap>'.$langs->trans("NbOfEMailingsSend").'</td>';
@@ -215,7 +215,7 @@ print '</tr>';
 
 // Instant message and no email
 print '<tr><td>'.$langs->trans("IM").'</td><td>'.$object->jabberid.'</td>';
-if (!empty($conf->mailing->enabled))
+if (isModEnabled('mailing'))
 {
 	print '<td>'.$langs->trans("No_Email").'</td><td>'.yn($object->no_email).'</td>';
 }

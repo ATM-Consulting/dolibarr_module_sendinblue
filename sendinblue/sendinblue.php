@@ -49,7 +49,7 @@ $nameList = GETPOST('nameList', 'none');
 $error=0;
 
 // Access control
-if (! $user->rights->mailing->creer || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && !empty($user->societe_id) && $user->societe_id > 0 )) {
+if (! $user->hasRight('mailing', 'creer') || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && !empty($user->societe_id) && $user->societe_id > 0 )) {
 	accessforbidden();
 }
 
@@ -354,13 +354,13 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 
 	// Description
     if(empty($object->titre) && !empty($object->title)) $object->titre = $object->title;
-	print '<tr class="pair"><td>'.$form->editfieldkey("MailTitle",'titre',!empty($object->titre) ? $object->titre : '',$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
-	print $form->editfieldval("MailTitle",'titre',!empty($object->titre) ? $object->titre : '',$object,$user->rights->mailing->creer && $object->statut < 3,'string');
+	print '<tr class="pair"><td>'.$form->editfieldkey("MailTitle",'titre',!empty($object->titre) ? $object->titre : '',$object,$user->hasRight('mailing', 'creer') && $object->statut < 3,'string').'</td><td colspan="3">';
+	print $form->editfieldval("MailTitle",'titre',!empty($object->titre) ? $object->titre : '',$object,$user->hasRight('mailing', 'creer') && $object->statut < 3,'string');
 	print '</td></tr>';
 
 	// From
-	print '<tr class="impair"><td>'.$form->editfieldkey("MailFrom",'email_from',$object->email_from,$object,$user->rights->mailing->creer && $object->statut < 3,'string').'</td><td colspan="3">';
-	print $form->editfieldval("MailFrom",'email_from',$object->email_from,$object,$user->rights->mailing->creer && $object->statut < 3,'string');
+	print '<tr class="impair"><td>'.$form->editfieldkey("MailFrom",'email_from',$object->email_from,$object,$user->hasRight('mailing', 'creer') && $object->statut < 3,'string').'</td><td colspan="3">';
+	print $form->editfieldval("MailFrom",'email_from',$object->email_from,$object,$user->hasRight('mailing', 'creer') && $object->statut < 3,'string');
 	print '</td></tr>';
 
 	// Status
@@ -398,9 +398,9 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 
 	// SendinBlue Sender Name
 	print '<tr class="pair"><td>';
-	print $form->editfieldkey("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
+	print $form->editfieldkey("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->hasRight('mailing', 'creer') && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
 	print '</td><td colspan="3">';
-	print $form->editfieldval("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->rights->mailing->creer && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
+	print $form->editfieldval("SendinBlueSenderName",'sendinblue_sender_name',$sendinblue->sendinblue_sender_name,$objecttoedit,$user->hasRight('mailing', 'creer') && $object->statut < 3 && empty($sendinblue->sendinblue_id),'string');
 	print '</td></tr>';
 
 
@@ -559,18 +559,18 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	}
 
 	print "\n\n<div class=\"tabsAction\">\n";
-	if (!in_array($object->statut, array(0,3)) && $user->rights->mailing->creer) {
+	if (!in_array($object->statut, array(0,3)) && $user->hasRight('mailing', 'creer')) {
 		if ((float) DOL_VERSION < 3.7) print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=setStatusToSent&amp;id='.$object->id.'">'.$langs->trans("SetStatusToSent").'</a>';
 		else print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=setStatusToSent&amp;id='.$object->id.'&token='.newToken().'">'.$langs->trans("SetStatusToSent").'</a>';
 	}
 
-	if (($object->statut == 0) && $user->rights->mailing->creer) {
+	if (($object->statut == 0) && $user->hasRight('mailing', 'creer')) {
 		if ((float) DOL_VERSION < 3.7) print '<a class="butAction" href="'.dol_buildpath('/comm/mailing/fiche.php',1).'?action=edit&amp;id='.$object->id.'">'.$langs->trans("EditMailing").'</a>';
 		else print '<a class="butAction" href="'.dol_buildpath('/comm/mailing/card.php',1).'?action=edit&amp;id='.$object->id.'">'.$langs->trans("EditMailing").'</a>';
 	}
 
-	if (($object->statut == 1 || $object->statut == 2) && $object->nbemail > 0 && $user->rights->mailing->valider && !$error_sendinblue_control) {
-		if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {
+	if (($object->statut == 1 || $object->statut == 2) && $object->nbemail > 0 && $user->hasRight('mailing', 'valider') && !$error_sendinblue_control) {
+		if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->hasRight('mailing', 'mailing_advance', 'send'))) {
 			print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendinBlueCreateCampaign").'</a>';
 		} else {
 			if (empty($sendinblue->sendinblue_id)) {
@@ -581,8 +581,8 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 		print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("SendinBlueCannotSendControlNotOK")).'">'.$langs->trans("SendinBlueCreateCampaign").'</a>';
 	}
 	if (!empty($sendinblue->sendinblue_id) && !$error_sendinblue_control) {
-		if (($object->statut == 1 || $object->statut == 2) && $object->nbemail > 0 && $user->rights->mailing->valider) {
-			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {
+		if (($object->statut == 1 || $object->statut == 2) && $object->nbemail > 0 && $user->hasRight('mailing', 'valider')) {
+			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->hasRight('mailing', 'mailing_advance', 'send'))) {
 				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendMailing").'</a>';
 			} else {
 				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=sendsendinbluecampaign&amp;id='.$object->id.'">'.$langs->trans("SendinBlueSendMailing").'</a>';
@@ -591,8 +591,8 @@ if ( !empty($conf->global->SENDINBLUE_API_KEY)) {
 	}
 
 	if (!empty($sendinblue->sendinblue_id) && !$error_sendinblue_control) {
-		if (($object->statut == 3 ) && $object->nbemail > 0 && $user->rights->mailing->valider) {
-			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->rights->mailing->mailing_advance->send)) {
+		if (($object->statut == 3 ) && $object->nbemail > 0 && $user->hasRight('mailing', 'valider')) {
+			if ((! empty($conf->global->MAIN_USE_ADVANCED_PERMS) && ! $user->hasRight('mailing', 'mailing_advance', 'send'))) {
 				print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("SendinBlueUpdateStatus").'</a>';
 			} else {
 				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=updatesendinbluecampaignstatus&amp;id='.$object->id.'">'.$langs->trans("SendinBlueUpdateStatus").'</a>';

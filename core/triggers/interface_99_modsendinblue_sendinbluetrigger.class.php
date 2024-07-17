@@ -109,7 +109,7 @@ class Interfacesendinbluetrigger extends DolibarrTriggers
 	 */
 	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
 	{
-		if (empty($conf->sendinblue->enabled)) return 0;     // Module not active, we do nothing
+		if (!isModEnabled('sendinblue')) return 0;     // Module not active, we do nothing
 
 		if (in_array($action, array('CONTACT_ENABLEDISABLE', 'CONTACT_DELETE'))) {
 			dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);

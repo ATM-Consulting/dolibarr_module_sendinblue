@@ -87,7 +87,7 @@ class modsendinblue extends DolibarrModules
 		// 'js' => array('/sendinblue/js/sendinblue.js'), // Set this to relative path of js file if module must load a js on all pages
 		// 'hooks' => array('hookcontext1','hookcontext2') // Set here all hooks context managed by module
 		// 'dir' => array('output' => 'othermodulename'), // To force the default directories names
-		// 'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@sendinblue')) // Set here all workflow context managed by module
+		// 'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'isModEnabled('module1') && isModEnabled('module2')', 'picto'=>'yourpicto@sendinblue')) // Set here all workflow context managed by module
 		// );
 		$this->module_parts = array(
 				'hooks' => array(
@@ -149,8 +149,8 @@ class modsendinblue extends DolibarrModules
 		);
 
 		// Array to add new pages in new tabs
-		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@sendinblue:$user->rights->sendinblue->read:/sendinblue/mynewtab1.php?id=__ID__', // To add a new tab identified by code tabname1
-		// 'objecttype:+tabname2:Title2:mylangfile@sendinblue:$user->rights->othermodule->read:/sendinblue/mynewtab2.php?id=__ID__', // To add another new tab identified by code tabname2
+		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@sendinblue:$user->hasRight('sendinblue', 'read'):/sendinblue/mynewtab1.php?id=__ID__', // To add a new tab identified by code tabname1
+		// 'objecttype:+tabname2:Title2:mylangfile@sendinblue:$user->hasRight('othermodule', 'read'):/sendinblue/mynewtab2.php?id=__ID__', // To add another new tab identified by code tabname2
 		// 'objecttype:-tabname:NU:conditiontoremove'); // To remove an existing tab identified by code tabname
 		// where objecttype can be
 		// 'categories_x' to add a tab in category view (replace 'x' by type of category (0=product, 1=supplier, 2=customer, 3=member)
@@ -173,20 +173,20 @@ class modsendinblue extends DolibarrModules
 		// 'thirdparty' to add a tab in third party view
 		// 'user' to add a tab in user view
 		$this->tabs = array(
-				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/sendinblue.php?id=__ID__',
+				'emailing:+tabSendinBlueSending:SendinBlueSending:sendinblue@sendinblue:$user->hasRight('mailing', 'creer'):/sendinblue/sendinblue/sendinblue.php?id=__ID__',
 				'emailing:-targets',
-				'emailing:+tabSendinBlueTarget:SendinBlueTarget:sendinblue@sendinblue:$user->rights->mailing->creer:/sendinblue/sendinblue/target.php?id=__ID__',
-				'contact:+tabSendinBlueActivites:Module104036Name:sendinblue@sendinblue:$user->rights->sendinblue->read:/sendinblue/sendinblue/contact_activites.php?id=__ID__'
+				'emailing:+tabSendinBlueTarget:SendinBlueTarget:sendinblue@sendinblue:$user->hasRight('mailing', 'creer'):/sendinblue/sendinblue/target.php?id=__ID__',
+				'contact:+tabSendinBlueActivites:Module104036Name:sendinblue@sendinblue:$user->hasRight('sendinblue', 'read'):/sendinblue/sendinblue/contact_activites.php?id=__ID__'
 		);
 
 		// Dictionaries
-		if (! isset($conf->sendinblue->enabled)) {
+		if (! isModEnabled('sendinblue')) {
 			$conf->sendinblue = new stdClass();
 			$conf->sendinblue->enabled = 0;
 		}
 		$this->dictionaries = array();
 		/* Example:
-		 if (! isset($conf->sendinblue->enabled)) $conf->sendinblue->enabled=0;	// This is to avoid warnings
+		 if (! isModEnabled('sendinblue')) $conf->sendinblue->enabled=0;	// This is to avoid warnings
 		 $this->dictionaries=array(
 		 'langs'=>'mylangfile@sendinblue',
 		 'tabname'=>array(MAIN_DB_PREFIX."table1",MAIN_DB_PREFIX."table2",MAIN_DB_PREFIX."table3"),		// List of tables we want to see into dictonnary editor
@@ -197,7 +197,7 @@ class modsendinblue extends DolibarrModules
 		 'tabfieldvalue'=>array("code,label","code,label","code,label"),																				// List of fields (list of fields to edit a record)
 		 'tabfieldinsert'=>array("code,label","code,label","code,label"),																			// List of fields (list of fields for insert)
 		 'tabrowid'=>array("rowid","rowid","rowid"),																									// Name of columns with primary key (try to always name it 'rowid')
-		 'tabcond'=>array($conf->sendinblue->enabled,$conf->sendinblue->enabled,$conf->sendinblue->enabled)												// Condition to show each dictionary
+		 'tabcond'=>array(isModEnabled('sendinblue'),isModEnabled('sendinblue'),isModEnabled('sendinblue'))												// Condition to show each dictionary
 		 );
 		 */
 
@@ -234,8 +234,8 @@ class modsendinblue extends DolibarrModules
 		// $this->rights[$r][0] = $this->numero . $r; // Permission id (must not be already used)
 		// $this->rights[$r][1] = 'Permision label'; // Permission label
 		// $this->rights[$r][3] = 1; // Permission by default for new user (0/1)
-		// $this->rights[$r][4] = 'level1'; // In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
-		// $this->rights[$r][5] = 'level2'; // In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
+		// $this->rights[$r][4] = 'level1'; // In php code, permission will be checked by test if ($user->hasRight('permkey', 'level1', 'level2'))
+		// $this->rights[$r][5] = 'level2'; // In php code, permission will be checked by test if ($user->hasRight('permkey', 'level1', 'level2'))
 		// $r++;
 		if (( float ) DOL_VERSION < 3.7) { // DOL_VERSION < 3.7
 			$is_doli_37_or_more = false;
@@ -255,7 +255,7 @@ class modsendinblue extends DolibarrModules
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 100,
 				'enabled' => '1',
-				'perms' => '$user->rights->sendinblue->read',
+				'perms' => '$user->hasRight('sendinblue', 'read')',
 				'target' => '',
 				'user' => 2
 		);
@@ -269,8 +269,8 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/destinaries_list.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 100,
-				'enabled' => '$user->rights->sendinblue->read',
-				'perms' => '$user->rights->sendinblue->read',
+				'enabled' => '$user->hasRight('sendinblue', 'read')',
+				'perms' => '$user->hasRight('sendinblue', 'read')',
 				'target' => '',
 				'user' => 2
 		);
@@ -283,8 +283,8 @@ class modsendinblue extends DolibarrModules
 				'url' => '/sendinblue/sendinblue/destinaries_list.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 101,
-				'enabled' => '$user->rights->sendinblue->read',
-				'perms' => '$user->rights->sendinblue->read',
+				'enabled' => '$user->hasRight('sendinblue', 'read')',
+				'perms' => '$user->hasRight('sendinblue', 'read')',
 				'target' => '',
 				'user' => 2
 		);
@@ -297,8 +297,8 @@ class modsendinblue extends DolibarrModules
 				'url' => $is_doli_37_or_more ? '/comm/mailing/card.php?leftmenu=mailing&action=create' : '/comm/mailing/fiche.php?leftmenu=mailing&action=create',
 				'langs' => 'mails',
 				'position' => 105,
-				'enabled' => '$user->rights->sendinblue->write',
-				'perms' => '$user->rights->sendinblue->write',
+				'enabled' => '$user->hasRight('sendinblue', 'write')',
+				'perms' => '$user->hasRight('sendinblue', 'write')',
 				'target' => '',
 				'user' => 2
 		);
@@ -311,8 +311,8 @@ class modsendinblue extends DolibarrModules
 				'url' => $is_doli_37_or_more ? '/comm/mailing/list.php' : '/comm/mailing/liste.php',
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 106,
-				'enabled' => '$user->rights->sendinblue->write',
-				'perms' => '$user->rights->sendinblue->write',
+				'enabled' => '$user->hasRight('sendinblue', 'write')',
+				'perms' => '$user->hasRight('sendinblue', 'write')',
 				'target' => '',
 				'user' => 2
 		);
@@ -326,7 +326,7 @@ class modsendinblue extends DolibarrModules
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 107,
 				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
-				'perms' => '$user->rights->sendinblue->read',
+				'perms' => '$user->hasRight('sendinblue', 'read')',
 				'target' => '',
 				'user' => 2
 		);
@@ -340,7 +340,7 @@ class modsendinblue extends DolibarrModules
 				'langs' => 'sendinblue@sendinblue',
 				'position' => 108,
 				'enabled' => '$conf->global->MAIN_FEATURES_LEVEL == 2',
-				'perms' => '$user->rights->sendinblue->read',
+				'perms' => '$user->hasRight('sendinblue', 'read')',
 				'target' => '',
 				'user' => 2
 		);
@@ -357,8 +357,8 @@ class modsendinblue extends DolibarrModules
 		// 'url'=>'/sendinblue/pagetop.php',
 		// 'langs'=>'mylangfile@sendinblue', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 		// 'position'=>100,
-		// 'enabled'=>'$conf->sendinblue->enabled', // Define condition to show or hide menu entry. Use '$conf->sendinblue->enabled' if entry must be visible if module is enabled.
-		// 'perms'=>'1', // Use 'perms'=>'$user->rights->sendinblue->level1->level2' if you want your menu with a permission rules
+		// 'enabled'=>'isModEnabled('sendinblue')', // Define condition to show or hide menu entry. Use 'isModEnabled('sendinblue')' if entry must be visible if module is enabled.
+		// 'perms'=>'1', // Use 'perms'=>'$user->hasRight('sendinblue', 'level1', 'level2')' if you want your menu with a permission rules
 		// 'target'=>'',
 		// 'user'=>2); // 0=Menu for internal users, 1=external users, 2=both
 		// $r++;
@@ -372,8 +372,8 @@ class modsendinblue extends DolibarrModules
 		// 'url'=>'/sendinblue/pagelevel2.php',
 		// 'langs'=>'mylangfile@sendinblue', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 		// 'position'=>100,
-		// 'enabled'=>'$conf->sendinblue->enabled', // Define condition to show or hide menu entry. Use '$conf->sendinblue->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-		// 'perms'=>'1', // Use 'perms'=>'$user->rights->sendinblue->level1->level2' if you want your menu with a permission rules
+		// 'enabled'=>'isModEnabled('sendinblue')', // Define condition to show or hide menu entry. Use 'isModEnabled('sendinblue')' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+		// 'perms'=>'1', // Use 'perms'=>'$user->hasRight('sendinblue', 'level1', 'level2')' if you want your menu with a permission rules
 		// 'target'=>'',
 		// 'user'=>2); // 0=Menu for internal users, 1=external users, 2=both
 		// $r++;

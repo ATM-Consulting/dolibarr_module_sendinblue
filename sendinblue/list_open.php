@@ -141,7 +141,7 @@ $formother = new FormOther($db);
 $contact = new Contact($db);
 
 // Security check
-if (! $user->rights->sendinblue->read ) {
+if (! $user->hasRight('sendinblue', 'read') ) {
 	accessforbidden();
 }
 

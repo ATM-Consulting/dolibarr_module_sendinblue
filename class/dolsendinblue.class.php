@@ -1084,7 +1084,7 @@ class DolSendinBlue extends CommonObject
 		$sql .= " FROM " . MAIN_DB_PREFIX . "societe as s";
 		$sql .= ", " . MAIN_DB_PREFIX . $table_source . " as f";
 		$sql .= ", " . MAIN_DB_PREFIX . $tabledet_source . " as d";
-		if (! $user->rights->societe->client->voir && ! $socid)
+		if (! $user->hasRight('societe', 'client', 'voir') && ! $socid)
 			$sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 		$sql .= " WHERE f.fk_soc = s.rowid";
 		$sql .= " AND f.entity = " . $conf->entity;
