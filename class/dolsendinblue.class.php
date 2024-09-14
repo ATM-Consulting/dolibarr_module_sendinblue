@@ -2676,6 +2676,7 @@ class DolSendinBlue extends CommonObject
 						} elseif ($email_activity['activity'] == 'open') {
 							$result = $this->updateTargetMailingStatus($user, 2, $email_activity['email'], 0, $dt_send_unix);
 						} elseif ($email_activity['activity'] == 'unsubscribe') {
+							var_dump($email_activity);
 							$result = $this->updateTargetMailingStatus($user, 3, $email_activity['email'], 0, $dt_send_unix);
 						} elseif ($email_activity['activity'] == 'click') {
 							$result = $this->updateTargetMailingStatus($user, 4, $email_activity['email'], 0, $dt_send_unix);
