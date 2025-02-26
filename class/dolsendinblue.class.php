@@ -94,8 +94,6 @@ class DolSendinBlue extends CommonObject
 			$this->fk_mailing = trim($this->fk_mailing);
 		if (isset($this->sendinblue_id))
 			$this->sendinblue_id = trim($this->sendinblue_id);
-		if (isset($this->sendinblue_webid))
-			$this->sendinblue_webid = trim($this->sendinblue_webid);
 		if (isset($this->sendinblue_listid))
 			$this->sendinblue_listid = trim($this->sendinblue_listid);
 		if (isset($this->sendinblue_segmentid))

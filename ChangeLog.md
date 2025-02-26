@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## UNRELEASED
 
 ## 2.4 *26/10/2021*
+- FIX : DA026150 - Encoding error and removed trim array - *2025-02-26* - 2.4.15
 - FIX : Ajout du bouton "Passer le mailing au statut envoyé complètement - *29/06/2023* - 2.4.14
 - FIX : Prise en compte du mauvais champ pour l'affichage du titre des mailings - *29/06/2023* - 2.4.13
 - FIX : Status of mailing targets were not working - *29/06/2023* - 2.4.12
