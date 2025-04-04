@@ -416,7 +416,7 @@ if ($object->fetch($id) >= 0)
 	}
 
 	// List of selected targets
-	$sql  = "SELECT DISTINCT mc.rowid, mc.lastname,civ.label as civilite,mc.firstname, mc.email, mc.other, sendinblue_status as statut
+	$sql  = "SELECT DISTINCT mc.rowid, mc.lastname,civ.label as civilite,mc.firstname, mc.email, mc.other, mc.statut
 	,soc.nom as 'societe',socp.address
 	,socp.zip,socp.town,socp.phone,socp.phone_mobile, mc.date_envoi, mc.source_url, mc.source_id, mc.source_type";
 	$sql .= " FROM ".MAIN_DB_PREFIX."mailing_cibles as mc";
